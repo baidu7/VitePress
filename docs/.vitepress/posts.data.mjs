@@ -4,13 +4,16 @@ import path from 'path'
 export default {
   watch: ['../*.md'],
   load() {
-    const dirPath = path.resolve(__dirname, '../../')
+    const dirPath = path.resolve(process.cwd(), 'docs')
     return fs.readdirSync(dirPath)
       .filter(file => file.endsWith('.md') && file !== 'index.md')
       .map(file => {
         const name = file.replace('.md', '')
-        // 注意：这里需要根据你的 base 路径调整
-        return { text: name, link: `/VitePress/${name}` }
+        return {
+          text: name,
+          // 这里的链接要加上你的仓库名 base 路径
+          link: `/VitePress/${name}`
+        }
       })
   }
 }
