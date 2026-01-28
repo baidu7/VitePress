@@ -49,23 +49,14 @@ const getAutoSidebar = () => {
 
 export default {
   title: "江大爷博客",
-  // 💡 这里的 head 保持通用配置
   head: [
-    // 1. 标准 Favicon
     ['link', { rel: 'icon', href: '/favicon.ico' }],
-    
-    // 2. 苹果 iOS 图标 (添加到主屏幕时的样式)
     ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
-    
-    // 3. Android / Chrome 移动端浏览器颜色
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],
-    
-    // 4. 社交分享 (OG 标签) 的标题自动生成
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:image', content: 'https://vitepress-6k9.pages.dev/og-image.png' }],
   ],
 
-  // 🪄 自动生成逻辑：为每篇文章动态注入分享标签
   transformPageData(pageData) {
     const canonicalUrl = `https://vitepress-6k9.pages.dev/${pageData.relativePath.replace('.md', '.html')}`
     pageData.frontmatter.head ??= []
@@ -73,14 +64,43 @@ export default {
       ['meta', { property: 'og:title', content: pageData.title || '江大爷博客' }],
       ['meta', { property: 'og:description', content: pageData.description || '点击查看精彩内容' }],
       ['meta', { property: 'og:url', content: canonicalUrl }],
-      // 如果没有给单篇文章设置封面图，则统一使用 public 下的 og-image.png
       ['meta', { property: 'og:image', content: 'https://vitepress-6k9.pages.dev/og-image.png' }]
     )
   },
 
+  // 1. Sitemap 必须放在这里，且前面要有逗号
+  sitemap: {
+    hostname: 'https://vitepress-6k9.pages.dev' 
+  },
+
   themeConfig: {
     logo: '/logo.png',
+    // 2. 社交图标
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/baidu8/VitePress' }
+    ],
+    
+    // 3. 导航栏 (修正了 sitemap 的小点)
+    nav: [
+      { text: '🏠 首页', link: '/' },
+      { text: '📜 归档', link: '/archives' },
+      {
+        text: '✨ 快捷功能',
+        items: [
+          { text: '🔍 站内搜索', link: '#' }, 
+          { text: '📄 站点地图', link: '/sitemap.xml' }, // 这里改成了点
+          { text: '👤 关于我', link: '/about' }
+        ]
+      }
+    ],
+
+    // 4. 右侧边栏
+    outline: {
+      level: [2, 3], 
+      label: '本页目录'
+    },
+
     search: { provider: 'local' },
-    sidebar: getAutoSidebar(), // 沿用你的全自动分类
+    sidebar: getAutoSidebar(), 
   }
 }
