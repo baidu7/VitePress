@@ -1,15 +1,15 @@
 ---
-layout: home
+layout: doc
 ---
 
-# 📝 我的文章列表
+# 🚀 江大爷的随想空间
 
-<div v-for="post in posts" :key="post.link" style="margin: 15px 0; padding: 20px; border: 2px solid #3eaf7c; border-radius: 12px; background: #f9f9f9;">
-  <a :href="post.link" style="font-size: 1.25rem; font-weight: 600; color: #3eaf7c; text-decoration: none;">
-    📄 {{ post.text }}
-  </a>
-</div>
+欢迎来到我的博客！所有的文章都已经按类别整理在 **左侧边栏** 了。
 
-<script setup>
-import { data as posts } from './.vitepress/posts.data.mjs'
-</script>
+### 🔍 快速开始
+* **找文章**：直接看左边的目录，点击分类即可展开。
+* **搜内容**：点击右上角的搜索框，或按 `Ctrl + K` 快速查找。
+* **换心情**：点击右上角的太阳/月亮图标，体验丝滑的切换动画。
+
+---
+> 梦到什么说什么，记录生活，分享点滴。
