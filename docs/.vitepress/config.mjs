@@ -48,6 +48,16 @@ const getAutoSidebar = () => {
 }
 
 export default {
+				ignoreDeadLinks: true,
+				vite: {
+				    assetsInclude: ['**/*.webm', '**/*.mp4'], // 告诉编译器：这些是文件，别当成代码解析
+				  },
+				markdown: {
+				    image: {
+				      // 启用图片懒加载
+				      lazyLoading: true
+				    }
+				  },
   title: "江大爷博客",
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
@@ -67,16 +77,6 @@ export default {
       ['meta', { property: 'og:image', content: 'https://vitepress-6k9.pages.dev/og-image.png' }]
     )
   },
-				ignoreDeadLinks: true,
-				vite: {
-				    assetsInclude: ['**/*.webm', '**/*.mp4'], // 告诉编译器：这些是文件，别当成代码解析
-				  },
-				markdown: {
-				    image: {
-				      // 启用图片懒加载
-				      lazyLoading: true
-				    }
-				  },
 
   // 1. Sitemap 必须放在这里，且前面要有逗号
   sitemap: {
