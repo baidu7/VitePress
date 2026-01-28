@@ -50,6 +50,9 @@ const getAutoSidebar = () => {
 export default {
   base: '/VitePress/',
   title: "江大爷博客",
+		head: [
+		    ['link', { rel: 'icon', href: '/VitePress/img/favicon.ico' }] 
+		  ],
   themeConfig: {
     search: { provider: 'local' },
     nav: [{ text: '首页', link: '/' }],
