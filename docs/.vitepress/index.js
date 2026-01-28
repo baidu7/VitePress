@@ -1,9 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
-import './custom.css'
+import MyLayout from './MyLayout.vue'
 
 export default {
   extends: DefaultTheme,
-  enhanceApp({ app }) {
-    // 动画逻辑集成
-  }
+  Layout: MyLayout
 }
