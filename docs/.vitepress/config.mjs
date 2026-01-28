@@ -99,7 +99,9 @@ export default {
       level: [2, 3], 
       label: '本页目录'
     },
-
+				// 允许死链
+    ignoreDeadLinks: true,
+				
     search: { provider: 'local' },
     sidebar: getAutoSidebar(), 
   }
