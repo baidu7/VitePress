@@ -19,3 +19,54 @@
 .zoom-overlay {
   animation: fadeIn 0.3s ease;
 }
+/* 自定义视频与框架容器样式 */
+
+/* 1. 视频标签优化 */
+video {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px; /* 圆角增加高级感 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 淡淡的阴影 */
+  background-color: #000;
+  margin: 1em 0;
+}
+
+/* 2. Iframe (外链) 容器优化 */
+/* 建议在 Markdown 中用 <div class="iframe-container"> 包裹 iframe */
+.iframe-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 比例 */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 1em 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.iframe-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* 3. 针对 B 站等视频的特定适配 */
+iframe[src*="bilibili.com"] {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+/* 直接写在 .vitepress/theme/custom.css 中 */
+.vp-doc video {
+  width: 100%;           /* 宽度铺满容器 */
+  display: block;        /* 消除下方间隙 */
+  margin: 20px auto;     /* 上下间距，居中 */
+  border-radius: 12px;   /* 柔和圆角 */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* 悬浮阴影感 */
+  background: #000;      /* 加载前的黑底 */
+  outline: none;
+}
