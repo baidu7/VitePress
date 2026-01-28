@@ -50,13 +50,38 @@ const getAutoSidebar = () => {
 export default {
   base: '/VitePress/',
   title: "江大爷博客",
-		head: [
-		    ['link', { rel: 'icon', href: '/VitePress/img/favicon.ico' }] 
-		  ],
+  // 💡 这里的 head 保持通用配置
+  head: [
+    // 1. 标准 Favicon
+    ['link', { rel: 'icon', href: '/VitePress/favicon.ico' }],
+    
+    // 2. 苹果 iOS 图标 (添加到主屏幕时的样式)
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/VitePress/apple-touch-icon.png' }],
+    
+    // 3. Android / Chrome 移动端浏览器颜色
+    ['meta', { name: 'theme-color', content: '#3eaf7c' }],
+    
+    // 4. 社交分享 (OG 标签) 的标题自动生成
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:image', content: 'https://baidu8.github.io/VitePress/og-image.png' }],
+  ],
+
+  // 🪄 自动生成逻辑：为每篇文章动态注入分享标签
+  transformPageData(pageData) {
+    const canonicalUrl = `https://baidu8.github.io/VitePress/${pageData.relativePath.replace('.md', '.html')}`
+    pageData.frontmatter.head ??= []
+    pageData.frontmatter.head.push(
+      ['meta', { property: 'og:title', content: pageData.title || '江大爷博客' }],
+      ['meta', { property: 'og:description', content: pageData.description || '点击查看精彩内容' }],
+      ['meta', { property: 'og:url', content: canonicalUrl }],
+      // 如果没有给单篇文章设置封面图，则统一使用 public 下的 og-image.png
+      ['meta', { property: 'og:image', content: 'https://baidu8.github.io/VitePress/og-image.png' }]
+    )
+  },
+
   themeConfig: {
+    logo: '/logo.png',
     search: { provider: 'local' },
-    nav: [{ text: '首页', link: '/' }],
-    sidebar: getAutoSidebar(), // 💡 自动分类魔法
-    socialLinks: [{ icon: 'github', link: 'https://github.com/baidu8' }]
+    sidebar: getAutoSidebar(), // 沿用你的全自动分类
   }
 }
