@@ -1,0 +1,11 @@
+/* 让图片点击时稍微放大，并增加丝滑的过渡 */
+.vp-doc img {
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
+}
+
+.vp-doc img:active {
+  transform: scale(1.5); /* 点击瞬间放大 1.5 倍 */
+  z-index: 999;
+  position: relative;
+}
