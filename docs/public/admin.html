@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>江大爷博客后台 - 颜值与实力并存版</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <style>
+        /* 基础变量定义 */
+        :root {
+            --primary: #3eaf7c;
+            --dark: #1e293b;
+            --bg-light: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #334155;
+        }
+    
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--bg-light);
+            color: var(--text-main);
+        }
+    
+        /* 顶部导航：沉浸式深色 */
+        header {
+            background: var(--dark);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        header input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+    
+        /* 侧边栏：文件胶囊流 */
+        #sidebar {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 15px;
+            overflow-x: auto;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .file-item {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid var(--border-color) !important;
+            text-decoration: none;
+        }
+        .file-item:hover {
+            background: var(--bg-light);
+            border-color: var(--primary) !important;
+        }
+    
+        /* 路径操作栏 */
+        .action-bar {
+            padding: 12px 15px;
+            display: flex;
+            gap: 10px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+        #filePath {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        #filePath:focus { border-color: var(--primary); }
+    
+        /* 工具栏：深色生产力风格 */
+        .vp-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 15px;
+            background: #0f172a; /* 更深的颜色区分功能区 */
+        }
+        .vp-tools button {
+            background: #334155;
+            color: #f1f5f9;
+            border: 1px solid #475569;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .vp-tools button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    
+        /* 编辑器与预览核心区 */
+        .work-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            background: white;
+        }
+        .editor-zone {
+            flex: 1.2; /* 编辑区稍微宽一点 */
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+        }
+        .preview-zone {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #fff;
+        }
+    
+        /* 按钮全局美化 */
+        .btn-green {
+            background: var(--primary) !important;
+            color: white !important;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-red {
+            background: #ef4444 !important;
+            color: white !important;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #preview-toggle-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none; /* 默认隐藏，手机端可显示 */
+        }
+    
+        /* EasyMDE 适配优化 */
+        .CodeMirror {
+            flex: 1;
+            height: auto !important;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 15px;
+            border: none !important;
+        }
+    
+        /* 适配手机端 */
+        @media (max-width: 768px) {
+            #preview-toggle-btn { display: inline-block; }
+            .preview-zone { display: none; }
+            .preview-zone.mobile-active {
+                display: block;
+                position: fixed;
+                top: 130px;
+                left: 0;
+                width: 100%;
+                height: calc(100% - 130px);
+                z-index: 99;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-weight: 800; letter-spacing: 1px; font-size: 18px;">JDY <span style="color:var(--primary)">ADMIN</span></div>
+    <div style="display:flex; gap:8px;">
+        <input type="password" id="tokenInput" placeholder="Token" style="width:100px;">
+        <button onclick="saveToken()" style="background:white; color:var(--dark); border:none; padding:3px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">SAVE</button>
+    </div>
+</header>
+
+<div id="sidebar">
+    <button class="file-item" style="background:var(--dark); color:white; font-weight:bold;" onclick="fetchFiles('docs')">🏠 根目录</button>
+    <button class="file-item" style="color:var(--primary); font-weight:bold;" onclick="createNewFile()">📄 新文章</button>
+    <button class="file-item" style="color:#f59e0b; font-weight:bold;" onclick="createNewFolder()">📁 新文件夹</button>
+    <div id="fileList" style="display:inline-block;"></div>
+</div>
+
+<div class="action-bar">
+    <input type="text" id="filePath" placeholder="docs/...">
+    <button id="preview-toggle-btn" onclick="toggleMobilePreview()">👁️ 预览</button>
+    <button class="btn-green" onclick="submitFile()">🚀 发布</button>
+    <button class="btn-red" onclick="deleteFile()">🗑️ 删除</button>
+</div>
+
+<div class="vp-tools">
+    <button onclick="insertVP('tip', '提示')">💡 提示</button>
+    <button onclick="insertVP('warning', '警告')">⚠️ 警告</button>
+    <button onclick="insertDetails()">📁 折叠</button>
+    <button onclick="insertCode()">💻 代码</button>
+    <button onclick="insertVideo()">📹 视频</button>
+    <button onclick="insertIframe()">🖼️ 框架</button>
+    <button onclick="easyMDE.drawTable()">📊 表格</button>
+</div>
+
+<div class="work-area">
+    <div id="editor-zone" class="editor-zone">
+        <textarea id="mdEditor"></textarea>
+    </div>
+    <div id="preview-zone" class="preview-zone markdown-body"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    // 这里保留你所有的 JS 逻辑，原封不动
+    const OWNER = 'baidu8', REPO = 'VitePress';
+    let currentSha = '', currentDir = 'docs';
+
+    const easyMDE = new EasyMDE({
+        element: document.getElementById('mdEditor'),
+        spellChecker: false, status: false,
+        toolbar: ["bold", "italic", "heading", "|", "link", "image"]
+    });
+
+    easyMDE.codemirror.on("change", () => {
+        const val = easyMDE.value();
+        document.getElementById('preview-zone').innerHTML = marked.parse(val.replace(/:::\s(\w+).*\n/g, '> **$1**: \n\n'));
+    });
+
+    function toggleMobilePreview() {
+        const p = document.getElementById('preview-zone'), e = document.getElementById('editor-zone'), b = document.getElementById('preview-toggle-btn');
+        if(p.classList.contains('mobile-active')) {
+            p.classList.remove('mobile-active'); e.classList.remove('mobile-hidden'); b.innerText = "👁️ 预览";
+        } else {
+            p.classList.add('mobile-active'); e.classList.add('mobile-hidden'); b.innerText = "✍️ 编辑";
+        }
+    }
+
+    function insertVP(t, s) { easyMDE.codemirror.replaceSelection(`\n::: ${t} ${s}\n内容\n:::\n`); }
+    function insertDetails() { easyMDE.codemirror.replaceSelection(`\n::: details 点击展开\n内容\n:::\n`); }
+    function insertCode() { easyMDE.codemirror.replaceSelection(`\n\`\`\`javascript\n// Code\n\`\`\`\n`); }
+    function insertVideo() { easyMDE.codemirror.replaceSelection(`\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n  <source src="/movie.mp4" type="video/mp4">\n  您的浏览器不支持播放该视频。\n</video>\n`); }
+    function insertIframe() { easyMDE.codemirror.replaceSelection(`\n<div class="iframe-container">\n  <iframe src="这里填链接" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n`); }
+
+    async function ghApi(path, method = 'GET', body = null) {
+        const token = localStorage.getItem('gh_token');
+        if (!token) return alert('请填 Token');
+        const options = {
+            method,
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        };
+        if (body) options.body = JSON.stringify(body);
+        return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, options);
+    }
+
+    async function fetchFiles(path) {
+        currentDir = path;
+        const list = document.getElementById('fileList');
+        const res = await ghApi(path);
+        if (res.ok) {
+            const data = await res.json();
+            list.innerHTML = '';
+            data.sort((a,b)=>b.type.localeCompare(a.type)).forEach(file => {
+                const item = document.createElement('span');
+                item.className = 'file-item';
+                item.innerText = (file.type==='dir'?'📁 ':'📄 ')+file.name;
+                item.onclick = () => file.type==='dir' ? fetchFiles(file.path) : loadFile(file.path);
+                list.appendChild(item);
+            });
+        }
+    }
+
+    async function loadFile(path) {
+        const res = await ghApi(path);
+        const data = await res.json();
+        easyMDE.value(decodeURIComponent(escape(atob(data.content))));
+        document.getElementById('filePath').value = path;
+        currentSha = data.sha;
+    }
+
+    function createNewFolder() {
+        const folderName = prompt("文件夹名称:");
+        if (folderName) {
+            currentDir = `${currentDir}/${folderName}`;
+            document.getElementById('filePath').value = `${currentDir}/new-article.md`;
+            easyMDE.value('---\ntitle: 新文章\n---');
+            currentSha = '';
+            alert(`已进入新文件夹路径，发布文件后将自动创建目录。`);
+        }
+    }
+
+    function createNewFile() {
+        const name = prompt("文件名:", "article.md");
+        if (name) {
+            document.getElementById('filePath').value = `${currentDir}/${name}`;
+            easyMDE.value('---\ntitle: \n---');
+            currentSha = '';
+        }
+    }
+
+    async function submitFile() {
+        const path = document.getElementById('filePath').value;
+        const content = btoa(unescape(encodeURIComponent(easyMDE.value())));
+        const res = await ghApi(path, 'PUT', { message: 'update', content, sha: currentSha || undefined });
+        if (res.ok) {
+            const data = await res.json();
+            currentSha = data.content.sha;
+            alert('✅ 发布成功');
+            fetchFiles(currentDir);
+        } else {
+            const err = await res.json();
+            alert('发布失败: ' + err.message);
+        }
+    }
+
+    async function deleteFile() {
+        const path = document.getElementById('filePath').value;
+        if (!path || !currentSha) return alert('请先选择一个已发布的文件');
+        if (!confirm(`确定要删除 ${path} 吗？此操作不可撤销！`)) return;
+
+        const res = await ghApi(path, 'DELETE', { message: 'delete', sha: currentSha });
+        if (res.ok) {
+            alert('🗑️ 删除成功');
+            easyMDE.value('');
+            document.getElementById('filePath').value = '';
+            currentSha = '';
+            fetchFiles(currentDir);
+        } else {
+            const err = await res.json();
+            alert('删除失败: ' + err.message);
+        }
+    }
+
+    function saveToken() {
+        localStorage.setItem('gh_token', document.getElementById('tokenInput').value);
+        location.reload();
+    }
+
+    window.onload = () => {
+        const tk = localStorage.getItem('gh_token');
+        if (tk) { document.getElementById('tokenInput').value = tk; fetchFiles('docs'); }
+    };
+</script>
+</body>
+</html>
