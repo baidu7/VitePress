@@ -87,7 +87,6 @@ export default {
       {
         text: '✨ 快捷功能',
         items: [
-          { text: '🔍 站内搜索', link: '#' }, 
           { text: '📄 站点地图', link: '/sitemap.xml' }, // 这里改成了点
           { text: '👤 关于我', link: '/about' }
         ]
@@ -99,8 +98,13 @@ export default {
       level: [2, 3], 
       label: '本页目录'
     },
-				// 允许死链
-    ignoreDeadLinks: true,
+				ignoreDeadLinks: true,
+				markdown: {
+				    image: {
+				      // 启用图片懒加载
+				      lazyLoading: true
+				    }
+				  },
 				
     search: { provider: 'local' },
     sidebar: getAutoSidebar(), 
