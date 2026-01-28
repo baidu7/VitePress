@@ -12,5 +12,4 @@ title: 📜 文章归档
 :::
 
 ## 🚀 快速开始
-- [Markdown 示例](./markdown-examples.md)
 - [关于本站](./about.md)
