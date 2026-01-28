@@ -70,7 +70,7 @@ export default {
 				ignoreDeadLinks: true,
 				vite: {
 				    assetsInclude: ['**/*.webm', '**/*.mp4'], // 告诉编译器：这些是文件，别当成代码解析
-				  }
+				  },
 				markdown: {
 				    image: {
 				      // 启用图片懒加载
