@@ -1,11 +1,21 @@
-/* 让图片点击时稍微放大，并增加丝滑的过渡 */
+/* 1. 基础图片样式：增加放大镜手势 */
 .vp-doc img {
   cursor: zoom-in;
-  transition: transform 0.3s ease;
+  transition: opacity 0.2s ease;
+  border-radius: 8px; /* 给图片加一点圆角，更现代 */
 }
 
-.vp-doc img:active {
-  transform: scale(1.5); /* 点击瞬间放大 1.5 倍 */
-  z-index: 999;
-  position: relative;
+.vp-doc img:hover {
+  opacity: 0.8; /* 鼠标悬停时变暗一点，提示可点击 */
+}
+
+/* 2. 这里的样式是配合刚才 JS 生成的全屏遮罩层 */
+/* 动画会让全屏看图弹出时更丝滑 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.zoom-overlay {
+  animation: fadeIn 0.3s ease;
 }
