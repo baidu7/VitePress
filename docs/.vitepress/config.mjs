@@ -102,7 +102,7 @@ export default {
   themeConfig: {
     logo: '/logo.png',
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/baidu8/VitePress' }
+      { icon: 'github', link: 'https://github.com/baidu8/' }
     ],
     
     nav: [
@@ -111,6 +111,7 @@ export default {
       {
         text: '✨ 快捷功能',
         items: [
+									 { text: '🖊️编辑', link: '/admin.html', target: '_blank' },
           { text: '📄 站点地图', link: '/sitemap.xml' },
           { text: '👤 关于我', link: '/about' }
         ]
