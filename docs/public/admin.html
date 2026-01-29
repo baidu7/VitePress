@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>江大爷博客后台 - 颜值与实力并存版</title>
+    <title>江大爷后台</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
     <style>
         /* 基础变量定义 */
@@ -40,17 +40,6 @@
                 box-shadow: 0 0 20px rgba(0,0,0,0.1);
             }
         }
-    @media (min-width: 768px) {
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-    }
         /* 顶部导航：沉浸式深色 */
         header {
             background: var(--dark);
@@ -228,12 +217,6 @@
 								    overflow: hidden; /* 防止外层出现滚动条 */
 								}
 								
-								/* 针对 EasyMDE 的内部容器（重点） */
-								.CodeMirror {
-								    height: 100% !important; /* 填满 editor-zone */
-								    overflow-y: auto !important;
-								}
-								
 								/* 预览区容器 */
 								.preview-zone {
 								    flex: 1;
@@ -254,6 +237,28 @@
 								    max-width: 50%;
 								    height: auto;
 								}
+								/* 强制编辑器里的字号统一，不许它变大 */
+								.CodeMirror .cm-header { 
+								    font-size: 1em !important; 
+								    line-height: 1.5 !important;
+								}
+								.CodeMirror .cm-strong { font-weight: bold; }
+								/* 强制编辑器内部使用等宽字体，更有敲代码的感觉 */
+								.CodeMirror pre.CodeMirror-line {
+								    font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+								    font-size: 14px !important;
+								}
+								
+								/* 这种写法能确保 --- 这种分割线在编辑器里也清清爽爽 */
+								.cm-hr {
+								    color: var(--primary) !important;
+								    line-height: 2 !important;
+								}
+								/* 修改编辑器选中文字的背景色，让您一眼看出选了啥 */
+								.CodeMirror-selected { background: #d1fae5 !important; }
+								
+								/* 让光标变粗一点，免得找不到在哪 */
+								.CodeMirror-cursor { border-left: 2px solid var(--primary) !important; }
     </style>
 </head>
 <body>
@@ -307,9 +312,20 @@
 
     const easyMDE = new EasyMDE({
         element: document.getElementById('mdEditor'),
+								autosave: {
+								        enabled: true,
+								        uniqueId: "jdy_blog_editor", // 唯一标识，防止和别的网站搞混
+								        delay: 1000, // 每隔 1 秒存一次
+								    },
 								maxHeight: "600px",
         spellChecker: false, status: false,
-        toolbar: ["bold", "italic", "heading", "|", "link", "image"]
+        toolbar: [
+									"bold", "italic", "strikethrough", "heading", "|", 
+									    "quote", "code","horizontal-rule", "|", 
+									    "unordered-list", "ordered-list", "|", 
+									    "link", "image", "|", 
+									    "guide"
+								]
     });
 
     easyMDE.codemirror.on("change", () => {
@@ -408,11 +424,29 @@
     }
 
     function createNewFile() {
-        const name = prompt("文件名:", "article.md");
+        // 提示：可以默认带上 .md 扩展名
+        const name = prompt("文件名 (建议加上 .md):", "新文章.md");
+        
         if (name) {
+            // 确保路径正确
             document.getElementById('filePath').value = `${currentDir}/${name}`;
-            easyMDE.value('---\ntitle: \n---');
-            currentSha = '';
+            
+            // 清理一下文件名（去掉 .md 后缀作为标题）
+            const titleName = name.replace('.md', '');
+    
+            // 使用反引号 `` 来定义多行模板字符串
+easyMDE.value(`---
+title: ${titleName}
+description: 
+tags: []
+outline: [2, 3]
+---
+
+# ${titleName}
+    
+    在这里开始你的写作吧...`);
+    
+            currentSha = ''; // 新文件没有 SHA，必须清空，否则会报错
         }
     }
 
