@@ -2,16 +2,16 @@
 layout: page
 ---
 
-# ** ÓÑÇéÁ´½Ó**
+# **ğŸ¤ å‹æƒ…é“¾æ¥**
 
 <div class="features">
   <a href="https://github.com/baidu8/" target="_blank" class="vp-link">
     <div class="feature-card">
       <div class="icon">
-  <img src="https://avatars.githubusercontent.com/u/84177566" alt="½­´óÒ¯" class="avatar-image">
+  <img src="https://avatars.githubusercontent.com/u/84177566" alt="æ±Ÿå¤§çˆ·" class="avatar-image">
 </div>
-      <h4>½­´óÒ¯</h4>
-      <p>±¾Õ¾ËùÓĞÕß</p>
+      <h4>æ±Ÿå¤§çˆ·</h4>
+      <p>æœ¬ç«™æ‰€æœ‰è€…</p>
     </div>
   </a>
 </div>
@@ -19,9 +19,9 @@ layout: page
 <style scoped>
 .features {
   display: grid;
-  /* Ä¬ÈÏ£¨µçÄÔ¶Ë£©£º¸ù¾İ¿í¶È×Ô¶¯Ìî³ä£¬Ã¿¸ö¿¨Æ¬×îĞ¡ 200px */
+  /* é»˜è®¤ï¼ˆç”µè„‘ç«¯ï¼‰ï¼šæ ¹æ®å®½åº¦è‡ªåŠ¨å¡«å……ï¼Œæ¯ä¸ªå¡ç‰‡æœ€å° 200px */
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px; /* ¼ä¾àÉÔÎ¢µ÷Ğ¡Ò»µã£¬¸øÊÖ»úÌÚµØ·½ */
+  gap: 15px; /* é—´è·ç¨å¾®è°ƒå°ä¸€ç‚¹ï¼Œç»™æ‰‹æœºè…¾åœ°æ–¹ */
   margin-top: 24px;
 }
 .feature-card {
@@ -51,9 +51,9 @@ layout: page
   font-size: 14px;
   color: var(--vp-c-text-2);
 		min-height: 40px;
-		/* --- ĞÂÔö£º³¬¹ıÁ½ĞĞ×Ô¶¯ÏÔÊ¾Ê¡ÂÔºÅ --- */
+		/* --- æ–°å¢ï¼šè¶…è¿‡ä¸¤è¡Œè‡ªåŠ¨æ˜¾ç¤ºçœç•¥å· --- */
 		display: -webkit-box;
-		-webkit-line-clamp: 2; /* ÕâÀïÊı×ÖÊÇ¼¸£¬¾ÍÏÔÊ¾¼¸ĞĞ */
+		-webkit-line-clamp: 2; /* è¿™é‡Œæ•°å­—æ˜¯å‡ ï¼Œå°±æ˜¾ç¤ºå‡ è¡Œ */
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -62,39 +62,39 @@ layout: page
   text-decoration: none !important;
 }
 	.feature-card .icon {
-  font-size: 40px; /* Õâ¸ö¿ÉÒÔÁô×Å£¬Ò²¿ÉÒÔÉ¾µô£¬ÒòÎªÍ¼Æ¬ÓĞ×Ô¼ºµÄ´óĞ¡ */
+  font-size: 40px; /* è¿™ä¸ªå¯ä»¥ç•™ç€ï¼Œä¹Ÿå¯ä»¥åˆ æ‰ï¼Œå› ä¸ºå›¾ç‰‡æœ‰è‡ªå·±çš„å¤§å° */
   margin-bottom: 8px;
-  /* Ôö¼Ó flex ²¼¾Ö£¬ÈÃÍ¼Æ¬ÔÚ icon ÈİÆ÷ÖĞ¾ÓÖĞ */
+  /* å¢åŠ  flex å¸ƒå±€ï¼Œè®©å›¾ç‰‡åœ¨ icon å®¹å™¨ä¸­å±…ä¸­ */
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60px; /* ±£³ÖºÍÔ­À´µÄ emoji ¸ß¶ÈÒ»ÖÂ */
-  width: 60px; /* ±£³ÖºÍÔ­À´µÄ emoji ¿í¶ÈÒ»ÖÂ */
-  overflow: hidden; /* Òş²Ø³¬³öÈİÆ÷µÄ²¿·Ö£¬·½±ãÍ¼Æ¬±äÔ² */
-  margin: 0 auto 8px auto; /* ¾ÓÖĞ²¢±£³Öµ×²¿¼ä¾à */
+  height: 60px; /* ä¿æŒå’ŒåŸæ¥çš„ emoji é«˜åº¦ä¸€è‡´ */
+  width: 60px; /* ä¿æŒå’ŒåŸæ¥çš„ emoji å®½åº¦ä¸€è‡´ */
+  overflow: hidden; /* éšè—è¶…å‡ºå®¹å™¨çš„éƒ¨åˆ†ï¼Œæ–¹ä¾¿å›¾ç‰‡å˜åœ† */
+  margin: 0 auto 8px auto; /* å±…ä¸­å¹¶ä¿æŒåº•éƒ¨é—´è· */
 }
 
 .avatar-image {
-  width: 100%;  /* ÈÃÍ¼Æ¬ÌîÂú¸¸ÈİÆ÷ */
-  height: 100%; /* ÈÃÍ¼Æ¬ÌîÂú¸¸ÈİÆ÷ */
-  object-fit: cover; /* ±£³ÖÍ¼Æ¬±ÈÀı£¬²Ã¼ô³¬³ö²¿·Ö */
-  border-radius: 50%; /* ºËĞÄ£ºÈÃÍ¼Æ¬±ä³ÉÔ²ĞÎ */
-		border: 2px solid var(--vp-c-divider); /* ¸øÍ·Ïñ¼Ó¸öÏ¸±ß¿ò */
+  width: 100%;  /* è®©å›¾ç‰‡å¡«æ»¡çˆ¶å®¹å™¨ */
+  height: 100%; /* è®©å›¾ç‰‡å¡«æ»¡çˆ¶å®¹å™¨ */
+  object-fit: cover; /* ä¿æŒå›¾ç‰‡æ¯”ä¾‹ï¼Œè£å‰ªè¶…å‡ºéƒ¨åˆ† */
+  border-radius: 50%; /* æ ¸å¿ƒï¼šè®©å›¾ç‰‡å˜æˆåœ†å½¢ */
+		border: 2px solid var(--vp-c-divider); /* ç»™å¤´åƒåŠ ä¸ªç»†è¾¹æ¡† */
 }
-/* --- ĞÂÔö£ºÊÖ»ú¶ËÊÊÅä (ÆÁÄ»¿í¶ÈĞ¡ÓÚ 640px Ê±´¥·¢) --- */
+/* --- æ–°å¢ï¼šæ‰‹æœºç«¯é€‚é… (å±å¹•å®½åº¦å°äº 640px æ—¶è§¦å‘) --- */
 @media (max-width: 640px) {
   .features {
-    /* ºËĞÄ£ºÇ¿ÖÆÒ»ĞĞÏÔÊ¾Á½¸ö£¬Æ½·Ö¿í¶È */
+    /* æ ¸å¿ƒï¼šå¼ºåˆ¶ä¸€è¡Œæ˜¾ç¤ºä¸¤ä¸ªï¼Œå¹³åˆ†å®½åº¦ */
     grid-template-columns: repeat(2, 1fr); 
-    gap: 10px; /* ÊÖ»ú¶Ë¼ä¾à¸ü½ô´Õ */
+    gap: 10px; /* æ‰‹æœºç«¯é—´è·æ›´ç´§å‡‘ */
   }
   
   .feature-card {
-    padding: 16px 8px; /* ÊÖ»ú¶Ë¿¨Æ¬ÄÚ±ß¾àµ÷Ğ¡£¬·ÀÖ¹ÎÄ×ÖÌ«¼· */
+    padding: 16px 8px; /* æ‰‹æœºç«¯å¡ç‰‡å†…è¾¹è·è°ƒå°ï¼Œé˜²æ­¢æ–‡å­—å¤ªæŒ¤ */
   }
   
   .feature-card .icon {
-    width: 45px; /* ÊÖ»ú¶ËÍ·ÏñÒ²ËõĞ¡Ò»µã */
+    width: 45px; /* æ‰‹æœºç«¯å¤´åƒä¹Ÿç¼©å°ä¸€ç‚¹ */
     height: 45px;
   }
 }
