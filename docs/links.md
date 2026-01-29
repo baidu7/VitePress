@@ -1,22 +1,9 @@
 ---
-layout: page
+title: 友情链接
 ---
 
-<VPTeamMembers :members="links" />
+# 🤝 我的朋友们
 
-<script setup>
-const links = [
-  {
-    avatar: 'https://github.com/yyx990803.png',
-    name: '尤雨溪',
-    title: 'Vue & Vite 创始人',
-    links: [{ icon: 'github', link: 'https://github.com/yyx990803' }]
-  },
-  {
-    avatar: 'https://github.com/baidu8.png',
-    name: '江大爷',
-    title: '硬核博主',
-    links: [{ icon: 'github', link: 'https://github.com/baidu8' }]
-  }
-]
-</script>
+| 昵称 | 链接 | 简介 |
+| :--- | :--- | :--- |
+| 百度 | [点击访问](https://www.baidu.com) | 搜索引擎 |
