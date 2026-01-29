@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-
 // 自动生成带分类的侧边栏
 const getAutoSidebar = () => {
   const docsPath = path.resolve(process.cwd(), 'docs')
@@ -19,7 +18,7 @@ const getAutoSidebar = () => {
         .filter(file => file.endsWith('.md'))
         .map(file => {
           const name = file.replace('.md', '')
-          // 【修复点】对包含中文或 Emoji 的路径进行编码，解决 Build 报错
+          // 对路径进行编码
           return { text: name, link: encodeURI(`/${item}/${name}`) }
         })
 
@@ -41,7 +40,8 @@ const getAutoSidebar = () => {
     })
     
   if (rootFiles.length > 0) {
-    sidebar.unshift({ text: '📑 杂记', items: rootFiles })
+    // 【修改点】将 unshift 改为 push，这样“杂记”就会排在所有文件夹分类的后面
+    sidebar.push({ text: '📑 杂记', items: rootFiles })
   }
 
   return sidebar
@@ -50,19 +50,13 @@ const getAutoSidebar = () => {
 export default {
   // 顶层配置
   ignoreDeadLinks: true, 
-  
-  vite: {
-    // 强制将视频后缀视为资源，解决 Rollup failed to resolve import 报错
-    assetsInclude: ['**/*.webm', '**/*.mp4', '**/*.mov', '**/*.PNG', '**/*.JPG'], 
-  },
-  
   markdown: {
     image: {
       lazyLoading: true // 开启图片懒加载
     }
   },
 
-  title: "江大爷博客",
+  title: "江大爷",
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
     ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
@@ -73,7 +67,7 @@ export default {
     const canonicalUrl = `https://vitepress-6k9.pages.dev/${pageData.relativePath.replace('.md', '.html')}`
     pageData.frontmatter.head ??= []
     pageData.frontmatter.head.push(
-      ['meta', { property: 'og:title', content: pageData.title || '江大爷博客' }],
+      ['meta', { property: 'og:title', content: pageData.title || '江大爷' }],
       ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }]
     )
   },
