@@ -2,6 +2,8 @@ import DefaultTheme from 'vitepress/theme'
 import MyLayout from './MyLayout.vue'
 import { onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vitepress'
+// 引入 Fancybox 样式（直接引用 CDN，省去安装麻烦）
+import 'https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css'
 import './custom.css'
 
 export default {
@@ -9,37 +11,47 @@ export default {
   Layout: MyLayout,
   setup() {
     const route = useRoute()
-    
-    // 自定义的轻量级看图逻辑
-    const initZoom = () => {
-      const images = document.querySelectorAll('.vp-doc img')
-      images.forEach(img => {
-        img.onclick = () => {
-          // 创建一个全屏遮罩层
-          const overlay = document.createElement('div')
-          overlay.style = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 10000;
-            display: flex; align-items: center; justify-content: center;
-            cursor: zoom-out; transition: opacity 0.3s;
-          `
-          const fullImg = document.createElement('img')
-          fullImg.src = img.src
-          fullImg.style = 'max-width: 90%; max-height: 90%; border-radius: 8px;'
+
+    // 整合后的看图逻辑：支持全屏、左右切换、手势缩放
+    const initFancybox = () => {
+      // 只有在浏览器环境下运行
+      if (typeof window !== 'undefined') {
+        // 动态引入 JS 模块，保证兼容性
+        import('https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.esm.js').then(({ Fancybox }) => {
           
-          overlay.appendChild(fullImg)
-          document.body.appendChild(overlay)
-          
-          // 点击遮罩关闭
-          overlay.onclick = () => {
-            overlay.style.opacity = '0'
-            setTimeout(() => document.body.removeChild(overlay), 300)
-          }
-        }
-      })
+          // 在重新绑定前先销毁旧实例，防止重复绑定导致翻页混乱
+          Fancybox.unbind(".vp-doc img");
+          Fancybox.close();
+
+          // 绑定所有文章内的图片
+          Fancybox.bind(".vp-doc img", {
+            groupAll: true, // 关键：将页面内所有图片连成画廊，支持下一张切换
+            compact: false, // 手机端不压缩 UI
+            dragToClose: true, // 向下滑动关闭
+            Image: {
+              zoom: true, // 支持点击放大
+            },
+            Toolbar: {
+              display: {
+                left: ["infobar"],
+                middle: [],
+                right: ["iterateZoom", "slideshow", "fullScreen", "download", "thumbs", "close"],
+              },
+            },
+          });
+        });
+      }
     }
 
-    onMounted(() => initZoom())
-    watch(() => route.path, () => nextTick(() => initZoom()))
+    // 1. 首次加载页面时初始化
+    onMounted(() => {
+      initFancybox()
+    })
+
+    // 2. 监听路由变化，跳转到新文章时重新绑定图片
+    watch(
+      () => route.path,
+      () => nextTick(() => initFancybox())
+    )
   }
 }
