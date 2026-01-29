@@ -1,7 +1,7 @@
 ---
     title: cf创建无服务器带后台博客
     description: cloudflare-workers-blog纯cf部署的博客，用的cf免费的kv桶
-    tags: [cf，cloudflare，博客，workers，blog]
+    tags: [cf, cloudflare, 博客, workers, blog]
     outline: [2, 3]
 ---
     
