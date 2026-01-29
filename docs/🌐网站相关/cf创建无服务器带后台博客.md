@@ -4,6 +4,10 @@
     tags: [cf, cloudflare, 博客, workers, blog]
     outline: [2, 3]
 ---
+
+> **分类标签**：#cf #cloudflare #博客 #workers #blog
+
+
     
 **cloudflare-workers-blog纯cf部署的博客，用的cf免费的kv桶**
 
