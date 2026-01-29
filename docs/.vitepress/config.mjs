@@ -97,7 +97,7 @@ export default {
 
   // 自动为每个页面添加社交媒体分享元标签（SEO 优化）
   transformPageData(pageData) {
-    const canonicalUrl = `https://vitepress-6k9.pages.dev/${pageData.relativePath.replace('.md', '.html')}`
+    const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
     pageData.frontmatter.head ??= []
     pageData.frontmatter.head.push(
       ['meta', { property: 'og:title', content: pageData.title || '江大爷' }],
@@ -107,7 +107,7 @@ export default {
 
   // 站点地图配置，利于搜索引擎收录
   sitemap: {
-    hostname: 'https://vitepress-6k9.pages.dev' 
+    hostname: 'https://baidu8.indevs.in/' 
   },
 
   themeConfig: {
