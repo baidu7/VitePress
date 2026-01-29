@@ -15,16 +15,42 @@
             --text-main: #334155;
         }
     
+        /* 修改后的 body：作为大背景 */
         body {
             font-family: -apple-system, system-ui, sans-serif;
             margin: 0;
+            /* 去掉 display: flex 和 flex-direction */
+            background: #e5e7eb; /* 换个稍微深点的颜色，更能衬托出中间的白色容器 */
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden; /* 防止出现双滚动条 */
+        }
+        
+        /* 新增的容器：承接原 body 的功能 */
+        .main-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: var(--bg-light);
-            color: var(--text-main);
+            background: #fff; /* 容器内部是纯白 */
+            
+            /* 电脑端居中逻辑 */
+            @media (min-width: 768px) {
+                max-width: 1200px;
+                margin: 0 auto;
+                box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            }
         }
-    
+    @media (min-width: 768px) {
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+    }
         /* 顶部导航：沉浸式深色 */
         header {
             background: var(--dark);
@@ -115,23 +141,17 @@
         }
     
         /* 编辑器与预览核心区 */
+        /* 核心：工作区固定高度 */
         .work-area {
-            flex: 1;
             display: flex;
-            overflow: hidden;
-            background: white;
+            height: calc(100vh - 220px); /* 必须减去上方所有按钮占用的高度 */
+            overflow: hidden; /* 禁止外层滚动 */
+            gap: 10px;
         }
+        /* 编辑器容器 */
         .editor-zone {
-            flex: 1.2; /* 编辑区稍微宽一点 */
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
-        }
-        .preview-zone {
             flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            background: #fff;
+            height: 100%;
         }
     
         /* 按钮全局美化 */
@@ -163,12 +183,11 @@
         }
     
         /* EasyMDE 适配优化 */
+        /* 强制编辑器容器高度，并显示滚动条 */
         .CodeMirror {
-            flex: 1;
-            height: auto !important;
-            font-family: 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 15px;
-            border: none !important;
+          height: calc(100vh - 200px) !important; /* 动态高度：窗口高度减去页眉等高度 */
+          min-height: 400px;
+          overflow-y: auto !important;
         }
     
         /* 适配手机端 */
@@ -184,11 +203,60 @@
                 height: calc(100% - 130px);
                 z-index: 99;
             }
+												.preview-zone.mobile-active {
+												        display: block !important;
+												        position: fixed !important;
+												        /* 【关键修改点】这里的数值要大于你上方所有工具栏的总高度 */
+												        /* 如果还是遮挡，就继续调大，比如改为 200px */
+												        top: 180px; 
+												        left: 0;
+												        width: 100% !important;
+												        /* 确保高度计算正确，防止底部溢出 */
+												        height: calc(100% - 180px) !important; 
+												        z-index: 2000;
+												        background: white;
+												        padding: 20px;
+												        box-shadow: 0 -5px 15px rgba(0,0,0,0.1); /* 增加阴影增加层级感 */
+												    }
         }
+								/* 1. 约束整个工作区的高度，防止被内容撑得无限长 */
+								.work-area {
+								    display: flex;
+								    height: calc(100vh - 250px); /* 减去 header、action-bar 和 tools 的高度 */
+								    gap: 20px;
+								    align-items: stretch;
+								    overflow: hidden; /* 防止外层出现滚动条 */
+								}
+								
+								/* 针对 EasyMDE 的内部容器（重点） */
+								.CodeMirror {
+								    height: 100% !important; /* 填满 editor-zone */
+								    overflow-y: auto !important;
+								}
+								
+								/* 预览区容器 */
+								.preview-zone {
+								    flex: 1;
+								    height: 100%;
+								    overflow-y: auto !important; /* 必须有这个才能滚动 */
+								    padding: 15px;
+								    border: 1px solid #ddd;
+								    background: #fff;
+								    scroll-behavior: smooth; /* 让同步更丝滑 */
+								}
+								
+								/* 如果你用的是 EasyMDE 自带的侧边预览，也要修一下高度 */
+								.editor-preview-side {
+								    height: 100% !important;
+								    overflow-y: auto !important;
+								}
+								#preview-zone img {
+								    max-width: 50%;
+								    height: auto;
+								}
     </style>
 </head>
 <body>
-
 <header>
     <div style="font-weight: 800; letter-spacing: 1px; font-size: 18px;">JDY <span style="color:var(--primary)">ADMIN</span></div>
     <div style="display:flex; gap:8px;">
@@ -196,6 +264,7 @@
         <button onclick="saveToken()" style="background:white; color:var(--dark); border:none; padding:3px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">SAVE</button>
     </div>
 </header>
+<div class="main-container">
 
 <div id="sidebar">
     <button class="file-item" style="background:var(--dark); color:white; font-weight:bold;" onclick="fetchFiles('docs')">🏠 根目录</button>
@@ -217,8 +286,9 @@
     <button onclick="insertDetails()">📁 折叠</button>
     <button onclick="insertCode()">💻 代码</button>
     <button onclick="insertVideo()">📹 视频</button>
-    <button onclick="insertIframe()">🖼️ 框架</button>
+    <button onclick="insertIframe()">🎞️️ iframe</button>
     <button onclick="easyMDE.drawTable()">📊 表格</button>
+				<button onclick="insertFrontmatter()">⚙️ 文章设置</button>
 </div>
 
 <div class="work-area">
@@ -227,7 +297,7 @@
     </div>
     <div id="preview-zone" class="preview-zone markdown-body"></div>
 </div>
-
+</div>
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
@@ -237,6 +307,7 @@
 
     const easyMDE = new EasyMDE({
         element: document.getElementById('mdEditor'),
+								maxHeight: "600px",
         spellChecker: false, status: false,
         toolbar: ["bold", "italic", "heading", "|", "link", "image"]
     });
@@ -260,7 +331,35 @@
     function insertCode() { easyMDE.codemirror.replaceSelection(`\n\`\`\`javascript\n// Code\n\`\`\`\n`); }
     function insertVideo() { easyMDE.codemirror.replaceSelection(`\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n  <source src="/movie.mp4" type="video/mp4">\n  您的浏览器不支持播放该视频。\n</video>\n`); }
     function insertIframe() { easyMDE.codemirror.replaceSelection(`\n<div class="iframe-container">\n  <iframe src="这里填链接" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n`); }
-
+    function insertFrontmatter() {
+        const cm = easyMDE.codemirror;
+        const content = cm.getValue();
+        
+        // 检查是否已经存在 Frontmatter
+        if (content.startsWith('---')) {
+            alert('这篇文章似乎已经配置过 Meta 信息了。');
+            return;
+        }
+    
+        // 获取当前路径中的文件名作为默认标题
+        const filePath = document.getElementById('filePath').value;
+        const fileName = filePath.split('/').pop().replace('.md', '') || '未命名文章';
+    
+        const template = `---
+    title: ${fileName}
+    description: 
+    tags: []
+    outline: [2, 3]
+    ---
+    
+    `;
+    
+        // 将光标移到最顶端并插入
+        cm.replaceRange(template, { line: 0, ch: 0 });
+        // 自动将光标定位到 description 后面，方便直接输入
+        cm.setCursor({ line: 2, ch: 13 });
+        cm.focus();
+    }
     async function ghApi(path, method = 'GET', body = null) {
         const token = localStorage.getItem('gh_token');
         if (!token) return alert('请填 Token');
@@ -359,6 +458,29 @@
         const tk = localStorage.getItem('gh_token');
         if (tk) { document.getElementById('tokenInput').value = tk; fetchFiles('docs'); }
     };
+				// 自动同步滚动逻辑
+				function initSyncScroll() {
+				    const cm = easyMDE.codemirror;
+				    const previewZone = document.getElementById('preview-zone');
+				
+				    // 监听 CodeMirror 的滚动事件
+				    cm.on("scroll", function(instance) {
+				        // 只有当预览区可见时才同步（针对移动端预览切换）
+				        if (previewZone.style.display !== 'none') {
+				            const scrollInfo = instance.getScrollInfo();
+				            
+				            // 计算滚动百分比：当前位置 / (总内容高度 - 可见窗口高度)
+				            const percentage = scrollInfo.top / (scrollInfo.height - scrollInfo.clientHeight);
+				            
+				            // 同步到右侧预览区
+				            previewZone.scrollTop = percentage * (previewZone.scrollHeight - previewZone.clientHeight);
+				        }
+				    });
+				}
+				
+				// 确保在 EasyMDE 初始化后调用
+				// 如果你已经有初始化逻辑，直接把这一行加在后面
+				setTimeout(initSyncScroll, 500);
 </script>
 </body>
 </html>
