@@ -1,17 +1,13 @@
 ---
-    title: cf创建无服务器带后台博客
-    description: cloudflare-workers-blog纯cf部署的博客，用的cf免费的kv桶
-    tags: [cf, cloudflare, 博客, workers, blog]
-    outline: [2, 3]
+title: cf创建无服务器带后台博客
+description: cloudflare-workers-blog纯cf部署的博客，用的cf免费的kv桶
+tags: [cf, cloudflare, 博客, workers, blog]
+outline: [2, 3]
 ---
-
-> **分类标签**： # cf # cloudflare # 博客 # workers # blog
-
 
     
 **cloudflare-workers-blog纯cf部署的博客，用的cf免费的kv桶**
-
-![](https://image.thum.io/get/https://blog.gezhong.vip/)
+<center><img src="https://image.thum.io/get/https://blog.gezhong.vip/" style="width: 50%;" /></center>
 
 1. 复制里面的`infex.js`代码
 2. 在cf里选择`workers`部署，全选粘贴
@@ -29,14 +25,15 @@
 4. 创建KV空间
 5. 在部署项目里绑定KV空间，变量名必须是`CFBLOG`
 
-
-::: tip 提示
+::: tip 💡 提示
 没域名好像不行，获取不了api
 :::
 
+
 ---
 
-[项目地址](https://github.com/gdtool/cloudflare-workers-blog "cloudflare-workers-blog")
 
-[作者播客](https://blog.gezhong.vip/)
+[![项目地址](https://img.shields.io/badge/%F0%9F%94%97-%E7%82%B9%E6%AD%A4%E5%89%8D%E5%BE%80-2257D7?style=flat-square)](https://github.com/gdtool/cloudflare-workers-blog "cloudflare-workers-blog")
+
+[![作者播客](https://img.shields.io/badge/%F0%9F%94%97-%E7%82%B9%E6%AD%A4%E5%89%8D%E5%BE%80-2257D7?style=flat-square)](https://blog.gezhong.vip/)
     
