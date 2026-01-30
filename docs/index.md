@@ -11,7 +11,7 @@ layout: doc
 * **搜内容**：点击右上角的搜索框，或按 `Ctrl + K` 快速查找。
 * **换心情**：点击右上角的太阳/月亮图标，体验丝滑的切换动画。
 
-<p align="center">
+<p id="my-badges" align="center">
   <img src="https://img.shields.io/badge/博主-江大爷-blue?style=flat-square" />
   <img src="https://img.shields.io/badge/内容-梦到什么说什么-98FB98?style=flat-square" />
   <img src="https://img.shields.io/badge/状态-不定期闭关-blueviolet?style=flat-square" />
@@ -36,11 +36,11 @@ layout: doc
 </div>
 
 <style scoped>
-/* 专门保护 p 标签里的徽章图片不被弄弯、不被换行 */
-p align="center" img {
-  display: inline-block !important;
-  margin: 0 2px !important;
-  border-radius: 0 !important;
+#my-badges img {
+  display: inline-block !important; /* 强制横排 */
+  border-radius: 0 !important;      /* 强制直角 */
+  margin: 4px 2px !important;       /* 给徽章一点呼吸空间 */
+  vertical-align: middle;           /* 防止对不齐 */
 }
 /* 1. 容器控制：只影响带有 .features 类的容器 */
 .features {
