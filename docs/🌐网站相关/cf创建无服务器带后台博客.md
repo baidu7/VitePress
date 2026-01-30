@@ -33,7 +33,7 @@ outline: [2, 3]
 ---
 
 
-[![项目地址](https://img.shields.io/badge/%F0%9F%94%97-%E7%82%B9%E6%AD%A4%E5%89%8D%E5%BE%80-2257D7?style=flat-square)](https://github.com/gdtool/cloudflare-workers-blog "cloudflare-workers-blog")
+[项目地址](https://github.com/gdtool/cloudflare-workers-blog "cloudflare-workers-blog")
 
-[![作者播客](https://img.shields.io/badge/%F0%9F%94%97-%E7%82%B9%E6%AD%A4%E5%89%8D%E5%BE%80-2257D7?style=flat-square)](https://blog.gezhong.vip/)
+[作者播客](https://blog.gezhong.vip/)
     
