@@ -2,99 +2,104 @@
 layout: page
 ---
 
-# **ğŸ¤ å‹æƒ…é“¾æ¥**
+# ** ÓÑÇéÁ´½Ó**
 
 <div class="features">
   <a href="https://github.com/baidu8/" target="_blank" class="vp-link">
     <div class="feature-card">
       <div class="icon">
-  <img src="https://avatars.githubusercontent.com/u/84177566" alt="æ±Ÿå¤§çˆ·" class="avatar-image">
+  <img src="https://avatars.githubusercontent.com/u/84177566" alt="½­´óÒ¯" class="avatar-image">
 </div>
-      <h4>æ±Ÿå¤§çˆ·</h4>
-      <p>æœ¬ç«™æ‰€æœ‰è€…</p>
+      <h4>½­´óÒ¯</h4>
+      <p>±¾Õ¾ËùÓĞÕß</p>
     </div>
   </a>
 </div>
 
 <style scoped>
+/* 1. ÈİÆ÷¿ØÖÆ£ºÖ»Ó°Ïì´øÓĞ .features ÀàµÄÈİÆ÷ */
 .features {
   display: grid;
-  /* é»˜è®¤ï¼ˆç”µè„‘ç«¯ï¼‰ï¼šæ ¹æ®å®½åº¦è‡ªåŠ¨å¡«å……ï¼Œæ¯ä¸ªå¡ç‰‡æœ€å° 200px */
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px; /* é—´è·ç¨å¾®è°ƒå°ä¸€ç‚¹ï¼Œç»™æ‰‹æœºè…¾åœ°æ–¹ */
+  gap: 15px;
   margin-top: 24px;
 }
-.feature-card {
+
+/* 2. Á´½Ó¿ØÖÆ£º×¨ÃÅÕë¶Ô¿¨Æ¬ÀïµÄÁ´½Ó£¬²»Ó°Ïì»ÕÕÂÁ´½Ó */
+.features .vp-link {
+  text-decoration: none !important;
+  display: block; /* È·±£Á´½Ó³ÅÂú¿¨Æ¬ */
+}
+
+/* 3. ¿¨Æ¬Ö÷Ìå */
+.features .feature-card {
   border: 1px solid var(--vp-c-bg-soft);
   border-radius: 12px;
   padding: 24px;
   background-color: var(--vp-c-bg-soft);
-  transition: border-color 0.25s, background-color 0.25s;
+  transition: all 0.25s;
   text-align: center;
   cursor: pointer;
+  height: 100%; /* ÈÃÍ¬Ò»ÅÅ¿¨Æ¬Ò»Ñù¸ß */
 }
-.feature-card:hover {
+
+.features .feature-card:hover {
   border-color: var(--vp-c-brand-1);
   background-color: var(--vp-c-bg-mute);
+  transform: translateY(-2px);
 }
-.feature-card .icon {
-  font-size: 40px;
-  margin-bottom: 8px;
-}
-.feature-card h4 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 16px;
-}
-.feature-card p {
-  margin: 8px 0 0;
-  font-size: 14px;
-  color: var(--vp-c-text-2);
-		min-height: 40px;
-		/* --- æ–°å¢ï¼šè¶…è¿‡ä¸¤è¡Œè‡ªåŠ¨æ˜¾ç¤ºçœç•¥å· --- */
-		display: -webkit-box;
-		-webkit-line-clamp: 2; /* è¿™é‡Œæ•°å­—æ˜¯å‡ ï¼Œå°±æ˜¾ç¤ºå‡ è¡Œ */
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-		text-overflow: ellipsis;
-}
-.vp-link {
-  text-decoration: none !important;
-}
-	.feature-card .icon {
-  font-size: 40px; /* è¿™ä¸ªå¯ä»¥ç•™ç€ï¼Œä¹Ÿå¯ä»¥åˆ æ‰ï¼Œå› ä¸ºå›¾ç‰‡æœ‰è‡ªå·±çš„å¤§å° */
-  margin-bottom: 8px;
-  /* å¢åŠ  flex å¸ƒå±€ï¼Œè®©å›¾ç‰‡åœ¨ icon å®¹å™¨ä¸­å±…ä¸­ */
+
+/* 4. Í¼±ê/Í·ÏñÈİÆ÷£º¾«×¼¶¨Î»£¬²»Ó°Ïì»ÕÕÂÍ¼±ê */
+.features .feature-card .icon {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60px; /* ä¿æŒå’ŒåŸæ¥çš„ emoji é«˜åº¦ä¸€è‡´ */
-  width: 60px; /* ä¿æŒå’ŒåŸæ¥çš„ emoji å®½åº¦ä¸€è‡´ */
-  overflow: hidden; /* éšè—è¶…å‡ºå®¹å™¨çš„éƒ¨åˆ†ï¼Œæ–¹ä¾¿å›¾ç‰‡å˜åœ† */
-  margin: 0 auto 8px auto; /* å±…ä¸­å¹¶ä¿æŒåº•éƒ¨é—´è· */
+  height: 60px;
+  width: 60px;
+  overflow: hidden;
+  margin: 0 auto 8px auto;
 }
 
-.avatar-image {
-  width: 100%;  /* è®©å›¾ç‰‡å¡«æ»¡çˆ¶å®¹å™¨ */
-  height: 100%; /* è®©å›¾ç‰‡å¡«æ»¡çˆ¶å®¹å™¨ */
-  object-fit: cover; /* ä¿æŒå›¾ç‰‡æ¯”ä¾‹ï¼Œè£å‰ªè¶…å‡ºéƒ¨åˆ† */
-  border-radius: 50%; /* æ ¸å¿ƒï¼šè®©å›¾ç‰‡å˜æˆåœ†å½¢ */
-		border: 2px solid var(--vp-c-divider); /* ç»™å¤´åƒåŠ ä¸ªç»†è¾¹æ¡† */
+/* 5. ¹Ø¼ü£ºÖ»ÈÃ¿¨Æ¬ÀïµÄÍ¼Æ¬±äÔ²£¬²»Ó°Ïì»ÕÕÂÍ¼Æ¬ */
+.features .feature-card .avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--vp-c-divider);
+  display: block; /* Ïû³ıÍ¼Æ¬ÏÂ·½µÄÎ¢Ğ¡¼äÏ¶ */
 }
-/* --- æ–°å¢ï¼šæ‰‹æœºç«¯é€‚é… (å±å¹•å®½åº¦å°äº 640px æ—¶è§¦å‘) --- */
+
+/* 6. ÎÄ×Ö¿ØÖÆ */
+.features .feature-card h4 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--vp-c-text-1);
+}
+
+.features .feature-card p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+  min-height: 40px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 7. ÊÖ»ú¶ËÊÊÅä */
 @media (max-width: 640px) {
   .features {
-    /* æ ¸å¿ƒï¼šå¼ºåˆ¶ä¸€è¡Œæ˜¾ç¤ºä¸¤ä¸ªï¼Œå¹³åˆ†å®½åº¦ */
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 10px; /* æ‰‹æœºç«¯é—´è·æ›´ç´§å‡‘ */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
-  
-  .feature-card {
-    padding: 16px 8px; /* æ‰‹æœºç«¯å¡ç‰‡å†…è¾¹è·è°ƒå°ï¼Œé˜²æ­¢æ–‡å­—å¤ªæŒ¤ */
+  .features .feature-card {
+    padding: 16px 8px;
   }
-  
-  .feature-card .icon {
-    width: 45px; /* æ‰‹æœºç«¯å¤´åƒä¹Ÿç¼©å°ä¸€ç‚¹ */
+  .features .feature-card .icon {
+    width: 45px;
     height: 45px;
   }
 }
