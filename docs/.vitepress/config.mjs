@@ -70,49 +70,46 @@ export default {
     hostname: 'https://baidu8.indevs.in/' 
   },
 
-  // 4. 自动化处理 (SEO & Tags)
   transformPageData(pageData) {
-    pageData.frontmatter.head ??= []
-    const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
-    // --- 核心逻辑：自动抓取第一张图 ---
-        // --- 安全的自动抓图逻辑 ---
-            let image = 'https://baidu8.indevs.in/logo.png' 
-            
-            // 加个安全锁：只有当页面有内容时才去 match
-            if (pageData.content) {
-              const imgMatch = pageData.content.match(/!\[.*?\]\((.*?)\)/)
-              if (imgMatch && imgMatch[1]) {
-                const firstImg = imgMatch[1]
-                image = firstImg.startsWith('http') 
-                  ? firstImg 
-                  : `https://baidu8.indevs.in${firstImg.startsWith('/') ? '' : '/'}${firstImg}`
-              }
-            }
-    // --------------------------------
-    // OG 标签
-    pageData.frontmatter.head.push(
-          // 通用分享标准
-          ['meta', { property: 'og:type', content: 'article' }],
-          ['meta', { property: 'og:title', content: title }],
-          ['meta', { property: 'og:description', content: description }],
-          ['meta', { property: 'og:image', content: image }],
-          ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }],
-          
-          // Twitter 大图卡片
-          ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-          ['meta', { name: 'twitter:image', content: image }],
-    
-          // 微信/移动端优化
-          ['meta', { itemprop: 'image', content: image }]
-        )
-
-    // Tags 自动转 Keywords
-    if (pageData.frontmatter.tags) {
-      const tags = pageData.frontmatter.tags
-      const keywordsStr = Array.isArray(tags) ? tags.join(', ') : tags
-      pageData.frontmatter.head.push(['meta', { name: 'keywords', content: keywordsStr }])
-    }
-  },
+      pageData.frontmatter.head ??= []
+      
+      // 【保险 1】先定义好变量，防止报错 "is not defined"
+      const title = pageData.title || '江大爷'
+      const description = pageData.frontmatter.description || '江大爷的个人博客'
+      const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
+  
+      // 【保险 2】安全的抓图逻辑：先检查有没有内容
+      let image = 'https://baidu8.indevs.in/logo.png' 
+      if (pageData.content) {
+        const imgMatch = pageData.content.match(/!\[.*?\]\((.*?)\)/)
+        if (imgMatch && imgMatch[1]) {
+          const firstImg = imgMatch[1]
+          image = firstImg.startsWith('http') 
+            ? firstImg 
+            : `https://baidu8.indevs.in${firstImg.startsWith('/') ? '' : '/'}${firstImg}`
+        }
+      }
+  
+      // 塞入社交媒体分享卡片
+      pageData.frontmatter.head.push(
+        ['meta', { property: 'og:type', content: 'article' }],
+        ['meta', { property: 'og:title', content: title }],
+        ['meta', { property: 'og:description', content: description }],
+        ['meta', { property: 'og:image', content: image }],
+        ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }],
+        ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+        ['meta', { name: 'twitter:image', content: image }],
+        ['meta', { itemprop: 'image', content: image }]
+      )
+  
+      // SEO 关键词自动化
+      if (pageData.frontmatter.tags) {
+        const keywordsStr = Array.isArray(pageData.frontmatter.tags) 
+          ? pageData.frontmatter.tags.join(', ') 
+          : pageData.frontmatter.tags
+        pageData.frontmatter.head.push(['meta', { name: 'keywords', content: keywordsStr }])
+      }
+    },
 
   // 5. 主题配置 (所有的 UI 界面设置都在这里)
   themeConfig: {
