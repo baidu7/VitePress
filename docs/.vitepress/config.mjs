@@ -112,7 +112,8 @@ export default {
 
   themeConfig: {
     logo: '/logo.png',
-    
+    sidebarMenuLabel: '菜单',
+    returnToTopLabel: '返回顶部',
     // 右上角 GitHub 链接
     socialLinks: [
       { icon: 'github', link: 'https://github.com/baidu8/' }
@@ -121,11 +122,11 @@ export default {
     // 顶部导航栏
     nav: [
       { text: '🏠 首页', link: '/' },
-      { text: '📜 归档', link: '/archives' },
       {
-        text: '✨ 快捷功能',
+        text: '✨ 更多',
         items: [
           { text: '🖊️ 编辑', link: '/admin.html', target: '_blank' },
+          { text: '📜 归档', link: '/archives' },
           { text: '📄 站点地图', link: '/sitemap.xml' },
           { text: '👤 关于我', link: '/about' }
         ]
