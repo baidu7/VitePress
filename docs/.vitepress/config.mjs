@@ -57,7 +57,6 @@ export default {
   ignoreDeadLinks: true,
   markdown: { image: { lazyLoading: true } },
   title: "江大爷",
-		lastUpdated: true, // 核心：开启最后更新时间抓取
   description: "江大爷的个人博客",
   
   // 2. 网站头部
@@ -126,14 +125,7 @@ export default {
     sidebarMenuLabel: '菜单',
     returnToTopLabel: '返回顶部',
     docFooter: { prev: '上一页', next: '下一页' },
-    lastUpdatedText: '最后更新于',
-    lastUpdated: {
-          text: '最后更新于',
-          formatOptions: {
-            dateStyle: 'short', // 显示：2026年1月30日星期五
-            timeStyle: 'short' // 显示：下午3:30
-          }
-        },
+
     socialLinks: [
       { icon: 'github', link: 'https://github.com/baidu8/' }
     ],
