@@ -103,16 +103,6 @@ export default {
       ['meta', { property: 'og:title', content: pageData.title || '江大爷' }],
       ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }]
     )
-				// 2. 自动化 SEO 关键词：把 tags 同步到 keywords
-				    if (pageData.frontmatter.tags) {
-				      const tags = pageData.frontmatter.tags
-				      // 将数组 [域名, gv.uy] 转换为 "域名, gv.uy" 字符串
-				      const keywordsStr = Array.isArray(tags) ? tags.join(', ') : tags
-				      
-				      pageData.frontmatter.head.push(
-				        ['meta', { name: 'keywords', content: keywordsStr }]
-				      )
-				    }
   },
 
   // 站点地图配置，利于搜索引擎收录
