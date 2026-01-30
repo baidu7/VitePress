@@ -4,14 +4,20 @@ layout: doc
 
 # 🚀 江大爷的随想空间
 
-欢迎来到我的博客！
+> 记录生活，分享点滴，梦到什么说什么，主打随意
 
 ### 🔍 快速开始
 * **找文章**：直接看左边的目录，点击分类即可展开。
 * **搜内容**：点击右上角的搜索框，或按 `Ctrl + K` 快速查找。
 * **换心情**：点击右上角的太阳/月亮图标，体验丝滑的切换动画。
 
-> 梦到什么说什么，记录生活，分享点滴。
+![江大爷](https://img.shields.io/badge/博主-江大爷-blue?style=flat-square)
+![Content](https://img.shields.io/badge/内容-梦到什么说什么-98FB98?style=flat-square)
+![Vibe](https://img.shields.io/badge/状态-不定期闭关-blueviolet?style=flat-square)
+
+![VitePress](https://img.shields.io/badge/框架-VitePress-646cff?style=flat-square&logo=vite)
+![Vue](https://img.shields.io/badge/技术-Vue3-42b883?style=flat-square&logo=vuedotjs)
+![Cloudflare](https://img.shields.io/badge/托管-Cloudflare-f38020?style=flat-square&logo=cloudflare)
 
 ---
 
