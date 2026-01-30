@@ -11,13 +11,15 @@ layout: doc
 * **搜内容**：点击右上角的搜索框，或按 `Ctrl + K` 快速查找。
 * **换心情**：点击右上角的太阳/月亮图标，体验丝滑的切换动画。
 
-![江大爷](https://img.shields.io/badge/博主-江大爷-blue?style=flat-square)
-![Content](https://img.shields.io/badge/内容-梦到什么说什么-98FB98?style=flat-square)
-![Vibe](https://img.shields.io/badge/状态-不定期闭关-blueviolet?style=flat-square)
-
-![VitePress](https://img.shields.io/badge/框架-VitePress-646cff?style=flat-square&logo=vite)
-![Vue](https://img.shields.io/badge/技术-Vue3-42b883?style=flat-square&logo=vuedotjs)
-![Cloudflare](https://img.shields.io/badge/托管-Cloudflare-f38020?style=flat-square&logo=cloudflare)
+<p align="center">
+  <img src="https://img.shields.io/badge/博主-江大爷-blue?style=flat-square" />
+  <img src="https://img.shields.io/badge/内容-梦到什么说什么-98FB98?style=flat-square" />
+  <img src="https://img.shields.io/badge/状态-不定期闭关-blueviolet?style=flat-square" />
+  <br>
+  <img src="https://img.shields.io/badge/框架-VitePress-646cff?style=flat-square&logo=vite" />
+  <img src="https://img.shields.io/badge/技术-Vue3-42b883?style=flat-square&logo=vuedotjs" />
+    <img src="https://img.shields.io/badge/托管-Cloudflare-f38020?style=flat-square&logo=cloudflare" />
+</p>
 
 ---
 
@@ -34,84 +36,89 @@ layout: doc
 </div>
 
 <style scoped>
+/* 1. 容器控制：只影响带有 .features 类的容器 */
 .features {
   display: grid;
-  /* 默认（电脑端）：根据宽度自动填充，每个卡片最小 200px */
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px; /* 间距稍微调小一点，给手机腾地方 */
+  gap: 15px;
   margin-top: 24px;
 }
-.feature-card {
+
+/* 2. 链接控制：专门针对卡片里的链接，不影响徽章链接 */
+.features .vp-link {
+  text-decoration: none !important;
+  display: block; /* 确保链接撑满卡片 */
+}
+
+/* 3. 卡片主体 */
+.features .feature-card {
   border: 1px solid var(--vp-c-bg-soft);
   border-radius: 12px;
   padding: 24px;
   background-color: var(--vp-c-bg-soft);
-  transition: border-color 0.25s, background-color 0.25s;
+  transition: all 0.25s;
   text-align: center;
   cursor: pointer;
+  height: 100%; /* 让同一排卡片一样高 */
 }
-.feature-card:hover {
+
+.features .feature-card:hover {
   border-color: var(--vp-c-brand-1);
   background-color: var(--vp-c-bg-mute);
+  transform: translateY(-2px);
 }
-.feature-card .icon {
-  font-size: 40px;
-  margin-bottom: 8px;
-}
-.feature-card h4 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 16px;
-}
-.feature-card p {
-  margin: 8px 0 0;
-  font-size: 14px;
-  color: var(--vp-c-text-2);
-		min-height: 40px;
-		/* --- 新增：超过两行自动显示省略号 --- */
-		display: -webkit-box;
-		-webkit-line-clamp: 2; /* 这里数字是几，就显示几行 */
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-		text-overflow: ellipsis;
-}
-.vp-link {
-  text-decoration: none !important;
-}
-	.feature-card .icon {
-  font-size: 40px; /* 这个可以留着，也可以删掉，因为图片有自己的大小 */
-  margin-bottom: 8px;
-  /* 增加 flex 布局，让图片在 icon 容器中居中 */
+
+/* 4. 图标/头像容器：精准定位，不影响徽章图标 */
+.features .feature-card .icon {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60px; /* 保持和原来的 emoji 高度一致 */
-  width: 60px; /* 保持和原来的 emoji 宽度一致 */
-  overflow: hidden; /* 隐藏超出容器的部分，方便图片变圆 */
-  margin: 0 auto 8px auto; /* 居中并保持底部间距 */
+  height: 60px;
+  width: 60px;
+  overflow: hidden;
+  margin: 0 auto 8px auto;
 }
 
-.avatar-image {
-  width: 100%;  /* 让图片填满父容器 */
-  height: 100%; /* 让图片填满父容器 */
-  object-fit: cover; /* 保持图片比例，裁剪超出部分 */
-  border-radius: 50%; /* 核心：让图片变成圆形 */
-		border: 2px solid var(--vp-c-divider); /* 给头像加个细边框 */
+/* 5. 关键：只让卡片里的图片变圆，不影响徽章图片 */
+.features .feature-card .avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--vp-c-divider);
+  display: block; /* 消除图片下方的微小间隙 */
 }
-/* --- 新增：手机端适配 (屏幕宽度小于 640px 时触发) --- */
+
+/* 6. 文字控制 */
+.features .feature-card h4 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--vp-c-text-1);
+}
+
+.features .feature-card p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+  min-height: 40px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 7. 手机端适配 */
 @media (max-width: 640px) {
   .features {
-    /* 核心：强制一行显示两个，平分宽度 */
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 10px; /* 手机端间距更紧凑 */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
-  
-  .feature-card {
-    padding: 16px 8px; /* 手机端卡片内边距调小，防止文字太挤 */
+  .features .feature-card {
+    padding: 16px 8px;
   }
-  
-  .feature-card .icon {
-    width: 45px; /* 手机端头像也缩小一点 */
+  .features .feature-card .icon {
+    width: 45px;
     height: 45px;
   }
 }
