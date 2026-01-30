@@ -95,14 +95,27 @@ export default {
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],
   ],
 
-  // 自动为每个页面添加社交媒体分享元标签（SEO 优化）
+  // 核心自动化处理（SEO 与 社交媒体标签）
   transformPageData(pageData) {
-    const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
     pageData.frontmatter.head ??= []
+
+    // 1. 处理社交媒体分享 (OG 标签)
+    const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
     pageData.frontmatter.head.push(
       ['meta', { property: 'og:title', content: pageData.title || '江大爷' }],
       ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }]
     )
+
+    // 2. 自动化 SEO 关键词：把 tags 同步到 keywords
+    if (pageData.frontmatter.tags) {
+      const tags = pageData.frontmatter.tags
+      // 将数组 [域名, gv.uy] 转换为 "域名, gv.uy" 字符串
+      const keywordsStr = Array.isArray(tags) ? tags.join(', ') : tags
+      
+      pageData.frontmatter.head.push(
+        ['meta', { name: 'keywords', content: keywordsStr }]
+      )
+    }
   },
 
   // 站点地图配置，利于搜索引擎收录
@@ -114,6 +127,12 @@ export default {
     logo: '/logo.png',
     sidebarMenuLabel: '菜单',
     returnToTopLabel: '返回顶部',
+				docFooter: {
+				    prev: '上一页',
+				    next: '下一页'
+				  },
+				  // 改掉最后更新时间的文字
+				lastUpdatedText: '最后更新于'
     // 右上角 GitHub 链接
     socialLinks: [
       { icon: 'github', link: 'https://github.com/baidu8/' }
