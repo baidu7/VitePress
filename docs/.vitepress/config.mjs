@@ -78,17 +78,25 @@ export default {
       const description = pageData.frontmatter.description || '江大爷的个人博客'
       const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
   
-      // 【保险 2】安全的抓图逻辑：先检查有没有内容
-      let image = 'https://baidu8.indevs.in/logo.png' 
-      if (pageData.content) {
-        const imgMatch = pageData.content.match(/!\[.*?\]\((.*?)\)/)
-        if (imgMatch && imgMatch[1]) {
-          const firstImg = imgMatch[1]
-          image = firstImg.startsWith('http') 
-            ? firstImg 
-            : `https://baidu8.indevs.in${firstImg.startsWith('/') ? '' : '/'}${firstImg}`
-        }
-      }
+      // --- 升级版：全能抓图逻辑（支持 MD 和 HTML 格式） ---
+          let image = 'https://baidu8.indevs.in/logo.png' 
+          
+          if (pageData.content) {
+            // 1. 先尝试找 Markdown 格式的图: ![alt](url)
+            const mdMatch = pageData.content.match(/!\[.*?\]\((.*?)\)/)
+            // 2. 再尝试找 HTML 格式的图: <img src="url" ...>
+            const htmlMatch = pageData.content.match(/<img.*?src=['"](.*?)['"]/)
+      
+            // 谁先出现就抓谁（或者优先抓 MD 格式）
+            const firstImg = (mdMatch ? mdMatch[1] : null) || (htmlMatch ? htmlMatch[1] : null)
+      
+            if (firstImg) {
+              image = firstImg.startsWith('http') 
+                ? firstImg 
+                : `https://baidu8.indevs.in${firstImg.startsWith('/') ? '' : '/'}${firstImg}`
+            }
+          }
+      // ----------------------------------------------
   
       // 塞入社交媒体分享卡片
       pageData.frontmatter.head.push(
