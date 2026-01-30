@@ -10,40 +10,26 @@ const getAutoSidebar = () => {
   
   if (!fs.existsSync(docsPath)) return []
 
-  // 1. 文件夹显示优先级（权重越小越靠前）
-  const orderMap = {
-    '🪄分享': 1,
-    '🧩代码片段': 2,
-    '📑 杂记': 999 
-  }
-
-  // 2. 控制文件夹默认是否展开（false 为展开，true 为折叠）
-  const configMap = {
-    '🪄分享': false,    
-    '🧩代码片段': true, 
-  }
+  const orderMap = { '🪄分享': 1, '🧩代码片段': 2, '📑 杂记': 999 }
+  const configMap = { '🪄分享': false, '🧩代码片段': true }
 
   const items = fs.readdirSync(docsPath)
 
-  // 遍历 docs 文件夹处理子目录
   items.forEach(item => {
     const itemPath = path.join(docsPath, item)
     const stat = fs.statSync(itemPath)
 
-    // 只处理文件夹，排除掉 .vitepress 和 public
     if (stat.isDirectory() && item !== '.vitepress' && item !== 'public') {
       const files = fs.readdirSync(itemPath)
         .filter(file => file.endsWith('.md'))
         .map(file => {
           const name = file.replace('.md', '')
-          // 【关键修复】去掉 encodeURI，保持路径原始状态，确保搜索功能能识别
           return { text: name, link: `/${item}/${name}` }
         })
 
       if (files.length > 0) {
         sidebar.push({
           text: item, 
-          // 根据上面的 configMap 判断是否折叠，没定义的默认折叠
           collapsed: configMap[item] !== undefined ? configMap[item] : true, 
           items: files
         })
@@ -51,14 +37,8 @@ const getAutoSidebar = () => {
     }
   })
 
-  // 排序：让“分享”排在前面，“杂记”排在最后
-  sidebar.sort((a, b) => {
-    const orderA = orderMap[a.text] || 50;
-    const orderB = orderMap[b.text] || 50;
-    return orderA - orderB;
-  })
+  sidebar.sort((a, b) => (orderMap[a.text] || 50) - (orderMap[b.text] || 50))
   
-  // 处理根目录（docs/ 下直接存放）的 md 文件，归类到“杂记”
   const rootFiles = items
     .filter(file => file.endsWith('.md') && file !== 'index.md' && file !== 'admin.md')
     .map(file => {
@@ -67,65 +47,60 @@ const getAutoSidebar = () => {
     })
     
   if (rootFiles.length > 0) {
-    sidebar.push({ 
-      text: '📑 杂记', 
-      collapsed: true,
-      items: rootFiles 
-    })
+    sidebar.push({ text: '📑 杂记', collapsed: true, items: rootFiles })
   }
-
   return sidebar
 }
 
 export default {
-  // 基础配置
-  ignoreDeadLinks: true, // 忽略死链接报错，防止构建中断
-  markdown: {
-    image: {
-      lazyLoading: true // 图片懒加载，提高访问速度
-    }
-  },
-
+  // 1. 基础配置
+  ignoreDeadLinks: true,
+  markdown: { image: { lazyLoading: true } },
   title: "江大爷",
   description: "江大爷的个人博客",
   
-  // 网站头部标签
+  // 2. 网站头部
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],
   ],
 
-  // 自动为每个页面添加社交媒体分享元标签（SEO 优化）
-  transformPageData(pageData) {
-    const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
-    pageData.frontmatter.head ??= []
-    pageData.frontmatter.head.push(
-      ['meta', { property: 'og:title', content: pageData.title || '江大爷' }],
-      ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }]
-    )
-  },
-
-  // 站点地图配置，利于搜索引擎收录
+  // 3. 站点地图 (必须在 export 第一层)
   sitemap: {
     hostname: 'https://baidu8.indevs.in/' 
   },
 
+  // 4. 自动化处理 (SEO & Tags)
+  transformPageData(pageData) {
+    pageData.frontmatter.head ??= []
+    const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
+    
+    // OG 标签
+    pageData.frontmatter.head.push(
+      ['meta', { property: 'og:title', content: pageData.title || '江大爷' }],
+      ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }]
+    )
+
+    // Tags 自动转 Keywords
+    if (pageData.frontmatter.tags) {
+      const tags = pageData.frontmatter.tags
+      const keywordsStr = Array.isArray(tags) ? tags.join(', ') : tags
+      pageData.frontmatter.head.push(['meta', { name: 'keywords', content: keywordsStr }])
+    }
+  },
+
+  // 5. 主题配置 (所有的 UI 界面设置都在这里)
   themeConfig: {
     logo: '/logo.png',
     sidebarMenuLabel: '菜单',
     returnToTopLabel: '返回顶部',
-				docFooter: {
-				    prev: '上一页',
-				    next: '下一页'
-				  },
-				  // 改掉最后更新时间的文字
-				lastUpdatedText: '最后更新于'
-    // 右上角 GitHub 链接
+    docFooter: { prev: '上一页', next: '下一页' },
+    lastUpdatedText: '最后更新于',
+
     socialLinks: [
       { icon: 'github', link: 'https://github.com/baidu8/' }
     ],
     
-    // 顶部导航栏
     nav: [
       { text: '🏠 首页', link: '/' },
       {
@@ -139,13 +114,8 @@ export default {
       }
     ],
 
-    // 文章内的右侧目录配置
-    outline: {
-      level: [2, 3], 
-      label: '本页目录'
-    },
+    outline: { level: [2, 3], label: '本页目录' },
     
-    // 【关键】本地搜索配置 + 界面汉化
     search: { 
       provider: 'local',
       options: {
@@ -164,7 +134,6 @@ export default {
       }
     },
 
-    // 侧边栏：使用上面定义的自动生成函数
-    sidebar: getAutoSidebar(), 
+    sidebar: getAutoSidebar()
   }
 }
