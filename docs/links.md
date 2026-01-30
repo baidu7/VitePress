@@ -2,7 +2,7 @@
 layout: page
 ---
 
-# ** 友情链接**
+<h1 style="text-align: center;font-size: 20px;font-weight: 900;margin: 14px 0;">友情链接</h1>
 
 <div class="features">
   <a href="https://github.com/baidu8/" target="_blank" class="vp-link">
