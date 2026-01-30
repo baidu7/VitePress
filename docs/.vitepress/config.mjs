@@ -74,12 +74,35 @@ export default {
   transformPageData(pageData) {
     pageData.frontmatter.head ??= []
     const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
-    
+    // --- 核心逻辑：自动抓取第一张图 ---
+        let image = 'https://baidu8.indevs.in/logo.png' // 默认用 Logo
+        
+        // 正则表达式：在文章内容里找 markdown 图片格式 ![alt](url)
+        const imgMatch = pageData.content.match(/!\[.*?\]\((.*?)\)/)
+        if (imgMatch && imgMatch[1]) {
+          const firstImg = imgMatch[1]
+          // 如果是相对路径，帮它拼成绝对路径
+          image = firstImg.startsWith('http') 
+            ? firstImg 
+            : `https://baidu8.indevs.in${firstImg.startsWith('/') ? '' : '/'}${firstImg}`
+        }
+        // --------------------------------
     // OG 标签
     pageData.frontmatter.head.push(
-      ['meta', { property: 'og:title', content: pageData.title || '江大爷' }],
-      ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }]
-    )
+          // 通用分享标准
+          ['meta', { property: 'og:type', content: 'article' }],
+          ['meta', { property: 'og:title', content: title }],
+          ['meta', { property: 'og:description', content: description }],
+          ['meta', { property: 'og:image', content: image }],
+          ['meta', { property: 'og:url', content: encodeURI(canonicalUrl) }],
+          
+          // Twitter 大图卡片
+          ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+          ['meta', { name: 'twitter:image', content: image }],
+    
+          // 微信/移动端优化
+          ['meta', { itemprop: 'image', content: image }]
+        )
 
     // Tags 自动转 Keywords
     if (pageData.frontmatter.tags) {
