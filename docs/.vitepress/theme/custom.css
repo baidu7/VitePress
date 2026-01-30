@@ -70,3 +70,30 @@ iframe[src*="bilibili.com"] {
   background: #000;      /* 加载前的黑底 */
   outline: none;
 }
+/* --- 江大爷的图片网格特供 --- */
+#image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+/* 重点：增加 .vp-doc 权重，确保能盖过 VitePress 默认样式 */
+.vp-doc #image-grid img {
+  width: 100% !important;
+  height: 200px !important;
+  object-fit: cover !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--vp-c-divider); /* 给照片加个边框更好看 */
+}
+
+/* 手机端适配 */
+@media (max-width: 640px) {
+  #image-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .vp-doc #image-grid img {
+    height: 150px !important;
+  }
+}
