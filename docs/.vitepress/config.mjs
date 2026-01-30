@@ -75,18 +75,20 @@ export default {
     pageData.frontmatter.head ??= []
     const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
     // --- 核心逻辑：自动抓取第一张图 ---
-        let image = 'https://baidu8.indevs.in/logo.png' // 默认用 Logo
-        
-        // 正则表达式：在文章内容里找 markdown 图片格式 ![alt](url)
-        const imgMatch = pageData.content.match(/!\[.*?\]\((.*?)\)/)
-        if (imgMatch && imgMatch[1]) {
-          const firstImg = imgMatch[1]
-          // 如果是相对路径，帮它拼成绝对路径
-          image = firstImg.startsWith('http') 
-            ? firstImg 
-            : `https://baidu8.indevs.in${firstImg.startsWith('/') ? '' : '/'}${firstImg}`
-        }
-        // --------------------------------
+        // --- 安全的自动抓图逻辑 ---
+            let image = 'https://baidu8.indevs.in/logo.png' 
+            
+            // 加个安全锁：只有当页面有内容时才去 match
+            if (pageData.content) {
+              const imgMatch = pageData.content.match(/!\[.*?\]\((.*?)\)/)
+              if (imgMatch && imgMatch[1]) {
+                const firstImg = imgMatch[1]
+                image = firstImg.startsWith('http') 
+                  ? firstImg 
+                  : `https://baidu8.indevs.in${firstImg.startsWith('/') ? '' : '/'}${firstImg}`
+              }
+            }
+    // --------------------------------
     // OG 标签
     pageData.frontmatter.head.push(
           // 通用分享标准
