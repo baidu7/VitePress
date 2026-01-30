@@ -2,22 +2,22 @@
 layout: page
 ---
 
-# ** ÓÑÇéÁ´½Ó**
+# ** å‹æƒ…é“¾æ¥**
 
 <div class="features">
   <a href="https://github.com/baidu8/" target="_blank" class="vp-link">
     <div class="feature-card">
       <div class="icon">
-  <img src="https://avatars.githubusercontent.com/u/84177566" alt="½­´óÒ¯" class="avatar-image">
+  <img src="https://avatars.githubusercontent.com/u/84177566" alt="æ±Ÿå¤§çˆ·" class="avatar-image">
 </div>
-      <h4>½­´óÒ¯</h4>
-      <p>±¾Õ¾ËùÓĞÕß</p>
+      <h4>æ±Ÿå¤§çˆ·</h4>
+      <p>æœ¬ç«™æ‰€æœ‰è€…</p>
     </div>
   </a>
 </div>
 
 <style scoped>
-/* 1. ÈİÆ÷¿ØÖÆ£ºÖ»Ó°Ïì´øÓĞ .features ÀàµÄÈİÆ÷ */
+/* 1. å®¹å™¨æ§åˆ¶ï¼šåªå½±å“å¸¦æœ‰ .features ç±»çš„å®¹å™¨ */
 .features {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -25,13 +25,13 @@ layout: page
   margin-top: 24px;
 }
 
-/* 2. Á´½Ó¿ØÖÆ£º×¨ÃÅÕë¶Ô¿¨Æ¬ÀïµÄÁ´½Ó£¬²»Ó°Ïì»ÕÕÂÁ´½Ó */
+/* 2. é“¾æ¥æ§åˆ¶ï¼šä¸“é—¨é’ˆå¯¹å¡ç‰‡é‡Œçš„é“¾æ¥ï¼Œä¸å½±å“å¾½ç« é“¾æ¥ */
 .features .vp-link {
   text-decoration: none !important;
-  display: block; /* È·±£Á´½Ó³ÅÂú¿¨Æ¬ */
+  display: block; /* ç¡®ä¿é“¾æ¥æ’‘æ»¡å¡ç‰‡ */
 }
 
-/* 3. ¿¨Æ¬Ö÷Ìå */
+/* 3. å¡ç‰‡ä¸»ä½“ */
 .features .feature-card {
   border: 1px solid var(--vp-c-bg-soft);
   border-radius: 12px;
@@ -40,7 +40,7 @@ layout: page
   transition: all 0.25s;
   text-align: center;
   cursor: pointer;
-  height: 100%; /* ÈÃÍ¬Ò»ÅÅ¿¨Æ¬Ò»Ñù¸ß */
+  height: 100%; /* è®©åŒä¸€æ’å¡ç‰‡ä¸€æ ·é«˜ */
 }
 
 .features .feature-card:hover {
@@ -49,7 +49,7 @@ layout: page
   transform: translateY(-2px);
 }
 
-/* 4. Í¼±ê/Í·ÏñÈİÆ÷£º¾«×¼¶¨Î»£¬²»Ó°Ïì»ÕÕÂÍ¼±ê */
+/* 4. å›¾æ ‡/å¤´åƒå®¹å™¨ï¼šç²¾å‡†å®šä½ï¼Œä¸å½±å“å¾½ç« å›¾æ ‡ */
 .features .feature-card .icon {
   display: flex;
   justify-content: center;
@@ -60,17 +60,17 @@ layout: page
   margin: 0 auto 8px auto;
 }
 
-/* 5. ¹Ø¼ü£ºÖ»ÈÃ¿¨Æ¬ÀïµÄÍ¼Æ¬±äÔ²£¬²»Ó°Ïì»ÕÕÂÍ¼Æ¬ */
+/* 5. å…³é”®ï¼šåªè®©å¡ç‰‡é‡Œçš„å›¾ç‰‡å˜åœ†ï¼Œä¸å½±å“å¾½ç« å›¾ç‰‡ */
 .features .feature-card .avatar-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid var(--vp-c-divider);
-  display: block; /* Ïû³ıÍ¼Æ¬ÏÂ·½µÄÎ¢Ğ¡¼äÏ¶ */
+  display: block; /* æ¶ˆé™¤å›¾ç‰‡ä¸‹æ–¹çš„å¾®å°é—´éš™ */
 }
 
-/* 6. ÎÄ×Ö¿ØÖÆ */
+/* 6. æ–‡å­—æ§åˆ¶ */
 .features .feature-card h4 {
   margin: 0;
   font-weight: 600;
@@ -89,7 +89,7 @@ layout: page
   overflow: hidden;
 }
 
-/* 7. ÊÖ»ú¶ËÊÊÅä */
+/* 7. æ‰‹æœºç«¯é€‚é… */
 @media (max-width: 640px) {
   .features {
     grid-template-columns: repeat(2, 1fr);
