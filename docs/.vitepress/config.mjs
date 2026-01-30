@@ -130,10 +130,10 @@ export default {
     lastUpdated: {
           text: '最后更新于',
           formatOptions: {
-            dateStyle: 'full', // 显示：2026年1月30日星期五
+            dateStyle: 'short', // 显示：2026年1月30日星期五
             timeStyle: 'short' // 显示：下午3:30
           }
-        }
+        },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/baidu8/' }
     ],
