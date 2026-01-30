@@ -26,9 +26,12 @@ outline: [2, 3]
 图床拓展满足资源存储需求，是轻量场景下的优质工具。
 
 
-
-
 ---
+::: tip 提示
+* chrome商店要钱就没上传
+* 可以仓库下载：[🔗点此前往](https://github.com/baidu8/J-git/)
+* Edge商店：[🔗点击前往](https://microsoftedge.microsoft.com/addons/detail/jgit/fpcpflpbhaeekgahmnjkiaikogponbeo)
+:::
 
 
-仓库地址：[https://github.com/baidu8/J-git/](https://github.com/baidu8/J-git/)
+
