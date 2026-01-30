@@ -36,6 +36,12 @@ layout: doc
 </div>
 
 <style scoped>
+/* 专门保护 p 标签里的徽章图片不被弄弯、不被换行 */
+p align="center" img {
+  display: inline-block !important;
+  margin: 0 2px !important;
+  border-radius: 0 !important;
+}
 /* 1. 容器控制：只影响带有 .features 类的容器 */
 .features {
   display: grid;
