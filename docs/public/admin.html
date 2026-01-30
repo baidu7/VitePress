@@ -362,13 +362,14 @@
         const fileName = filePath.split('/').pop().replace('.md', '') || '未命名文章';
     
         const template = `---
-    title: ${fileName}
-    description: 
-    tags: []
-    outline: [2, 3]
-    ---
-    
-    `;
+title: ${fileName}
+description: 
+tags: []
+outline: [2, 3]
+---
+
+# ${fileName}
+`;
     
         // 将光标移到最顶端并插入
         cm.replaceRange(template, { line: 0, ch: 0 });
