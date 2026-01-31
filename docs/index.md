@@ -6,15 +6,14 @@ next: false
 
 <h1 style="text-align: center;font-size: 30px;font-weight: 900;">🚀 江大爷的随想空间</h1>
 
-> 
-
 <p style="text-align: center;font-size: 20px;font-weight: 900;color: #777777;" class="">记录生活，分享点滴，梦到什么说什么，主打随意</p>
 
-<RandomQuote />
-
+### 🔍 快速开始
 * **找文章**：直接看左边的目录，点击分类即可展开。
 * **搜内容**：点击右上角的搜索框，或按 `Ctrl + K` 快速查找。
 * **换心情**：点击右上角的太阳/月亮图标，体验丝滑的切换动画。
+
+<RandomQuote />
 
 ---
 
@@ -31,6 +30,7 @@ next: false
   <img class="no-zoom" src="https://img.shields.io/badge/托管-Cloudflare-f38020?style=flat-square&logo=cloudflare" />
   </div>
 </div>
+
 <style scoped>
 #footer-console {
   display: flex;
