@@ -26,7 +26,7 @@ onMounted(() => {
   setInterval(() => {
     const randomIndex = Math.floor(Math.random() * quotes.length)
     currentQuote.value = quotes[randomIndex]
-  }, 5000) 
+  }, 8000) 
 })
 </script>
 
