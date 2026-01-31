@@ -19,6 +19,11 @@
 .zoom-overlay {
   animation: fadeIn 0.3s ease;
 }
+/* 强制屏蔽所有带 no-zoom 类的图片放大镜指针 */
+img.no-zoom {
+  cursor: default !important; /* 强制鼠标变成普通箭头 */
+  pointer-events: none;       /* 彻底禁掉图片的鼠标事件，插件就抓不到它了 */
+}
 /* 自定义视频与框架容器样式 */
 
 /* 1. 视频标签优化 */
