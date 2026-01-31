@@ -24,11 +24,16 @@
 /* 1. 视频标签优化 */
 video {
   width: 100%;
+  /* 关键优化：限制最大高度，防止竖屏视频太长撑破屏幕 */
+  max-height: 70vh;           /* 限制最高占屏幕高度的 70%，留点呼吸感 */
+  object-fit: contain;        /* 确保视频内容在限高内完整显示，不被裁剪 */
+  
   max-width: 100%;
-  border-radius: 8px; /* 圆角增加高级感 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 淡淡的阴影 */
-  background-color: #000;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #000;     /* 竖屏视频两侧留黑边，显得专业 */
   margin: 1em 0;
+  display: block;             /* 消除底部间隙 */
 }
 
 /* 2. Iframe (外链) 容器优化 */
