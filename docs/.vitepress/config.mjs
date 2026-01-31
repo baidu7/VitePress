@@ -57,13 +57,6 @@ export default {
   ignoreDeadLinks: true,
   markdown: { image: { lazyLoading: true } },
 		cleanUrls: true,
-		rewrites: {
-		    // 语法：'原中文文件夹名/:path' : '新英文名/:path'
-		    '🌐 网站相关/:name.md': 'web/:name.md',
-		    '💾 软件插件/:name.md': 'plugins/:name.md',
-		    '🧩 代码片段/:name.md': 'snippets/:name.md',
-		    '🪄 分享/:name.md': 'share/:name.md'
-		  },
   title: "江大爷",
   description: "江大爷的个人博客",
   
