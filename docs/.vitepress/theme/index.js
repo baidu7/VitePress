@@ -32,9 +32,9 @@ export default {
 
         // 动态加载 JS
         import('https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.esm.js').then(({ Fancybox }) => {
-          Fancybox.unbind(".vp-doc img");
+          Fancybox.unbind(".vp-doc img:not(.no-zoom)");
           Fancybox.close();
-          Fancybox.bind(".vp-doc img", {
+          Fancybox.bind(".vp-doc img:not(.no-zoom)", {
             groupAll: true,
             compact: false,
             Image: { zoom: true },
