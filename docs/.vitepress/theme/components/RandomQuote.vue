@@ -31,10 +31,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* --- 基础样式 (白天模式) --- */
 #quote-box {
   position: relative;          /* 为绝对定位提供参考 */
   border: 2px solid #333;      /* 硬核粗边框 */
-  background: #fff;
+  background-color: #ffffff;
   padding: 20px;
   margin: 20px 0;
   box-shadow: 6px 6px 0px #333; /* 工业感硬阴影 */
@@ -43,6 +44,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   overflow: hidden;            /* 隐藏切换时的溢出 */
+  transition: all 0.3s ease;    /* 同步关灯动画的 300ms 时长 */
 }
 
 .quote-header {
@@ -64,8 +66,7 @@ onMounted(() => {
   height: 10px;
   background: #ff5f56;
   border-radius: 50%;
-  /* 呼吸灯动画 */
-  animation: breathe 2.5s infinite ease-in-out;
+  animation: breathe 2.5s infinite ease-in-out; /* 呼吸灯 */
 }
 
 @keyframes breathe {
@@ -83,39 +84,38 @@ onMounted(() => {
   text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
 }
 
-/* 信号传输切换动画 */
+/* --- 信号传输切换动画 --- */
 .fade-enter-active {
   transition: all 0.5s ease;
 }
-
 .fade-leave-active {
-  position: absolute;           /* 离场时不占位，解决竖跳问题 */
+  position: absolute;           /* 解决竖跳重叠 */
   width: calc(100% - 40px);
   transition: all 0.3s ease;
 }
-
 .fade-enter-from {
   opacity: 0;
-  transform: translateX(-15px); /* 从左滑入 */
+  transform: translateX(-15px);
 }
-
 .fade-leave-to {
   opacity: 0;
-  transform: translateX(15px);  /* 向右滑出 */
-}
-/* 黑暗模式适配 - 强行感应全局状态 */
-:global(html.dark) #quote-box {
-  background: #1e1e1e !important;   /* 深色背景 */
-  border-color: #444 !important;    /* 暗色边框 */
-  box-shadow: 6px 6px 0px #000 !important; /* 纯黑阴影 */
+  transform: translateX(15px);
 }
 
-:global(html.dark) .system-title {
-  color: #aaa !important; 
+/* --- 🌙 终极黑暗模式适配 (重点) --- */
+/* 使用 html.dark 配合 !important 确保强制覆盖 */
+html.dark #quote-box {
+  background-color: #1a1a1a !important;
+  border-color: #444 !important;
+  box-shadow: 6px 6px 0px #000 !important;
 }
 
-:global(html.dark) .quote-text {
-  color: #e0e0e0 !important;        /* 文字变亮 */
-  text-shadow: 1px 1px 0px rgba(0,0,0,0.8);
+html.dark .system-title {
+  color: #999 !important;
+}
+
+html.dark .quote-text {
+  color: #e0e0e0 !important;    /* 提升黑夜模式文字亮度 */
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.8) !important;
 }
 </style>
