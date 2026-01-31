@@ -103,19 +103,19 @@ onMounted(() => {
   opacity: 0;
   transform: translateX(15px);  /* 向右滑出 */
 }
-/* 黑暗模式适配 */
-:deep(.dark) #quote-box {
-  background: #1a1a1a;        /* 深色背景 */
-  border-color: #555;         /* 稍微亮一点的灰色边框 */
-  box-shadow: 6px 6px 0px #111; /* 阴影变黑 */
+/* 黑暗模式适配 - 强行感应全局状态 */
+:global(html.dark) #quote-box {
+  background: #1e1e1e !important;   /* 深色背景 */
+  border-color: #444 !important;    /* 暗色边框 */
+  box-shadow: 6px 6px 0px #000 !important; /* 纯黑阴影 */
 }
 
-:deep(.dark) .system-title {
-  color: #ccc;                /* 标题变淡灰 */
+:global(html.dark) .system-title {
+  color: #aaa !important; 
 }
 
-:deep(.dark) .quote-text {
-  color: #bdc3c7;             /* 金句变亮灰，对比度更舒服 */
-  text-shadow: 1px 1px 0px rgba(0,0,0,0.5); /* 阴影变深 */
+:global(html.dark) .quote-text {
+  color: #e0e0e0 !important;        /* 文字变亮 */
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.8);
 }
 </style>
