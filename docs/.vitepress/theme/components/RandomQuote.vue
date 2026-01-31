@@ -1,74 +1,86 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { quotes } from './quotes.js' // 确保路径正确
-
-const currentQuote = ref('')
-const isVisible = ref(false)
-
-const updateQuote = () => {
-  isVisible.value = false // 切换时先隐藏，触发重新打字
-  setTimeout(() => {
-    const randomIndex = Math.floor(Math.random() * quotes.length)
-    currentQuote.value = quotes[randomIndex]
-    isVisible.value = true
-  }, 300)
-}
-
-onMounted(() => {
-  updateQuote()
-  setInterval(updateQuote, 8000) // 每8秒自动更新一次
-})
-</script>
-
 <template>
   <div id="quote-box" @click="updateQuote">
     <div class="quote-header">
-      <div class="dot"></div>
+      <span class="dot"></span>
       <span class="system-title">SYSTEM READY // 动力装填中...</span>
     </div>
     
     <div class="typing-viewport">
-      <transition name="type-fade">
-        <p v-if="isVisible" class="quote-text">
-          {{ currentQuote }}
-          <span class="cursor">_</span>
-        </p>
-      </transition>
+      <p :key="currentQuote" class="quote-text">
+        {{ displayedText }}<span class="cursor">_</span>
+      </p>
     </div>
   </div>
 </template>
 
-<style>
-/* --- 1. 基础容器：彻底去框、轻量化 --- */
-#quote-box {
-  margin: 40px 0;
-  padding: 15px 0;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  cursor: pointer;
-  min-height: 100px;
-  transition: all 0.3s ease;
+<script setup>
+import { ref, onMounted } from 'vue'
+// 【修复重点】请根据您的实际目录结构调整路径。如果是同级目录用 ./quotes.js
+import { quotes } from '../quotes.js' 
+
+const currentQuote = ref('')
+const displayedText = ref('')
+let typingTimer = null
+
+// 打字机逻辑函数
+const typeWriter = (text, speed = 100) => {
+  displayedText.value = ''
+  let i = 0
+  clearInterval(typingTimer)
+  typingTimer = setInterval(() => {
+    if (i < text.length) {
+      displayedText.value += text.charAt(i)
+      i++
+    } else {
+      clearInterval(typingTimer)
+    }
+  }, speed)
 }
 
-/* --- 2. 头部状态栏 --- */
+const updateQuote = () => {
+  if (quotes.length > 0) {
+    const randomIndex = Math.floor(Math.random() * quotes.length)
+    currentQuote.value = quotes[randomIndex]
+    typeWriter(currentQuote.value)
+  }
+}
+
+onMounted(() => {
+  updateQuote()
+  // 每 10 秒自动装填一次新句子
+  setInterval(updateQuote, 10000) 
+})
+</script>
+
+<style>
+/* --- 1. 彻底去框，轻量化布局 --- */
+#quote-box {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 15px 0;
+  margin: 30px 0;
+  min-height: 80px;
+  cursor: pointer;
+}
+
 .quote-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  opacity: 0.7;
+  gap: 8px;
+  margin-bottom: 12px;
+  opacity: 0.8;
 }
 
 .system-title {
-  font-family: monospace; /* 使用等宽字体更有科技感 */
+  font-family: monospace;
   font-size: 12px;
   font-weight: bold;
-  letter-spacing: 2px;
   color: #666;
+  letter-spacing: 1px;
 }
 
-/* --- 3. 呼吸灯 --- */
+/* --- 2. 灵魂呼吸灯 --- */
 .dot {
   width: 8px;
   height: 8px;
@@ -78,60 +90,34 @@ onMounted(() => {
 }
 
 @keyframes breathe {
-  0%, 100% { opacity: 0.4; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px #ff5f56; }
+  0%, 100% { opacity: 0.4; box-shadow: 0 0 2px #ff5f56; }
+  50% { opacity: 1; box-shadow: 0 0 8px #ff5f56; }
 }
 
-/* --- 4. 打字机文字效果 --- */
-.typing-viewport {
-  overflow: hidden;
-}
-
+/* --- 3. 文字与光标效果 --- */
 .quote-text {
   font-size: 1.25em;
+  color: var(--vp-c-text-1); /* 自动适配 VitePress 默认文字颜色 */
   line-height: 1.6;
-  color: #333;
   font-weight: 500;
   margin: 0;
-  display: inline;
-  position: relative;
 }
 
-/* 光标闪烁 */
 .cursor {
-  font-weight: bold;
   color: #ff5f56;
-  animation: blink 0.8s infinite;
+  font-weight: bold;
   margin-left: 2px;
+  animation: blink 0.8s step-end infinite;
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
+  from, to { opacity: 1; }
   50% { opacity: 0; }
 }
 
-/* 文字切入动画 */
-.type-fade-enter-active {
-  transition: all 0.5s ease-out;
-}
-.type-fade-enter-from {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-/* --- 5. 黑暗模式自适应 --- */
-html.dark .quote-text {
-  color: #e0e0e0 !important;
-}
-
+/* --- 4. 🌙 黑暗模式自适应 --- */
 html.dark .system-title {
-  color: #888;
+  color: #999;
 }
-
-/* 适配手机端 */
-@media (max-width: 640px) {
-  .quote-text {
-    font-size: 1.1em;
-  }
-}
+/* 去框后背景透明，文字会自动随主题变色，无需强行覆写背景 */
 </style>
