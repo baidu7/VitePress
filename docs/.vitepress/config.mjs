@@ -10,8 +10,8 @@ const getAutoSidebar = () => {
   
   if (!fs.existsSync(docsPath)) return []
 
-  const orderMap = { '🪄分享': 1, '🧩代码片段': 2, '📑 杂记': 999 }
-  const configMap = { '🪄分享': false, '🧩代码片段': true }
+  const orderMap = { '🌐网站相关': 1, '💾软件插件': 2, '🧩代码片段': 3, '🪄分享':4, '📑 杂记': 999 }
+  const configMap = { '🌐网站相关': false, '🪄分享': false, '🧩代码片段': true }
 
   const items = fs.readdirSync(docsPath)
 
@@ -56,6 +56,14 @@ export default {
   // 1. 基础配置
   ignoreDeadLinks: true,
   markdown: { image: { lazyLoading: true } },
+		cleanUrls: true,
+		rewrites: {
+		    // 语法：'原中文文件夹名/:path' : '新英文名/:path'
+		    '🌐 网站相关/:name.md': 'web/:name.md',
+		    '💾 软件插件/:name.md': 'plugins/:name.md',
+		    '🧩 代码片段/:name.md': 'snippets/:name.md',
+		    '🪄 分享/:name.md': 'share/:name.md'
+		  },
   title: "江大爷",
   description: "江大爷的个人博客",
   
