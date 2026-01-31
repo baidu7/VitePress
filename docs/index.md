@@ -1,8 +1,10 @@
 ---
 layout: doc
+prev: false
+next: false
 ---
 
-# 🚀 江大爷的随想空间
+<h1 style="text-align: center;font-size: 30px;font-weight: 900;">🚀 江大爷的随想空间</h1>
 
 > 记录生活，分享点滴，梦到什么说什么，主打随意
 
