@@ -8,10 +8,8 @@ next: false
 
 <p style="text-align: center;font-size: 20px;font-weight: 900;color: #777777;" class="">记录生活，分享点滴，梦到什么说什么，主打随意</p>
 
-### 🔍 快速开始
 * **找文章**：直接看左边的目录，点击分类即可展开。
 * **搜内容**：点击右上角的搜索框，或按 `Ctrl + K` 快速查找。
-* **换心情**：点击右上角的太阳/月亮图标，体验丝滑的切换动画。
 
 <RandomQuote />
 
@@ -47,13 +45,28 @@ next: false
   background: #f9f9f9;         /* 纯净浅色背景 */
   max-width: fit-content;
   box-shadow: 6px 6px 0px #333; /* 这种硬阴影跟直角最搭 */
+  transition: all 0.3s ease;    /* 增加一个颜色切换的过渡，更丝滑 */
 }
 
-/* 内部的小组也可以强制直角（如果图片自带圆角，这一招能封印它） */
+/* 🌙 黑暗模式适配：当 html 包含 .dark 类时生效 */
+:slotted(.dark) #footer-console, 
+.dark #footer-console {
+  background: #1a1a1a !important;   /* 深色背景 */
+  border-color: #555 !important;    /* 边框稍微亮一点点 */
+  box-shadow: 6px 6px 0px #000 !important; /* 纯黑阴影更深邃 */
+}
+
+/* 内部的小组也可以强制直角 */
 #left-group img, 
 #right-group img {
   border-radius: 0 !important; /* 强制徽章本身也变直角 */
   border: 1px solid #eee;
+}
+
+/* 🌙 黑暗模式下的徽章边框 */
+.dark #left-group img, 
+.dark #right-group img {
+  border-color: #333;
 }
 
 .divider {
@@ -62,11 +75,19 @@ next: false
   background: #333;
 }
 
+/* 🌙 黑暗模式下的分割线 */
+.dark .divider {
+  background: #555;
+}
+
 /* 适配手机端 */
 @media (max-width: 640px) {
   #footer-console {
     flex-direction: column;
     box-shadow: 4px 4px 0px #333;
+  }
+  .dark #footer-console {
+    box-shadow: 4px 4px 0px #000;
   }
   .divider {
     width: 80%;
