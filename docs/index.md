@@ -64,114 +64,91 @@ next: false
 </div>
 
 <style scoped>
-/* 顶部主标题区域的硬核直角框 */
+/* 标题区：不封口，只留左侧立柱 */
 .main-header-box {
-  border: 2px solid #333;      /* 硬核粗边框 */
-  background: #fff;
-  padding: 25px;               /* 比卡片和金句框稍大一点的内边距 */
-  margin: 0 auto 30px auto;    /* 自动居中，底部留空 */
-  box-shadow: 6px 6px 0px #333; /* 更大的硬阴影，突出主标题 */
-  border-radius: 0 !important; /* 强制直角 */
-  transition: all 0.3s ease;   /* 颜色切换过渡 */
-}
-
-/* 🌙 黑暗模式适配 */
-.dark .main-header-box {
-  background: #1a1a1a !important;
-  border-color: #444 !important;
-  box-shadow: 6px 6px 0px #000 !important;
-}
-
-/* 如果标题文字在黑暗模式下看不清，也可以这样调整 */
-.dark .main-header-box h1,
-.dark .main-header-box p,
-.dark .main-header-box li {
-  color: #eee !important;
+  border-left: 4px solid #ff5f56; /* 呼应下方红色 */
+  padding-left: 20px;
+  margin-bottom: 40px;
+  background: transparent;
 }
 .card-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
-  margin: 30px 0;
+  gap: 12px;
+  margin: 20px 0;
   width: 100%;
 }
 
-/* 2. 卡片本体：解决溢出的关键是 overflow: hidden */
 .nav-card {
-  /* 电脑端 4 个一排的计算方式 */
-  flex: 1 1 calc(25% - 15px); 
-  min-width: 0;                /* 重点：防止子元素把 flex 容器撑开 */
+  flex: 1 1 calc(25% - 12px);
+  min-width: 0;
   display: flex;
   align-items: center;
-  padding: 12px;
-  border: 2px solid #333;
+  /* 重点 1：调低高度，缩减上下 padding */
+  padding: 8px 12px; 
+  border: 1px solid #e2e2e2;
   background: #fff;
   text-decoration: none !important;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
   transition: all 0.2s ease;
-  box-shadow: 4px 4px 0px #333;
-  overflow: hidden;            /* 裁掉跑出去的内容 */
+  overflow: hidden; /* 确保内容不溢出 */
 }
 
-/* 3. 文字区域：一定要设置宽度或 flex-shrink */
+.nav-card:hover {
+  transform: translate(1px, 1px); /* 细微按压感 */
+  box-shadow: 0px 0px 0px transparent;
+  border-color: #333;
+}
+
+.card-icon {
+  width: 24px;  /* 稍微缩小图标，配合低高度 */
+  height: 24px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
 .card-content {
   flex: 1;
-  min-width: 0;                /* 重点：让内容区可以收缩 */
+  min-width: 0; /* 允许子元素缩放以触发省略号 */
 }
 
 .card-title {
-  font-weight: 900;
-  font-size: 15px;
+  font-weight: bold;
+  font-size: 14px;
   color: #333;
-  margin-bottom: 2px;
-  /* 标题也防一手溢出 */
+  margin: 0;
+  /* 标题防溢出 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .card-desc {
-  font-size: 12px;
-  color: #666;
-  /* 重点：这就是变省略号的神技 */
-  white-space: nowrap;         /* 禁止换行 */
-  overflow: hidden;            /* 隐藏超出部分 */
-  text-overflow: ellipsis;     /* 变成省略号 */
-  display: block;              /* 确保它占满一行 */
+  font-size: 11px;
+  color: #999;
+  margin: 0;
+  /* 重点 2：简介强制单行省略 */
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block; 
 }
 
-/* 📱 手机端适配：强制 2 个一排 */
+/* 🌙 黑暗模式 */
+.dark .nav-card {
+  background: #1a1a1a;
+  border-color: #333;
+}
+.dark .nav-card:hover { border-color: #ff5f56; }
+.dark .card-title { color: #eee; }
+.dark .card-desc { color: #777; }
+
+/* 📱 手机端：2 个一排 */
 @media (max-width: 640px) {
   .nav-card {
-    flex: 1 1 calc(50% - 15px); /* 手机端各占 50% */
-    min-width: calc(50% - 15px);
+    flex: 1 1 calc(50% - 12px);
+    min-width: calc(50% - 12px);
   }
-}
-
-/* 🌙 黑暗模式同步（保持原样） */
-.dark .nav-card { background: #1a1a1a; border-color: #444; box-shadow: 4px 4px 0px #000; }
-.dark .card-title { color: #eee; }
-.dark .card-desc { color: #aaa; }
-/* 图标容器 */
-.card-icon {
-  width: 32px;            /* 固定宽度，保证文字对齐 */
-  height: 32px;           /* 固定高度 */
-  margin-right: 12px;
-  flex-shrink: 0;         /* 重点：防止图片被挤扁 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 图片本身 */
-.card-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;    /* 保证图片比例不失真 */
-  border-radius: 4px;     /* 如果您想硬核到底，可以改成 0 */
-  cursor: default !important; /* 彻底干掉放大镜指针 */
-}
-.dark .card-icon img {
-  filter: brightness(0.9); /* 稍微降低一点亮度，不刺眼 */
 }
 #footer-console {
   display: flex;
