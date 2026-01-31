@@ -3,10 +3,15 @@ import MyLayout from './MyLayout.vue'
 import { onMounted, watch, nextTick, h } from 'vue' // 必须导入 h
 import { useRoute } from 'vitepress'
 import './custom.css'
-import Encourage from './components/Encourage.vue' 
+import Encourage from './components/Encourage.vue'
+import RandomQuote from './components/RandomQuote.vue'
 
 export default {
   extends: DefaultTheme,
+		enhanceApp({ app }) {
+		    // 2. 注册组件，这样你在 md 里写 <RandomQuote /> 就能生效了
+		    app.component('RandomQuote', RandomQuote)
+		  },
   Layout: MyLayout, // 指定使用您这个带动画的布局
   // 【重点修复】如果您有自定义的 MyLayout.vue，就这样写
   // 把 Encourage 组件通过插槽传给 MyLayout 或 DefaultTheme
