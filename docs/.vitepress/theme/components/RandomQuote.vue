@@ -103,4 +103,19 @@ onMounted(() => {
   opacity: 0;
   transform: translateX(15px);  /* 向右滑出 */
 }
+/* 黑暗模式适配 */
+:deep(.dark) #quote-box {
+  background: #1a1a1a;        /* 深色背景 */
+  border-color: #555;         /* 稍微亮一点的灰色边框 */
+  box-shadow: 6px 6px 0px #111; /* 阴影变黑 */
+}
+
+:deep(.dark) .system-title {
+  color: #ccc;                /* 标题变淡灰 */
+}
+
+:deep(.dark) .quote-text {
+  color: #bdc3c7;             /* 金句变亮灰，对比度更舒服 */
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.5); /* 阴影变深 */
+}
 </style>
