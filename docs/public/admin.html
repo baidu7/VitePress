@@ -259,6 +259,13 @@
 								
 								/* 让光标变粗一点，免得找不到在哪 */
 								.CodeMirror-cursor { border-left: 2px solid var(--primary) !important; }
+								/* 专门针对 CodeMirror 里的链接和强调文本 */
+								.cm-link, 
+								.cm-em {
+								  word-break: break-all !important;   /* 强制字符级断行，专治长链接 */
+								  overflow-wrap: anywhere !important; /* 确保在任何地方都能折行 */
+								  white-space: pre-wrap !important;   /* 既保留空格，又允许自动换行 */
+								}
     </style>
 </head>
 <body>
@@ -286,12 +293,14 @@
 </div>
 
 <div class="vp-tools">
-    <button onclick="insertVP('tip', '提示')">💡 提示</button>
+    <button onclick="insertVP('tip', '💡 提示')">💡 提示</button>
     <button onclick="insertVP('warning', '警告')">⚠️ 警告</button>
     <button onclick="insertDetails()">📁 折叠</button>
     <button onclick="insertCode()">💻 代码</button>
     <button onclick="insertVideo()">📹 视频</button>
     <button onclick="insertIframe()">🎞️️ iframe</button>
+				<button onclick="insertImageGrid()">🖼️ 图片网格</button>
+				<button onclick="insertJZ()">🀄 缩小居中</button>
     <button onclick="easyMDE.drawTable()">📊 表格</button>
 				<button onclick="insertFrontmatter()">⚙️ 文章设置</button>
 </div>
@@ -344,7 +353,19 @@
 
     function insertVP(t, s) { easyMDE.codemirror.replaceSelection(`\n::: ${t} ${s}\n内容\n:::\n`); }
     function insertDetails() { easyMDE.codemirror.replaceSelection(`\n::: details 点击展开\n内容\n:::\n`); }
+				function insertJZ() { easyMDE.codemirror.replaceSelection(`<center><img src="" style="width: 50%;" /></center>`); }
     function insertCode() { easyMDE.codemirror.replaceSelection(`\n\`\`\`javascript\n// Code\n\`\`\`\n`); }
+				function insertImageGrid() {
+				  // 这里的 easyMDE.codemirror.replaceSelection 是关键，它会把代码插到光标位置
+				  easyMDE.codemirror.replaceSelection(
+				    '\n<div id="image-grid">\n' +
+				    '  <img src="/img/pic1.jpg" />\n' +
+				    '  <img src="/img/pic2.jpg" />\n' +
+				    '  <img src="/img/pic3.jpg" />\n' +
+				    '  <img src="/img/pic4.jpg" />\n' +
+				    '</div>\n'
+				  );
+				}
     function insertVideo() { easyMDE.codemirror.replaceSelection(`\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n  <source src="/movie.mp4" type="video/mp4">\n  您的浏览器不支持播放该视频。\n</video>\n`); }
     function insertIframe() { easyMDE.codemirror.replaceSelection(`\n<div class="iframe-container">\n  <iframe src="这里填链接" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n`); }
     function insertFrontmatter() {
