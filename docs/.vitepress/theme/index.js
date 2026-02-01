@@ -5,12 +5,14 @@ import { useRoute } from 'vitepress'
 import './custom.css'
 import Encourage from './components/Encourage.vue'
 import RandomQuote from './components/RandomQuote.vue'
+import MusicPlayer from './components/MusicPlayer.vue' // 引入刚写好的文件
 
 export default {
   extends: DefaultTheme,
 		enhanceApp({ app }) {
 		    // 2. 注册组件，这样你在 md 里写 <RandomQuote /> 就能生效了
-		    app.component('RandomQuote', RandomQuote)
+		    app.component('RandomQuote', RandomQuote),
+						app.component('MusicPlayer', MusicPlayer) // 全局注册
 		  },
   Layout: MyLayout, // 指定使用您这个带动画的布局
   // 【重点修复】如果您有自定义的 MyLayout.vue，就这样写
