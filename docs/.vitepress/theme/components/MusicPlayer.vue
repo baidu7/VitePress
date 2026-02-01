@@ -45,9 +45,9 @@ import { ref, computed, onMounted } from 'vue'
 
 // --- 1. 配置区 ---
 const localList = [
-  { name: "Stars", url: "https://mr1.doubanio.com/484a8df54b09620ae3c9eeb48875f1a7/1/fm/song/p195694_128k.mp4", lrc: "Janis-Ian-Stars.lrc", isCloud: false }
+  { name: "Stars", url: "https://mr1.doubanio.com/484a8df54b09620ae3c9eeb48875f1a7/1/fm/song/p195694_128k.mp4", lrc: "/Janis-Ian-Stars.lrc", isCloud: false }
 ]
-const NETEASE_PLAYLIST_ID = '2250993850' // 👈 这里换成您自己的网易云歌单 ID
+const NETEASE_PLAYLIST_ID = '17426483259' // 👈 这里换成您自己的网易云歌单 ID
 const API_BASE = 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id='
 
 const fullList = ref([...localList])
@@ -134,7 +134,7 @@ onMounted(() => {
 .lyric-text { font-size: 20px; font-weight: bold; color: #ff5f56; text-shadow: 0 0 5px rgba(0,0,0,0.1); }
 #music-drawer { position: fixed; left: 0; bottom: 80px; width: 240px; z-index: 2000; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); transform: translateX(-100%); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
 #music-drawer.open { transform: translateX(0); }
-#drawer-handle { position: absolute; right: -35px; top: -1px; width: 34px; height: 90px; background: var(--vp-c-divider); border: 1px solid var(--vp-c-divider); color: var(--vp-c-text-1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0 4px 4px 0; }
+#drawer-handle { position: absolute; right: -23px; top: -1px; width: 22px; height: 90px; background: var(--vp-c-divider); border: 1px solid var(--vp-c-divider); color: var(--vp-c-text-1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0 4px 4px 0; }
 .handle-text { writing-mode: vertical-lr; font-size: 10px; letter-spacing: 2px; }
 .drawer-content { padding: 12px; color: var(--vp-c-text-1); }
 .song-title { font-weight: bold; font-size: 13px; margin-bottom: 5px; border-bottom: 1px dashed var(--vp-c-divider); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
