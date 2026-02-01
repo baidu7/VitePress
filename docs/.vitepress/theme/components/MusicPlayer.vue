@@ -129,9 +129,47 @@ onMounted(() => {
 
 <style scoped>
 /* 此处粘贴之前发您的 Scoped 样式即可，保持一致性 */
-#lyric-island { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2001; opacity: 0; transition: 0.5s; pointer-events: none; }
+/* --- 歌词岛：手机端适配 --- */
+#lyric-island { 
+  position: fixed; 
+  top: 20px;       /* 手机端往上挪一点，别挡住标题 */
+  left: 50%; 
+  transform: translateX(-50%); 
+  z-index: 2001; 
+  opacity: 0; 
+  transition: 0.5s; 
+  pointer-events: none;
+  width: 90%;      /* 限制容器宽度，防止长歌词撑破屏幕 */
+  text-align: center;
+}
 #lyric-island.show { opacity: 1; }
-.lyric-text { font-size: 20px; font-weight: bold; color: #ff5f56; text-shadow: 0 0 5px rgba(0,0,0,0.1); }
+.lyric-text { 
+  font-size: 20px; /* 电脑端保持 20px */
+  font-weight: bold; 
+  color: #ff5f56; 
+  text-shadow: 0 0 5px rgba(0,0,0,0.1);
+  display: inline-block;
+  white-space: normal; /* 允许折行，防止文字溢出 */
+  line-height: 1.2;
+}
+/* --- 📱 核心：当屏幕宽度小于 768px 时（手机端） --- */
+@media (max-width: 768px) {
+  #lyric-island {
+    top: 15px; /* 手机端贴顶更紧凑 */
+  }
+  .lyric-text {
+    font-size: 14px;      /* 字号缩小到 14px，刚好能看清又不占地 */
+    background: rgba(255, 255, 255, 0.8); /* 手机端背景杂乱，加个半透明底 */
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  /* 播放器抽屉在手机端也可以稍微变窄一点 */
+  #music-drawer {
+    width: 200px; 
+  }
+}
 #music-drawer { position: fixed; left: 0; bottom: 80px; width: 240px; z-index: 2000; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); transform: translateX(-100%); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
 #music-drawer.open { transform: translateX(0); }
 #drawer-handle { position: absolute; right: -23px; top: -1px; width: 22px; height: 90px; background: var(--vp-c-divider); border: 1px solid var(--vp-c-divider); color: var(--vp-c-text-1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0 4px 4px 0; }
