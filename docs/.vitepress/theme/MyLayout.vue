@@ -3,8 +3,11 @@ import { useData } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import { nextTick, provide } from 'vue'
 
+// 解构出 Layout 组件供下面使用
+const { Layout } = DefaultTheme
 const { isDark } = useData()
 
+// --- 1. 这里是您原有的圆形切换动画逻辑 ---
 const enableTransitions = () =>
   'startViewTransition' in document &&
   window.matchMedia('(prefers-reduced-motion: no-preference)').matches
@@ -23,7 +26,7 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
     )}px at ${x}px ${y}px)`
   ]
 
-  await document.startViewTransition(async () => {
+  await (document as any).startViewTransition(async () => {
     isDark.value = !isDark.value
     await nextTick()
   }).ready
@@ -41,14 +44,19 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 </script>
 
 <template>
-  <DefaultTheme.Layout>
+  <Layout>
     <template #doc-footer-before>
       <slot name="doc-footer-before" />
     </template>
-  </DefaultTheme.Layout>
+
+    <template #layout-bottom>
+      <MusicPlayer />
+    </template>
+  </Layout>
 </template>
 
 <style>
+/* 保持您原有的动画 CSS */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
