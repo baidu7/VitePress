@@ -104,44 +104,53 @@ onMounted(() => { parseLrc(currentSong.value.lrc); })
 </script>
 
 <style scoped>
-/* 适配 VitePress 光暗模式的 CSS */
-#lyric-island { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 1001; opacity: 0; transition: 0.5s; pointer-events: none; }
+/* --- 1. 歌词：增加一个半透明底色，确保任何背景下都清晰 --- */
+#lyric-island { 
+  position: fixed; top: 40px; left: 50%; transform: translateX(-50%); 
+  z-index: 2000; opacity: 0; transition: 0.5s; pointer-events: none; 
+}
 #lyric-island.show { opacity: 1; }
-.lyric-text { font-size: 22px; font-weight: bold; color: #ff5f56; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+.lyric-text { 
+  font-size: 22px; font-weight: bold; color: #ff5f56; 
+  text-shadow: 0 0 8px rgba(0,0,0,0.2); 
+}
 
+/* --- 2. 播放器主体：使用 VitePress 变量，不冲突 --- */
 #music-drawer { 
   position: fixed; left: 0; bottom: 80px; width: 280px; z-index: 1000;
-  background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider);
-  transform: translateX(-100%); transition: 0.4s; box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+  background: var(--vp-c-bg); /* 跟随系统背景 */
+  border: 1px solid var(--vp-c-divider); /* 跟随系统分割线 */
+  transform: translateX(-100%); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+  box-shadow: 4px 0 0px var(--vp-c-divider); 
 }
 #music-drawer.open { transform: translateX(0); }
 
 #drawer-handle { 
   position: absolute; right: -32px; top: -1px; width: 32px; height: 100px;
-  background: var(--vp-c-brand); color: #fff; cursor: pointer;
+  background: var(--vp-c-divider); color: var(--vp-c-text-1); cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   border-radius: 0 4px 4px 0;
 }
-.handle-text { writing-mode: vertical-lr; font-size: 11px; letter-spacing: 3px; }
 
+/* --- 3. 内部元素适配 --- */
 .drawer-content { padding: 15px; color: var(--vp-c-text-1); }
-.song-title { font-weight: bold; font-size: 14px; margin-bottom: 8px; }
-.progress-box { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.song-title { font-weight: bold; font-size: 14px; margin-bottom: 8px; border-bottom: 1px dashed var(--vp-c-divider); }
+
+.progress-box { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
 .time { font-size: 10px; opacity: 0.6; width: 35px; }
 input[type="range"] { flex: 1; accent-color: #ff5f56; cursor: pointer; }
 
-.btn-group { display: flex; flex-wrap: wrap; gap: 4px; }
 .btn-group button { 
-  flex: 1; padding: 6px; border: 1px solid var(--vp-c-divider); 
-  background: var(--vp-c-bg-soft); color: var(--vp-c-text-1); font-size: 12px; cursor: pointer;
+  flex: 1 1 30%; padding: 6px; border: 1px solid var(--vp-c-divider); 
+  background: var(--vp-c-bg-soft); color: var(--vp-c-text-1); cursor: pointer;
 }
-.list-btn { flex: 1 1 100% !important; margin-top: 4px; }
+.btn-group button:hover { border-color: #ff5f56; color: #ff5f56; }
 
-#p-list { max-height: 0; overflow: hidden; transition: 0.3s; }
-#p-list.show { max-height: 150px; overflow-y: auto; margin-top: 10px; border-top: 1px dashed var(--vp-c-divider); }
-.s-item { padding: 6px; font-size: 12px; cursor: pointer; }
+/* 歌单适配 */
+#p-list.show { max-height: 150px; overflow-y: auto; margin-top: 10px; border-top: 1px solid var(--vp-c-divider); }
+.s-item { padding: 6px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--vp-c-bg-soft); }
 .s-item.active { color: #ff5f56; font-weight: bold; background: var(--vp-c-bg-mute); }
 
-.dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; margin-bottom: 8px; animation: b 2s infinite; }
+.dot { width: 6px; height: 6px; background: #ff5f56; border-radius: 50%; margin-bottom: 8px; animation: b 2s infinite; }
 @keyframes b { 0%,100% {opacity:0.4} 50% {opacity:1} }
 </style>
