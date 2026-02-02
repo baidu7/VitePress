@@ -19,42 +19,55 @@ const visible = ref(false)
 const greeting = ref('')
 const location = ref('远方')
 const browser = ref('神秘设备')
+
 onMounted(() => {
-  // --- 1. 新增：检查是否已经欢迎过了 ---
+  // 1. 检查是否已经欢迎过了，避免重复打扰
   const hasWelcomed = sessionStorage.getItem('hasWelcomed')
-  if (hasWelcomed) {
-    console.log('大爷，刚才打过招呼了，这次咱闭嘴。')
-    return // 直接结束，不执行下面的逻辑
-  }
-  // 1. 根据时间定问候语
+  if (hasWelcomed) return 
+
+  // 2. 根据当前时间自动设定问候语
   const hour = new Date().getHours()
-  if (hour < 6) greeting.value = '凌晨好，熬夜辛苦了'
+  if (hour < 6) greeting.value = '凌晨好'
   else if (hour < 11) greeting.value = '早上好'
   else if (hour < 13) greeting.value = '中午好'
   else if (hour < 18) greeting.value = '下午好'
   else greeting.value = '晚上好'
 
-  // 2. 识别浏览器
+  // 3. 简单的浏览器识别
   const ua = navigator.userAgent
   if (ua.indexOf('Chrome') > -1) browser.value = 'Chrome 浏览器'
   else if (ua.indexOf('Safari') > -1) browser.value = 'Safari 浏览器'
   else browser.value = '移动端设备'
 
-  // 3. 抓取地理位置
-  fetch('https://pv.sohu.com/cityjson?ie=utf-8')
-    .then(res => res.text())
+  // 4. 使用最稳的 ip.sb 接口（支持 HTTPS）
+  fetch('https://api.ip.sb/geoip')
+    .then(res => res.json())
     .then(data => {
-      const match = data.match(/"cname":\s*"([^"]+)"/)
-      if (match) location.value = match[1]
+      let city = data.city || '互联网'
+      
+      // --- 大爷专属映射区：在这里把英文翻译成中文 ---
+      if (city === 'Jinan') city = '济南'
+      if (city === 'Beijing') city = '北京'
+      if (city === 'Shanghai') city = '上海'
+      // ------------------------------------------
+      
+      location.value = city
+    })
+    .catch(() => {
+      // 如果接口彻底挂了，显示这个酷炫的保底词
+      location.value = '赛博空间'
     })
     .finally(() => {
-      // 这里的 500 代表 0.5 秒后弹出，让用户先进站站稳
-						visible.value = true
+      // 5. 无论定位成功与否，1秒后弹出气泡
+      setTimeout(() => {
+        visible.value = true
+        sessionStorage.setItem('hasWelcomed', 'true')
+      }, 1000)
+
+      // 6. 停留 6 秒后自动收回气泡
       setTimeout(() => { 
-							sessionStorage.setItem('hasWelcomed', 'true')
-						}, 500)
-      // 这里的 6000 代表 6 秒后自动消失
-      setTimeout(() => { visible.value = false }, 6000)
+        visible.value = false 
+      }, 7000)
     })
 })
 </script>
