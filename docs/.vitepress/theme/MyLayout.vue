@@ -2,6 +2,7 @@
 import { useData } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import { nextTick, provide } from 'vue'
+import WelcomeToast from './components/WelcomeToast.vue'
 
 // 解构出 Layout 组件供下面使用
 const { Layout } = DefaultTheme
@@ -52,6 +53,7 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
     <template #layout-bottom>
       <MusicPlayer />
     </template>
+				<WelcomeToast />
   </Layout>
 </template>
 

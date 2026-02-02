@@ -68,7 +68,7 @@ export default {
 
   // 3. 站点地图 (必须在 export 第一层)
   sitemap: {
-    hostname: 'https://baidu8.indevs.in/' 
+    hostname: 'https://828111.xyz/' 
   },
 
   transformPageData(pageData) {
@@ -77,10 +77,10 @@ export default {
       // 【保险 1】先定义好变量，防止报错 "is not defined"
       const title = pageData.title || '江大爷'
       const description = pageData.frontmatter.description || '江大爷的个人博客'
-      const canonicalUrl = `https://baidu8.indevs.in/${pageData.relativePath.replace('.md', '.html')}`
+      const canonicalUrl = `https://828111.xyz/${pageData.relativePath.replace('.md', '.html')}`
   
       // --- 升级版：全能抓图逻辑（支持 MD 和 HTML 格式） ---
-          let image = 'https://baidu8.indevs.in/logo.png' 
+          let image = 'https://828111.xyz/logo.png' 
           
           if (pageData.content) {
             // 1. 先尝试找 Markdown 格式的图: ![alt](url)
