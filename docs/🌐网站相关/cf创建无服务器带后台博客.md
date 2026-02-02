@@ -5,8 +5,10 @@ tags: [cf, cloudflare, 博客, workers, blog]
 outline: [2, 3]
 ---
 
-    
+# cf创建无服务器带后台博客
+
 **cloudflare-workers-blog纯cf部署的博客，用的cf免费的kv桶**
+
 <center><img src="https://image.thum.io/get/https://blog.gezhong.vip/" style="width: 50%;" /></center>
 
 1. 复制里面的`infex.js`代码

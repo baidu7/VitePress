@@ -17,4 +17,4 @@ title: 👤 关于我
 ### 🛠️ 本站技术栈
 - **框架**: [VitePress](https://vitepress.dev/)
 - **部署**: [Cloudflare Pages](https://pages.cloudflare.com/)
-- **域名**:  (正在努力注册中...)
+- **域名**: [828111.xyz](https://828111.xyz)

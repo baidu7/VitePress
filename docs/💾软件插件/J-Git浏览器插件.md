@@ -1,14 +1,14 @@
 ---
 title: J-Git浏览器插件
 description: 图床拓展满足资源存储需求，是轻量场景下的优质工具。
-tags: [J-Git,插件,浏览器]
+tags: [J-Git, 插件, 浏览器]
 outline: [2, 3]
 ---
     
-# J-Git 浏览器插件
+# J-Git 浏览器插件<Badge type="tip" text="v1.3.1" />
 
-![图片描述](https://raw.githubusercontent.com/baidu8/J-git/refs/heads/main/J-git-h.png)
 
+<center><img src="https://raw.githubusercontent.com/baidu8/J-git/refs/heads/main/J-git-h.png" style="width: 50%;" /></center>
 
 > GitHub上传用命令行或打开网站上传都太麻烦了，搞了个插件，轻轻一点就上传，还能返回`jsdelivr`的链接，直接当图床用也行
 
@@ -23,7 +23,8 @@ outline: [2, 3]
 
 图床拓展满足资源存储需求，是轻量场景下的优质工具。
 
-[![GitHub Star](https://img.shields.io/badge/⭐-点个Star支持下-yellow?style=flat-square)](https://github.com/baidu8/J-git)
+<a href="https://github.com/baidu8/J-git" target="_blank"><img class="no-zoom" src="https://img.shields.io/badge/⭐-点个Star支持下-yellow?style=flat-square"></a>
+
 
 ---
 

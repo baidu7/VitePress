@@ -1,8 +1,17 @@
 ---
-title: 四季动画
+title: 四季动画js
+description: 随四季变化显示不同特效js
+tags: [canvas, js, 特效]
+outline: [2, 3]
 ---
-## 随四季变化显示不同特效
-```javascript
+
+## 四季动画js
+
+1. 随四季变化显示不同特效
+2. 用和风天气api，不同天气显示不同效果
+
+::: code-group
+```javascript [四季.js]
 (function() {
     /**
      * 【1. 图片素材配置】
@@ -201,11 +210,8 @@ title: 四季动画
 
 })();
 ```
-## 四季加天气
-用和风天气api，不同天气显示不同效果
 
-
-```javascript
+```javascript [四季加天气.js]
 (function() {
     /**
      * 【1. 素材路径配置】
@@ -416,4 +422,4 @@ title: 四季动画
     animate(0);                      // 开启循环动画
 })();
 ```
-
+:::

@@ -3,6 +3,7 @@ import path from 'path'
 
 /**
  * 自动生成侧边栏的函数
+ * 功能：支持二级目录，且文件夹永远排在普通文件前面
  */
 const getAutoSidebar = () => {
   const docsPath = path.resolve(process.cwd(), 'docs')
@@ -10,8 +11,9 @@ const getAutoSidebar = () => {
   
   if (!fs.existsSync(docsPath)) return []
 
-  const orderMap = { '🌐网站相关': 1, '💾软件插件': 2, '🧩代码片段': 3, '🪄分享':4, '📑 杂记': 999 }
-  const configMap = { '🌐网站相关': false, '🪄分享': false, '🧩代码片段': true }
+  // 1. 定义一级大类的顺序和展开状态
+  const orderMap = { '🌐网站相关': 1, '💾软件插件': 2, '🧩代码片段': 3, '🪄分享': 4, '📑 杂记': 999 }
+  const configMap = { '🌐网站相关': false, '🪄分享': true, '🧩代码片段': true }
 
   const items = fs.readdirSync(docsPath)
 
@@ -19,26 +21,57 @@ const getAutoSidebar = () => {
     const itemPath = path.join(docsPath, item)
     const stat = fs.statSync(itemPath)
 
+    // 只处理 docs 下的一级文件夹
     if (stat.isDirectory() && item !== '.vitepress' && item !== 'public') {
-      const files = fs.readdirSync(itemPath)
-        .filter(file => file.endsWith('.md'))
-        .map(file => {
-          const name = file.replace('.md', '')
-          return { text: name, link: `/${item}/${name}` }
-        })
+      const subItems = fs.readdirSync(itemPath)
+      
+      let folderItems = [] // 专门装：二级文件夹（子分类）
+      let fileItems = []   // 专门装：当前文件夹下的 MD 文件
 
-      if (files.length > 0) {
+      subItems.forEach(sub => {
+        const subPath = path.join(itemPath, sub)
+        const subStat = fs.statSync(subPath)
+
+        if (subStat.isDirectory()) {
+          // 如果是二级文件夹，抓取里面的 MD
+          const subFiles = fs.readdirSync(subPath)
+            .filter(f => f.endsWith('.md'))
+            .map(f => {
+              const name = f.replace('.md', '')
+              return { text: name, link: `/${item}/${sub}/${name}` }
+            })
+          
+          if (subFiles.length > 0) {
+            folderItems.push({
+              text: '📌 ' + sub,
+              collapsed: true,
+              items: subFiles
+            })
+          }
+        } else if (sub.endsWith('.md')) {
+          // 如果是普通文件
+          const name = sub.replace('.md', '')
+          fileItems.push({ text: name, link: `/${item}/${name}` })
+        }
+      })
+
+      // 【核心逻辑】：将文件夹排在文件前面
+      const children = [...folderItems, ...fileItems]
+
+      if (children.length > 0) {
         sidebar.push({
           text: item, 
           collapsed: configMap[item] !== undefined ? configMap[item] : true, 
-          items: files
+          items: children
         })
       }
     }
   })
 
+  // 2. 对一级大类进行排序
   sidebar.sort((a, b) => (orderMap[a.text] || 50) - (orderMap[b.text] || 50))
   
+  // 3. 处理根目录下的散篇 MD（即杂记）
   const rootFiles = items
     .filter(file => file.endsWith('.md') && file !== 'index.md' && file !== 'admin.md')
     .map(file => {
@@ -49,6 +82,7 @@ const getAutoSidebar = () => {
   if (rootFiles.length > 0) {
     sidebar.push({ text: '📑 杂记', collapsed: true, items: rootFiles })
   }
+
   return sidebar
 }
 
@@ -127,9 +161,9 @@ export default {
     returnToTopLabel: '返回顶部',
     docFooter: { prev: '上一页', next: '下一页' },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/baidu8/' }
-    ],
+    // socialLinks: [
+    //   { icon: 'github', link: 'https://github.com/baidu8/' }
+    // ],
     
     nav: [
       { text: '🏠 首页', link: '/' },
@@ -137,8 +171,7 @@ export default {
         text: '✨ 更多',
         items: [
           { text: '🖊️ 编辑', link: '/admin.html', target: '_blank' },
-          { text: '📜 归档', link: '/archives' },
-          { text: '📄 站点地图', link: '/sitemap.xml' },
+          { text: '🗺 站点地图', link: '/sitemap.xml' },
           { text: '👤 关于我', link: '/about' }
         ]
       }

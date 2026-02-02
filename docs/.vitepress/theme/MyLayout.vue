@@ -53,8 +53,8 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
     <template #layout-bottom>
       <MusicPlayer />
     </template>
-				<WelcomeToast />
   </Layout>
+  <WelcomeToast />
 </template>
 
 <style>

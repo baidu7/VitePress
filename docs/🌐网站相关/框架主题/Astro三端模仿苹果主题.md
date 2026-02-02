@@ -1,12 +1,12 @@
 ---
 title: Astro三端模仿苹果主题
-description: 
-tags: [Astro,主题]
+description: Astro三端模仿苹果主题
+tags: [Astro, 主题]
 outline: [2, 3]
 ---
 
 # Astro三端模仿苹果主题
-    
+
 
 * 三端初具雏形
 * 越搞越费劲

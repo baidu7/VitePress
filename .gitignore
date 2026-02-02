@@ -1,0 +1,20 @@
+# --- 建筑垃圾（VitePress 自动生成的缓存和打包文件） ---
+node_modules/
+.temp/
+.cache/
+dist/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# --- 系统残留 ---
+.DS_Store
+**/.DS_Store
+*.swp
+Thumbs.db
+
+# --- 开发工具相关 ---
+.idea/
+.vscode/
+*.log
+
+# --- 注意：不要忽略 package-lock.json，它是版本定海神针 ---
