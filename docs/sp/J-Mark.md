@@ -1,17 +1,19 @@
 ---
-title: J-Mark：让你的浏览器书签一键“变身”精美导航站
+title: J-nav配套插件J-Mark
 description: 深度体验一款支持文件夹筛选的书签导出神器
 tags: [工具推荐, 浏览器插件, 开源项目, J-nav, J-Mark, 插件]
 outline: [2, 3]
 prev:
   text: 'J-nav纯静态导航'
-  link: '/🌐网站相关/J-nav纯静态导航'
+  link: '/web/J-nav'
 next:
   text: 'J-Git浏览器插件'
-  link: '/💾软件插件/J-Git浏览器插件'
+  link: '/sp/J-Git'
 ---
 
 # J-nav配套插件J-Mark
+
+让你的浏览器书签一键“变身”精美导航站
 
 ## 🚀 你的书签栏，不该只是“吃灰”的列表
 

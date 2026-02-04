@@ -1,11 +1,11 @@
 ---
-title: J-nav：一款能从浏览器书签“自动进化”的纯静态导航
+title: J-nav纯静态导航
 description: 配合 J-Mark 插件，实现书签到导航站的零手工同步
 tags: [工具推荐, 极简, 开源项目, J-nav, J-Mark, 插件]
 outline: [2, 3]
 next:
   text: 'J-nav配套插件J-Mark'
-  link: '/💾软件插件/J-nav配套插件J-Mark'
+  link: '/sp/J-Mark'
 ---
 
 # J-nav：一款能从浏览器书签“自动进化”的纯静态导航

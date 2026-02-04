@@ -1,5 +1,7 @@
 ---
 title: 👤 关于我
+prev: false
+next: false
 ---
 
 # 👤 关于我
@@ -12,7 +14,7 @@ title: 👤 关于我
 
 ### 📩 联系方式
 - **GitHub**: [baidu8](https://github.com/baidu8)
-- **Email**: jxe2131@qq.com
+- **Email**: [1@828111.xyz](mailto:1@828111.xyz)
 
 ### 🛠️ 本站技术栈
 - **框架**: [VitePress](https://vitepress.dev/)
