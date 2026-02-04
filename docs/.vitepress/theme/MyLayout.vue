@@ -1,14 +1,26 @@
 <script setup lang="ts">
 import { useData } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
-import { nextTick, provide } from 'vue'
+import { nextTick, provide, watch, onMounted } from 'vue' // 增加 watch 和 onMounted
 import WelcomeToast from './components/WelcomeToast.vue'
 
-// 解构出 Layout 组件供下面使用
 const { Layout } = DefaultTheme
 const { isDark } = useData()
 
-// --- 1. 这里是您原有的圆形切换动画逻辑 ---
+// --- 💡 核心：定义一个专门改“头顶颜色”的函数 ---
+const updateThemeColor = () => {
+  const color = isDark.value ? '#1b1b1f' : '#ffffff' // 深色模式用灰黑，浅色用纯白
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) {
+    meta.setAttribute('content', color) // 动态修改 PWA 状态栏颜色
+  }
+}
+
+// 页面加载和每次切换模式时，都同步一下颜色
+onMounted(updateThemeColor)
+watch(isDark, updateThemeColor)
+
+// --- 1. 您原有的圆形切换动画逻辑 ---
 const enableTransitions = () =>
   'startViewTransition' in document &&
   window.matchMedia('(prefers-reduced-motion: no-preference)').matches
@@ -30,6 +42,7 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
   await (document as any).startViewTransition(async () => {
     isDark.value = !isDark.value
     await nextTick()
+    // 在这里切换时，watch 会自动触发 updateThemeColor
   }).ready
 
   document.documentElement.animate(

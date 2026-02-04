@@ -90,7 +90,7 @@ export default withPwa(defineConfig({
       name: '江大爷',
       short_name: '江大爷',
       description: '江大爷的个人博客',
-      theme_color: '#3eaf7c',
+      theme_color: '#ffffff',
       start_url: '/',
       display: 'standalone', // 关键！让它看起来像个独立的 App
       background_color: '#ffffff',
