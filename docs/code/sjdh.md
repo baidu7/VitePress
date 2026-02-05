@@ -423,3 +423,201 @@ outline: [2, 3]
 })();
 ```
 :::
+
+
+<script setup>
+import { onMounted, onUnmounted } from 'vue'
+
+onMounted(() => {
+    (function() {
+        const assets = {
+            spring: 'https://img.icons8.com/color/48/sakura.png',
+            summer: 'https://img.icons8.com/color/48/leaf.png',
+            autumn: 'https://img.icons8.com/color/48/maple-leaf.png',
+            winter: 'https://img.icons8.com/color/48/snow.png',
+            cloud:  'https://img.icons8.com/color/96/cloud.png' 
+        };
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.style.cssText = 'position:fixed;top:0;left:0;pointer-events:none;z-index:999998;';
+        document.body.appendChild(canvas);
+
+        // --- 新增：切换控制台 UI ---
+        const controls = document.createElement('div');
+        controls.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;gap:8px;z-index:999999;opacity:0.3;transition:opacity 0.3s;';
+        controls.onmouseenter = () => controls.style.opacity = '1';
+        controls.onmouseleave = () => controls.style.opacity = '0.3';
+        
+        const modes = [
+            { id: '1', name: '春', type: 'season', val: 'spring', color: '#ffb7c5' },
+            { id: '2', name: '夏', type: 'season', val: 'summer', color: '#7cfc00' },
+            { id: '3', name: '秋', type: 'season', val: 'autumn', color: '#ff8c00' },
+            { id: '4', name: '冬', type: 'season', val: 'winter', color: '#fff' },
+            { id: 'Q', name: '晴', type: 'weather', val: 'clear', color: '#ffd700' },
+            { id: 'W', name: '雨', type: 'weather', val: 'rain', color: '#00bfff' },
+            { id: 'E', name: '风', type: 'weather', val: 'windy', color: '#adff2f' },
+            { id: 'R', name: '云', type: 'weather', val: 'cloudy', color: '#ccc' }
+        ];
+
+        modes.forEach(m => {
+            const btn = document.createElement('button');
+            btn.innerText = m.name;
+            btn.style.cssText = `padding:4px 8px;border:1px solid ${m.color};background:rgba(0,0,0,0.5);color:${m.color};cursor:pointer;border-radius:4px;font-size:12px;`;
+            btn.onclick = () => {
+                if(m.type === 'season') currentSeason = m.val;
+                else currentWeather = m.val;
+                refreshParticles();
+            };
+            controls.appendChild(btn);
+        });
+        document.body.appendChild(controls);
+        // --- 控制台结束 ---
+
+        let width, height, particles = [], splashes = [];
+        let currentSeason = 'spring', currentWeather = 'clear'; 
+
+        function autoGetSeason() {
+            const month = new Date().getMonth() + 1; 
+            if (month >= 3 && month <= 5) return 'spring';
+            if (month >= 6 && month <= 8) return 'summer';
+            if (month >= 9 && month <= 11) return 'autumn';
+            return 'winter';
+        }
+
+        const imgPool = {};
+        Object.keys(assets).forEach(key => {
+            imgPool[key] = new Image();
+            imgPool[key].src = assets[key];
+        });
+
+        async function syncWeather() {
+            try {
+                const res = await fetch('https://wttr.in/?format=j1');
+                const data = await res.json();
+                const desc = data.current_condition[0].weatherDesc[0].value.toLowerCase();
+                if (desc.includes('rain') || desc.includes('shower')) currentWeather = 'rain';
+                else if (desc.includes('wind')) currentWeather = 'windy';
+                else if (desc.includes('cloud') || desc.includes('overcast')) currentWeather = 'cloudy';
+                else currentWeather = 'clear';
+                refreshParticles();
+            } catch (e) { 
+                currentWeather = 'clear';
+                refreshParticles();
+            }
+        }
+
+        function refreshParticles() {
+            particles = [];
+            const countMap = { clear: 40, rain: 80, windy: 60, cloudy: 6 };
+            let count = countMap[currentWeather] || 40;
+            for (let i = 0; i < count; i++) particles.push(new Particle(true));
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Splash {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = -Math.random() * 3 - 2;
+                this.gravity = 0.25;
+                this.life = 1.0;
+            }
+            update() { this.x += this.vx; this.y += this.vy; this.vy += this.gravity; this.life -= 0.04; }
+            draw() {
+                ctx.fillStyle = `rgba(100, 130, 160, ${this.life})`;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        class Particle {
+            constructor(randomY = false) { this.reset(randomY); }
+            reset(randomY = false) {
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.angle = Math.random() * Math.PI * 2;
+                if (currentWeather === 'cloudy') {
+                    this.x = randomY ? Math.random() * width : -300;
+                    this.y = Math.random() * height * 0.3;
+                    this.size = Math.random() * 100 + 150;
+                    this.velX = Math.random() * 0.2 + 0.1;
+                } else if (currentWeather === 'rain') {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : -100;
+                    this.velY = Math.random() * 5 + 10;
+                } else if (currentWeather === 'windy') {
+                    this.x = randomY ? Math.random() * width : -200;
+                    this.y = Math.random() * height;
+                    this.velX = Math.random() * 10 + 10;
+                    this.len = Math.random() * 100 + 50;
+                } else {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : -100;
+                    this.size = Math.random() * 10 + 15;
+                    const s = currentSeason;
+                    this.velY = s === 'summer' ? 0.5 : (s === 'autumn' ? 1.2 : 0.8);
+                    this.velX = (Math.random() - 0.5) * 0.5 + (s === 'spring' ? 1.0 : 0);
+                    this.spinSpeed = s === 'autumn' ? 0.04 : 0.02;
+                }
+            }
+            update(tick) {
+                if (currentWeather === 'rain') {
+                    this.y += this.velY;
+                    if (this.y >= height - 5) {
+                        for(let i=0; i<2; i++) splashes.push(new Splash(this.x, height - 2));
+                        this.reset(false);
+                    }
+                } else {
+                    this.x += (this.velX || 0); this.y += (this.velY || 0);
+                    this.angle += (this.spinSpeed || 0);
+                }
+                if (this.x > width + 400 || this.y > height + 200 || this.y < -200) this.reset(false);
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                if (currentWeather === 'rain') {
+                    ctx.strokeStyle = '#506e96'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x, this.y + 20); ctx.stroke();
+                } else if (currentWeather === 'cloudy') {
+                    if (imgPool['cloud'].complete) ctx.drawImage(imgPool['cloud'], this.x, this.y, this.size, this.size * 0.6);
+                } else if (currentWeather === 'windy') {
+                    ctx.strokeStyle = 'LightSkyBlue'; ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.len, this.y); ctx.stroke();
+                } else {
+                    const img = imgPool[currentSeason];
+                    if (img.complete) {
+                        ctx.translate(this.x, this.y); ctx.rotate(this.angle);
+                        ctx.drawImage(img, -this.size/2, -this.size/2, this.size, this.size);
+                    }
+                }
+                ctx.restore();
+            }
+        }
+
+        function animate(tick) {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => { p.update(tick); p.draw(); });
+            splashes = splashes.filter(s => s.life > 0);
+            splashes.forEach(s => { s.update(); s.draw(); });
+            requestAnimationFrame(() => animate(tick + 1));
+        }
+
+        currentSeason = autoGetSeason();
+        syncWeather();
+        animate(0);
+        
+        window._weather_canvas = canvas;
+        window._weather_controls = controls;
+    })();
+})
+
+onUnmounted(() => {
+    if (window._weather_canvas) window._weather_canvas.remove();
+    if (window._weather_controls) window._weather_controls.remove();
+})
+</script>
