@@ -97,7 +97,7 @@ next: false
 .nav-card:hover {
   transform: translate(1px, 1px); /* 细微按压感 */
   box-shadow: 0px 0px 0px transparent;
-  border-color: #333;
+  border-color: #5483c9c7;
 }
 
 .card-icon {
@@ -151,28 +151,25 @@ next: false
   }
 }
 #footer-console {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  
-  /* 强行直角设计 */
-  border: 2px solid #333;      /* 深色粗边框增强工业感 */
-  border-radius: 0 !important; /* 彻底干掉圆角 */
-  
-  padding: 10px 20px;
-  margin: 60px auto 30px;
-  background: #f9f9f9;         /* 纯净浅色背景 */
-  max-width: fit-content;
-  box-shadow: 6px 6px 0px #333; /* 这种硬阴影跟直角最搭 */
-  transition: all 0.3s ease;    /* 增加一个颜色切换的过渡，更丝滑 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    border: 2px solid #f1f1f5;
+    border-radius: 0 !important;
+    padding: 10px 20px;
+    margin: 60px auto 30px;
+    background: #f6f6f7;
+    max-width: fit-content;
+    box-shadow: 6px 6px #c8d2dd;
+    transition: all .3s ease;
 }
 
 /* 🌙 黑暗模式适配：当 html 包含 .dark 类时生效 */
 :slotted(.dark) #footer-console, 
 .dark #footer-console {
   background: #1a1a1a !important;   /* 深色背景 */
-  border-color: #555 !important;    /* 边框稍微亮一点点 */
+  border-color: #1e1e1e !important;    /* 边框稍微亮一点点 */
   box-shadow: 6px 6px 0px #000 !important; /* 纯黑阴影更深邃 */
 }
 
@@ -204,7 +201,7 @@ next: false
 @media (max-width: 640px) {
   #footer-console {
     flex-direction: column;
-    box-shadow: 4px 4px 0px #333;
+    box-shadow: 4px 4px 0px #c8d2dd;
   }
   .dark #footer-console {
     box-shadow: 4px 4px 0px #000;

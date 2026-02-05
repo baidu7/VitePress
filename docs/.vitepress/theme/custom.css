@@ -1,32 +1,107 @@
+/* 1. 整体滚动条宽度（设细一点才有高级感） */
+::-webkit-scrollbar {
+  width: 6px;  /* 纵向滚动条宽度 */
+  height: 6px; /* 横向滚动条高度 */
+}
+
+/* 2. 滚动条轨道（背景） */
+::-webkit-scrollbar-track {
+  background: transparent; /* 设为透明，不占视觉空间 */
+}
+
+/* 3. 滚动条滑块（那个能拖动的条） */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.3); /* 半透明灰色 */
+  border-radius: 10px; /* 圆角化 */
+  transition: background-color 0.3s;
+}
+
+/* 4. 鼠标悬停在滑块上时加深颜色 */
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(155, 155, 155, 0.6); 
+}
+
+/* 5. 针对 Firefox 浏览器的兼容性设置 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.3) transparent;
+}
+/* 侧边栏同步：利落滑入 */
+.VPSidebarItem.level-1, .VPSidebarItem.level-2 {
+  opacity: 0;
+  /* 时间缩短到 0.3s，动作更干脆 */
+  animation: modernSlide 0.3s ease-out forwards;
+}
+
+/* 延迟也缩短，让它几乎是一闪而过但又有层次感 */
+.VPSidebarItem:nth-child(1) { animation-delay: 0.05s; }
+.VPSidebarItem:nth-child(2) { animation-delay: 0.1s; }
+.VPSidebarItem:nth-child(3) { animation-delay: 0.15s; }
+.VPSidebarItem:nth-child(4) { animation-delay: 0.2s; }
+
+/* 现代简约版：快、稳、准 */
+@keyframes modernSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(15px); /* 只向上移动一点点 */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 1. 基础图片样式：增加放大镜手势 */
+/* 综合最优版 */
 .vp-doc img {
   cursor: zoom-in;
-  transition: opacity 0.2s ease;
-  border-radius: 8px; /* 给图片加一点圆角，更现代 */
+  border-radius: 8px; /* 保留您的圆角，这叫“润” */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* 平滑过渡 */
 }
 
 .vp-doc img:hover {
-  opacity: 0.8; /* 鼠标悬停时变暗一点，提示可点击 */
+  /* 咱们不用变暗，咱们用“浮起” */
+  transform: translateY(-4px) scale(1.02); /* 向上飘一点点，并微放大 */
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15); /* 加个影深，像从纸面浮起来了 */
 }
 
-/* 2. 这里的样式是配合刚才 JS 生成的全屏遮罩层 */
-/* 动画会让全屏看图弹出时更丝滑 */
+/* 您的 fadeIn 动画留着，那是给点开大图用的，非常专业 */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+.vp-doc > div > *, .vp-doc li {
+  opacity: 0;
+  /* 关键点：时间缩短到 0.4s，曲线换成简单的 ease-out */
+  animation: modernSlide 0.4s ease-out forwards;
+}/* 现代简约版：快、稳、准 */
+@keyframes modernSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(15px); /* 只向上移动一点点 */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.vp-doc > div > *, .vp-doc li {
+  opacity: 0;
+  /* 关键点：时间缩短到 0.4s，曲线换成简单的 ease-out */
+  animation: modernSlide 0.4s ease-out forwards;
+}
 
+/* 强制屏蔽所有带 no-zoom 类的图片放大镜指针 */
 .zoom-overlay {
   animation: fadeIn 0.3s ease;
 }
-/* 强制屏蔽所有带 no-zoom 类的图片放大镜指针 */
 img.no-zoom {
   cursor: default !important; /* 强制鼠标变成普通箭头 */
   pointer-events: none;       /* 彻底禁掉图片的鼠标事件，插件就抓不到它了 */
 		border-radius: 0 !important;
 }
-/* 自定义视频与框架容器样式 */
 
+/* 自定义视频与框架容器样式 */
 /* 1. 视频标签优化 */
 video {
   width: 100%;

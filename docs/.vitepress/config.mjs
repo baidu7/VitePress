@@ -113,27 +113,45 @@ export default withPwa(defineConfig({
   sitemap: { hostname: 'https://828111.xyz', lastmodDateOnly: false },
 
   // --- PWA 重新补齐 ---
-  pwa: {
-    registerType: 'autoUpdate',
-    manifest: {
-      name: '江大爷',
-      short_name: '江大爷',
-      description: '江大爷的个人博客',
-      theme_color: '#ffffff',
-      start_url: '/',
-      display: 'standalone',
-      background_color: '#ffffff',
-      icons: [
-        { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' }
-      ]
-    },
-    workbox: {
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      navigateFallbackDenylist: [/^\/sitemap.xml$/]
-    }
+pwa: {
+  registerType: 'autoUpdate',
+  manifest: {
+    name: '江大爷',
+    short_name: '江大爷',
+    description: '江大爷的个人博客',
+    theme_color: '#ffffff',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#ffffff',
+    icons: [
+      { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' }
+    ]
   },
-
+  workbox: {
+    // 1. 强制“夺权”：新 Service Worker 安装后立即激活，不准等老用户关浏览器
+    skipWaiting: true,
+    clientsClaim: true,
+    
+    globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+    navigateFallbackDenylist: [/^\/sitemap.xml$/],
+    
+    // 2. 核心改进：设置 runtimeCaching，确保 HTML 总是先看网络
+    runtimeCaching: [
+      {
+        // 匹配所有 HTML 页面请求
+        urlPattern: ({ request }) => request.destination === 'document',
+        handler: 'NetworkFirst', // 核心：先从网络拿新的，拿不到才用缓存
+        options: {
+          cacheName: 'pages-cache',
+          expiration: {
+            maxEntries: 50, // 最多缓存50个页面
+          }
+        }
+      }
+    ]
+  }
+},
   // --- 分享卡片逻辑补齐 ---
   transformPageData(pageData) {
     pageData.frontmatter.head ??= []
