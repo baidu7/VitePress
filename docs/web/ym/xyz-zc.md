@@ -2,6 +2,8 @@
 title: xyz顶级域名注册指南
 description: 一年只需 8 块钱！手把手教你认领 6 位数字 .xyz 顶级域名
 tags: [域名, xyz, cf, Cloudflare]
+category: [🌐 网站相关, 信息分享]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

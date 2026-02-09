@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="66" height="20" role="img" aria-label="内容: 随意">
+    <title>内容: 随意</title>
+    <g shape-rendering="crispEdges">
+        <rect width="33" height="20" fill="#555"/>
+        <rect x="33" width="33" height="20" fill="#98fb98"/>
+    </g>
+    <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
+        <text x="175" y="140" transform="scale(.1)" fill="#fff" textLength="230">内容</text>
+        <text x="485" y="140" transform="scale(.1)" fill="#333" textLength="230">随意</text>
+    </g>
+</svg>

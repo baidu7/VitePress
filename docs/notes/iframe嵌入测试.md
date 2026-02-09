@@ -2,6 +2,8 @@
 title: iframe嵌入测试
 description: 试试iframe效果
 tags: [iframe, 嵌入]
+category: [📑 杂记, 未分类]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

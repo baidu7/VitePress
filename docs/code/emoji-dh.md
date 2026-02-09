@@ -1,6 +1,8 @@
 ---
 title: 随机emoji动画
 description: 屏幕上会随机飘落五彩斑斓的小表情。
+category: [🌐 网站相关, 代码片段]
+date: 2026-01-18
 tags: [canvas, js, 特效]
 outline: [2, 3]
 ---

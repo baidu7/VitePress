@@ -47,7 +47,7 @@ import { ref, computed, onMounted } from 'vue'
 const localList = [
   { name: "Stars", url: "https://mr1.doubanio.com/484a8df54b09620ae3c9eeb48875f1a7/1/fm/song/p195694_128k.mp4", lrc: "/Janis-Ian-Stars.lrc", isCloud: false }
 ]
-const NETEASE_PLAYLIST_ID = '17426483259' // 👈 这里换成您自己的网易云歌单 ID
+const NETEASE_PLAYLIST_ID = '60198' // 👈 这里换成您自己的网易云歌单 ID
 const API_BASE = 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id='
 
 const fullList = ref([...localList])
@@ -128,51 +128,101 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 此处粘贴之前发您的 Scoped 样式即可，保持一致性 */
-/* --- 歌词岛：手机端适配 --- */
+/* ============================================================
+   1. 电脑端默认样式 (顶部悬浮)
+   ============================================================ */
 #lyric-island { 
   position: fixed; 
-  top: 20px;       /* 手机端往上挪一点，别挡住标题 */
+  top: 25px;            /* 电脑端钉在顶部 */
   left: 50%; 
   transform: translateX(-50%); 
-  z-index: 2001; 
+  z-index: 9999;        /* 确保它是最高层级 */
   opacity: 0; 
-  transition: 0.5s; 
+  transition: all 0.5s ease; 
   pointer-events: none;
-  width: 90%;      /* 限制容器宽度，防止长歌词撑破屏幕 */
+  width: auto;          /* 电脑端自适应文字宽度 */
+  max-width: 80%;
   text-align: center;
 }
-#lyric-island.show { opacity: 1; }
-.lyric-text { 
-  font-size: 20px; /* 电脑端保持 20px */
-  font-weight: bold; 
-  color: #ff5f56; 
-  text-shadow: 0 0 5px rgba(0,0,0,0.1);
-  display: inline-block;
-  white-space: normal; /* 允许折行，防止文字溢出 */
-  line-height: 1.2;
+
+#lyric-island.show { 
+  opacity: 1; 
 }
-/* --- 📱 核心：当屏幕宽度小于 768px 时（手机端） --- */
+
+.lyric-text { 
+  font-size: 20px; 
+  font-weight: bold; 
+  color: #00b894; 
+  text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: inline-block;
+  white-space: nowrap;  /* 电脑端尽量一行显示 */
+  line-height: 1.4;
+}
+
+/* ============================================================
+   2. 📱 手机端适配 (屏幕底部浮动)
+   ============================================================ */
 @media (max-width: 768px) {
   #lyric-island {
-    top: 15px; /* 手机端贴顶更紧凑 */
+    top: auto;          /* 清除顶部的定位 */
+    bottom: 30px;       /* 改为钉在屏幕底部 */
+    width: 90%;         /* 手机端宽度占满 */
   }
+
   .lyric-text {
-    font-size: 14px;      /* 字号缩小到 14px，刚好能看清又不占地 */
-    background: rgba(255, 255, 255, 0.8); /* 手机端背景杂乱，加个半透明底 */
-    padding: 4px 10px;
-    border-radius: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 15px;    /* 字号稍微调大一点点，14px有时太小 */
+    background: rgba(var(--vp-c-bg-rgb), 0.85); /* 适配深色/浅色模式背景 */
+    backdrop-filter: blur(10px);               /* 磨砂玻璃感 */
+    padding: 8px 16px;
+    border-radius: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    border: 1px solid var(--vp-c-divider);
+    white-space: normal; /* 允许折行，防止长歌词溢出 */
+    color: #00b894;      /* 保持您的专属红色 */
   }
-  
-  /* 播放器抽屉在手机端也可以稍微变窄一点 */
+
+  /* 播放器抽屉适配：防止在手机端遮挡歌词 */
   #music-drawer {
     width: 200px; 
+    bottom: 100px;      /* 抽屉往上抬一点，别跟歌词岛打架 */
   }
 }
-#music-drawer { position: fixed; left: 0; bottom: 80px; width: 240px; z-index: 2000; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); transform: translateX(-100%); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+
+/* ============================================================
+   3. 音乐播放器基础样式 (保持您的逻辑)
+   ============================================================ */
+#music-drawer { 
+  position: fixed; 
+  left: 0; 
+  bottom: 80px; 
+  width: 240px; 
+  z-index: 2000; 
+  background: var(--vp-c-bg); 
+  border: 1px solid var(--vp-c-divider); 
+  transform: translateX(-100%); 
+  transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+  box-shadow: var(--vp-shadow-3);
+}
+
 #music-drawer.open { transform: translateX(0); }
-#drawer-handle { position: absolute; right: -23px; top: -1px; width: 22px; height: 90px; background: var(--vp-c-divider); border: 1px solid var(--vp-c-divider); color: var(--vp-c-text-1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0 4px 4px 0; }
+
+#drawer-handle { 
+  position: absolute; 
+  right: -23px; 
+  top: -1px; 
+  width: 22px; 
+  height: 90px; 
+  background: var(--vp-c-divider); 
+  border: 1px solid var(--vp-c-divider); 
+  color: var(--vp-c-text-1); 
+  cursor: pointer; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 0 4px 4px 0; 
+}
+
 .handle-text { writing-mode: vertical-lr; font-size: 10px; letter-spacing: 2px; }
 .drawer-content { padding: 12px; color: var(--vp-c-text-1); }
 .song-title { font-weight: bold; font-size: 13px; margin-bottom: 5px; border-bottom: 1px dashed var(--vp-c-divider); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

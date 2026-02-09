@@ -2,6 +2,8 @@
 title: 图床网站收集
 description: 免费又好用的图床网站在这里
 tags: [cf, cloudflare, 博客, workers, blog]
+category: [🌐 网站相关, 实用工具]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

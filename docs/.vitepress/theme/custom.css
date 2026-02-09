@@ -51,11 +51,43 @@
   }
 }
 
+/* 左上角标题样式 */
+.VPNavBarTitle .title {
+  font-family: "STXingkai", "STKaiti", "Kaiti SC", "Kaiti", serif;
+  font-size: 22px !important;    /* 比默认稍微大一点点 */
+  font-weight: 700 !important;
+  letter-spacing: 2px;           /* 稍微拉开点间距 */
+  
+  /* 渐变色：让“老江”看起来更有质感 */
+  background: linear-gradient(135deg, var(--vp-c-text-1) 30%, var(--vp-c-brand-1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  /* 悬停效果：鼠标放上去时，文字轻轻动一下 */
+  transition: transform 0.3s ease;
+}
+
+/* 鼠标划过标题时稍微放大，像是在打招呼 */
+.VPNavBarTitle:hover .title {
+  transform: scale(1.1);
+}
+.VPNavBarTitle .title::before {
+  content: '「';
+  color: var(--vp-c-brand-1);
+  margin-right: 4px;
+}
+.VPNavBarTitle .title::after {
+  content: ' 」';
+  color: var(--vp-c-brand-1);
+  margin-left: 4px;
+}
+
+
 /* 1. 基础图片样式：增加放大镜手势 */
 /* 综合最优版 */
 .vp-doc img {
   cursor: zoom-in;
-  border-radius: 8px; /* 保留您的圆角，这叫“润” */
+  border-radius: 5px; /* 保留您的圆角，这叫“润” */
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* 平滑过渡 */
 }
 
@@ -108,9 +140,8 @@ video {
   /* 关键优化：限制最大高度，防止竖屏视频太长撑破屏幕 */
   max-height: 70vh;           /* 限制最高占屏幕高度的 70%，留点呼吸感 */
   object-fit: contain;        /* 确保视频内容在限高内完整显示，不被裁剪 */
-  
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background-color: #000;     /* 竖屏视频两侧留黑边，显得专业 */
   margin: 1em 0;
@@ -125,7 +156,7 @@ video {
   padding-bottom: 56.25%; /* 16:9 比例 */
   height: 0;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 5px;
   margin: 1em 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -144,14 +175,14 @@ iframe[src*="bilibili.com"] {
   aspect-ratio: 16 / 9;
   width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: 5px;
 }
 /* 直接写在 .vitepress/theme/custom.css 中 */
 .vp-doc video {
   width: 100%;           /* 宽度铺满容器 */
   display: block;        /* 消除下方间隙 */
   margin: 20px auto;     /* 上下间距，居中 */
-  border-radius: 12px;   /* 柔和圆角 */
+  border-radius: 5px;   /* 柔和圆角 */
   box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* 悬浮阴影感 */
   background: #000;      /* 加载前的黑底 */
   outline: none;
@@ -170,7 +201,7 @@ iframe[src*="bilibili.com"] {
   height: 200px !important;
   object-fit: cover !important;
   margin: 0 !important;
-  border-radius: 8px !important;
+  border-radius: 5px !important;
   border: 1px solid var(--vp-c-divider); /* 给照片加个边框更好看 */
 }
 
@@ -182,4 +213,27 @@ iframe[src*="bilibili.com"] {
   .vp-doc #image-grid img {
     height: 150px !important;
   }
+}
+/* 1. 缩减内容区域与底栏之间的强制间距 */
+.VPHome {
+  margin-bottom: 0 !important;
+  padding-bottom: 5px !important; /* 给分页器下面留一点点呼吸感就行 */
+}
+
+/* 2. 针对底栏本身的顶部间距进行“抽脂” */
+.VPFooter {
+  margin-top: 0 !important;
+  padding-top: 5px !important; /* 调小这个值，底栏就往上提了 */
+  border-top: 1px solid var(--vp-c-divider); /* 顺便加个细线，分界更清晰 */
+}
+
+/* 3. 如果是分页插件（pagination）占了位，也压一压 */
+.vp-pagination {
+  margin-bottom: 0 !important;
+}
+/* 只有这几行，强制把那个灰色的搜索框底色改了 */
+.DocSearch-Button {
+  /* 注意：!important 必须写在分号内部，不能跑出去 */
+  background-color: var(--docsearch-searchbox-focus-background) !important;
+  border: 1px solid var(--vp-c-divider); /* 既然底色深了，加个细边框更有质感 */
 }

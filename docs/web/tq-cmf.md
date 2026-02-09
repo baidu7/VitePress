@@ -2,6 +2,8 @@
 title: 网站天气组件
 description: 怎么给自己的个人网站加个天气预报，最好是能自动定位、不花钱、还不用注册 API Key 的。今天我就把这套“保姆级”的代码分享出来。
 tags: [js, html, css, 分享, 代码, 天气, api]
+category: [🌐 网站相关, 代码片段]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

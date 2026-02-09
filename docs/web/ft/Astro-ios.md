@@ -2,6 +2,8 @@
 title: Astro三端模仿苹果主题
 description: Astro三端模仿苹果主题
 tags: [Astro, 主题]
+category: [🌐 网站相关, 开源分享]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

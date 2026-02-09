@@ -2,6 +2,8 @@
 title: 快捷取色💄
 description: 
 tags: [取色, html, css]
+category: [🌐 网站相关, 实用工具]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

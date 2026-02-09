@@ -1,7 +1,9 @@
 ---
 title: 自用浏览器插件收藏
 description: 收藏一些不错的浏览器插件
-tags: [插件, 浏览器, 划词翻译, 侧边栏, 油猴, Tampermonkey]
+tags: [插件, 浏览器, 划词翻译, 油猴, Tampermonkey]
+category: [💾 软件插件, 插件]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

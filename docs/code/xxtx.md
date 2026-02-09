@@ -2,6 +2,8 @@
 title: 下雪特效
 description: 漂亮的下雪特效js
 tags: [canvas, js, 特效]
+category: [🌐 网站相关, 代码片段]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

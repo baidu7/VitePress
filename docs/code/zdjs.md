@@ -2,6 +2,8 @@
 title: 站点运行时间计算js
 description: 站点运行时间计算js代码
 tags: [js, 代码, html]
+category: [🌐 网站相关, 代码片段]
+date: 2026-01-18
 outline: [2, 3]
 ---
 

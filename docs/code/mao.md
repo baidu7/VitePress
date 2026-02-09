@@ -1,6 +1,8 @@
 ---
 title: 屏幕上有根毛
 description: 随机位置出现一根毛
+category: [🌐 网站相关, 代码片段]
+date: 2026-01-18
 tags: [js]
 outline: [2, 3]
 ---

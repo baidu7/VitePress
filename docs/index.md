@@ -1,214 +1,758 @@
 ---
-layout: doc
-prev: false
-next: false
+layout: home
 ---
 
-<div class="main-header-box">
-  <h1>江大爷的随想空间</h1>
-  <p>记录生活，分享点滴，梦到什么说什么，主打随意</p>
-  <ul>
-    <li>找文章：戳右上角的搜索框，快捷键 <kbd>Ctrl</kbd> + <kbd>K</kbd> 快速查找。</li>
-  </ul>
-</div>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { data as allPosts } from './.vitepress/posts.data.mjs'
 
-<RandomQuote />
+const pageSize = 9
+const currentPage = ref(1)
+const selectedTag = ref('')
 
----
+// 1. 提取标签逻辑：确保即使是空也不会报错
+const allTags = computed(() => {
+  const tags = new Set()
+  allPosts.forEach(post => {
+    if (post.category) tags.add(post.category)
+    if (Array.isArray(post.tags)) {
+      post.tags.forEach(t => tags.add(t))
+    }
+  })
+  return Array.from(tags)
+})
 
-<div class="card-container">
-  <a class="nav-card" href="https://github.com/baidu8/" target="_blank">
-    <div class="card-icon"><img class="no-zoom" src="https://avatars.githubusercontent.com/u/84177566" /></div>
-    <div class="card-content">
-      <div class="card-title">江大爷</div>
-      <div class="card-desc">本站所有者</div>
+// 2. 核心过滤逻辑
+const filteredPosts = computed(() => {
+  if (!selectedTag.value) return allPosts
+  return allPosts.filter(post => 
+    post.category === selectedTag.value || 
+    (Array.isArray(post.tags) && post.tags.includes(selectedTag.value))
+  )
+})
+
+// 3. 分页与 URL 同步
+const updateRoute = (tag, page) => {
+  selectedTag.value = tag
+  currentPage.value = page
+  const params = new URLSearchParams()
+  if (tag) params.set('tag', tag)
+  if (page > 1) params.set('page', page)
+  const query = params.toString()
+  window.history.pushState(null, '', query ? `?${query}` : window.location.pathname)
+}
+
+const filterByTag = (tag) => {
+  updateRoute(tag, 1)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const updatePage = (num) => {
+  currentPage.value = num
+  updateRoute(selectedTag.value, num)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  const params = new URLSearchParams(window.location.search)
+  selectedTag.value = params.get('tag') || ''
+  currentPage.value = parseInt(params.get('page')) || 1
+})
+
+// 计算分页内容
+const totalPages = computed(() => Math.ceil(filteredPosts.value.length / pageSize) || 1)
+const posts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredPosts.value.slice(start, start + pageSize)
+})
+
+// 页码折叠 (保持不变...)
+const visiblePageNumbers = computed(() => {
+  const nums = []; const range = 2
+  for (let i = 1; i <= totalPages.value; i++) {
+    if (i === 1 || i === totalPages.value || (i >= currentPage.value - range && i <= currentPage.value + range)) {
+      nums.push(i)
+    } else if (i === currentPage.value - range - 1 || i === currentPage.value + range + 1) {
+      if (!nums.includes('...')) nums.push('...')
+    }
+  }
+  return nums.filter((item, index) => item !== '...' || nums[index - 1] !== '...')
+})
+
+const prevPage = () => { if (currentPage.value > 1) updatePage(currentPage.value - 1) }
+const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(currentPage.value + 1) }
+</script>
+
+<div class="blog-wrapper">
+  <div class="blog-main">
+		<div class="mobile-tag-scroller">
+		  <div class="mobile-tag-list-inner">
+		    <span 
+		      v-for="tag in allTags" :key="'m1' + tag"
+		      :class="['mobile-tag-item', { active: selectedTag === tag }]"
+		      @click="filterByTag(tag)"
+		    >
+		      {{ tag }}
+		    </span>
+		    <span 
+		      v-for="tag in allTags" :key="'m2' + tag"
+		      :class="['mobile-tag-item', { active: selectedTag === tag }]"
+		      @click="filterByTag(tag)"
+		    >
+		      {{ tag }}
+		    </span>
+		  </div>
+		</div>
+    <div v-if="selectedTag" class="filter-status">
+      正在查看 “<strong>{{ selectedTag }}</strong>” 相关的文章
+      <span class="clear-link" @click="filterByTag('')">显示全部</span>
     </div>
-  </a>
-  <a class="nav-card" href="https://github.com/baidu8/" target="_blank">
-    <div class="card-icon"><img class="no-zoom" src="https://avatars.githubusercontent.com/u/84177566" /></div>
-    <div class="card-content">
-      <div class="card-title">占位</div>
-      <div class="card-desc">占位</div>
+    <div class="blog-container">
+      <div v-for="post in posts" :key="post.url" class="post-card">
+        <a :href="post.url" class="post-image-link">
+          <div class="post-image-wrapper">
+            <img :src="post.cover" class="no-zoom" alt="cover" loading="lazy">
+            <div class="post-overlay">
+              <p class="overlay-desc">{{ post.description }}</p>
+            </div>
+          </div>
+        </a>
+        <div class="post-info">
+          <h3 class="post-title">{{ post.title }}</h3>
+          <div class="post-meta-row">
+            <span class="post-date">📅 {{ post.date }}</span>
+            <span 
+              v-if="post.category" 
+              class="post-category-tag" 
+              @click.stop.prevent="filterByTag(post.category)"
+            >
+              {{ post.category }}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
-  </a>
-  <a class="nav-card" href="https://github.com/baidu8/" target="_blank">
-    <div class="card-icon"><img class="no-zoom" src="https://avatars.githubusercontent.com/u/84177566" /></div>
-    <div class="card-content">
-      <div class="card-title">占位</div>
-      <div class="card-desc">占位</div>
+    <div class="pagination" v-if="totalPages > 1">
+      <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">←</button>
+      <div class="page-numbers">
+        <template v-for="(page, index) in visiblePageNumbers" :key="index">
+          <button 
+            v-if="page !== '...'"
+            :class="['num-btn', { active: currentPage === page }]"
+            @click="updatePage(page)"
+          >
+            {{ page }}
+          </button>
+          <span v-else class="page-ellipsis">...</span>
+        </template>
+      </div>
+      <button class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">→</button>
     </div>
-  </a>
-  <a class="nav-card" href="https://github.com/baidu8/" target="_blank">
-    <div class="card-icon"><img class="no-zoom" src="https://avatars.githubusercontent.com/u/84177566" /></div>
-    <div class="card-content">
-      <div class="card-title">占位</div>
-      <div class="card-desc">占位</div>
-    </div>
-  </a>
-</div>
-
----
-
-<div id="footer-console">
-  <div id="left-group">
-  <img class="no-zoom" src="https://img.shields.io/badge/博主-江大爷-blue?style=flat-square" />
-  <img class="no-zoom" src="https://img.shields.io/badge/内容-随意-98FB98?style=flat-square" />
-  <img class="no-zoom" src="https://img.shields.io/badge/状态-不定期闭关-blueviolet?style=flat-square" />
   </div>
-  <div class="divider"></div>
-  <div id="right-group">
-  <img class="no-zoom" src="https://img.shields.io/badge/框架-VitePress-646cff?style=flat-square&logo=vite" />
-  <img class="no-zoom" src="https://img.shields.io/badge/技术-Vue3-42b883?style=flat-square&logo=vuedotjs" />
-  <img class="no-zoom" src="https://img.shields.io/badge/托管-Cloudflare-f38020?style=flat-square&logo=cloudflare" />
-  </div>
+
+  <aside class="blog-aside">
+    <div class="info-card">
+      <div class="avatar-wrapper">
+        <div class="avatar-shield"></div> 
+        <img src="/img/avatar.png" class="avatar">
+								<div class="status-badge" title="若无烦心事，便是好时节">
+								    <span>🤔</span> 
+								  </div>
+      </div>
+      <h3 class="name">江大爷</h3>
+      <p class="bio">梦到什么说什么</p>
+      <div class="stats">
+        <div class="item"><strong>{{ allPosts.length }}</strong><span>文章</span></div>
+        <div class="item"><strong>{{ allTags.length }}</strong><span>标签</span></div>
+      </div>
+    </div>
+				<RandomQuote />
+    <div class="side-card tags-card">
+      <div class="card-title">🏷️ 标签</div>
+      <div class="tag-scroll-window">
+        <div class="tag-list scroll-anim">
+          <span 
+            v-for="tag in allTags" 
+            :key="'a' + tag"
+            :class="['tag-item', { active: selectedTag === tag }]"
+            @click="filterByTag(tag)"
+          >
+            {{ tag }}
+          </span>
+          <span 
+            v-for="tag in allTags" 
+            :key="'b' + tag"
+            :class="['tag-item', { active: selectedTag === tag }]"
+            @click="filterByTag(tag)"
+          >
+            {{ tag }}
+          </span>
+          <span v-if="selectedTag" class="tag-item clear" @click="filterByTag('')">× 重置</span>
+        </div>
+      </div>
+    </div>
+  </aside>
 </div>
+
 
 <style scoped>
-/* 标题区：不封口，只留左侧立柱 */
-.main-header-box {
-  border-left: 4px solid #ff5f56; /* 呼应下方红色 */
-  padding-left: 20px;
-  margin-bottom: 40px;
-  background: transparent;
-}
-.card-container {
+/* ============================================================
+   1. 基础布局
+   ============================================================ */
+.blog-wrapper {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 20px 0;
-  width: 100%;
+  max-width: 1150px;
+  margin: 40px auto;
+  gap: 30px;
+  padding: 0 20px;
 }
 
-.nav-card {
-  flex: 1 1 calc(25% - 12px);
-  min-width: 0;
+.blog-main { flex: 1; min-width: 0; }
+
+.blog-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 24px;
+  margin-bottom: 40px;
+}
+
+/* ============================================================
+   2. 文章卡片 (Post Card)
+   ============================================================ */
+.post-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 5px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.post-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+/* 图片区域 */
+.post-image-link { display: block; overflow: hidden; }
+
+.post-image-wrapper {
+  position: relative;
+		border-radius: 8px 8px 0 0; /* 只有顶部有圆角 */
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.post-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.post-card:hover .post-image-wrapper img { transform: scale(1.08); }
+
+/* 悬停简介蒙版 */
+.post-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(var(--vp-c-brand-rgb), 0.85);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.post-card:hover .post-overlay { opacity: 1; }
+
+.overlay-desc {
+  color: white;
+  font-size: 0.9rem;
+  text-align: center;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* 电脑端大屏幕调整 */
+@media (min-width: 960px) {
+  .blog-container {
+    /* 关了侧边栏后，这里改成 repeat(3, 1fr) 就能出三列 */
+    grid-template-columns: repeat(3, 1fr); 
+  }
+}
+/* 文字信息区 */
+.post-info { padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+
+.post-title-link { text-decoration: none; color: inherit; }
+
+.post-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+  transition: color 0.2s;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-title-link:hover .post-title { color: var(--vp-c-brand); }
+
+.post-meta-row {
   display: flex;
   align-items: center;
-  /* 重点 1：调低高度，缩减上下 padding */
-  padding: 8px 12px; 
-  border: 1px solid #e2e2e2;
-  background: #fff;
-  text-decoration: none !important;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
-  transition: all 0.2s ease;
-  overflow: hidden; /* 确保内容不溢出 */
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--vp-c-text-2);
 }
 
-.nav-card:hover {
-  transform: translate(1px, 1px); /* 细微按压感 */
-  box-shadow: 0px 0px 0px transparent;
-  border-color: #5483c9c7;
+.post-category-tag {
+  cursor: pointer;
+  padding: 1px 8px;
+  border-radius: 4px;
+  color: var(--vp-c-brand);
+  background-color: var(--vp-c-brand-soft);
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.card-icon {
-  width: 24px;  /* 稍微缩小图标，配合低高度 */
-  height: 24px;
-  margin-right: 10px;
-  flex-shrink: 0;
+.post-category-tag:hover {
+  background-color: var(--vp-c-brand);
+  color: white;
 }
 
-.card-content {
-  flex: 1;
-  min-width: 0; /* 允许子元素缩放以触发省略号 */
+/* ============================================================
+   3. 侧边栏 (Aside)
+   ============================================================ */
+/* 头像容器 */
+.info-card .avatar-wrapper {
+  position: relative; /* 确保子元素的 absolute 定位是相对于它 */
+  width: 90px; /* 根据您首页头像的实际大小调整 */
+  height: 90px; /* 保持宽高一致，确保圆形 */
+  margin: 0 auto 20px; /* 居中并向下留白 */
 }
 
-.card-title {
+/* 首页头像本体 */
+.info-card .avatar-wrapper .avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* 确保圆形 */
+  object-fit: cover;
+  border: 2px solid var(--vp-c-yellow-1); /* 大爷的专属高光圈 */
+  transition: transform 0.5s ease-in-out; /* 平滑旋转动画 */
+  /* 最关键：让图片本身不接收鼠标事件，彻底躲开插件 */
+  pointer-events: none; 
+}
+
+/* 透明护盾 */
+.info-card .avatar-wrapper .avatar-shield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* 和头像一样圆 */
+  z-index: 1; /* 确保它在头像上面 */
+  cursor: pointer; /* 鼠标放上去时显示手型，表示可点击或互动 */
+  /* 可以加一个淡淡的背景，鼠标放上去时提示用户这里可以互动 */
+  background-color: rgba(var(--vp-c-brand-1-rgb), 0.1);
+  transition: background-color 0.3s;
+}
+
+/* 当鼠标划过整个容器时，让里面的头像转动 */
+.info-card .avatar-wrapper:hover .avatar {
+  transform: rotate(360deg);
+}
+
+/* 如果您想让护盾本身也有动画，可以这样 */
+/* .info-card .avatar-wrapper:hover .avatar-shield {
+  background-color: rgba(var(--vp-c-brand-1-rgb), 0.2);
+} */
+/* 气泡本体 */
+.info-card .avatar-wrapper .status-badge {
+  position: absolute;
+  bottom: 1px;   /* 距离底部位置 */
+  right: 1px;    /* 距离右侧位置 */
+  width: 28px;   /* 气泡大小 */
+  height: 28px;
+  background-color: var(--vp-c-bg); /* 跟随主题背景色 */
+  border: 2px solid var(--vp-c-bg-soft); /* 浅色边框增加层次感 */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+		cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* 阴影是灵魂 */
+  z-index: 2; /* 确保在护盾之上，这样鼠标放上去能显示 title */
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 鼠标划过头像，气泡跟着有个俏皮的小缩放 */
+.info-card .avatar-wrapper:hover .status-badge {
+  transform: scale(1.2);
+}
+
+/* 适配移动端，气泡稍微缩小一点点 */
+@media (max-width: 640px) {
+  .info-card .avatar-wrapper .status-badge {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    bottom: 2px;
+    right: 2px;
+  }
+}
+/* 其他 info-card 样式，根据您的需求调整 */
+.info-card .name {
+  font-size: 24px;
   font-weight: bold;
+  color: var(--vp-c-text-1);
+  margin-top: 10px;
+		font-family: "STXingkai", "STKaiti", "Kaiti SC", "Kaiti", serif;
+		letter-spacing: 2px;
+}
+.info-card .name:hover {
+  animation: wave 0.5s ease-in-out;
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+.info-card .bio {
   font-size: 14px;
-  color: #333;
-  margin: 0;
-  /* 标题防溢出 */
-  white-space: nowrap;
+  color: var(--vp-c-text-2);
+  margin-top: 5px;
+  min-height: 5px; /* 防止内容为空时塌陷 */
+}
+
+.info-card .stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 25px;
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 20px;
+}
+
+.info-card .stats .item strong {
+  display: block;
+  font-size: 20px;
+  color: var(--vp-c-text-1);
+  font-weight: bold;
+}
+
+.info-card .stats .item span {
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+  margin-top: 5px;
+  display: block;
+}
+.blog-aside { width: 280px; display: flex; flex-direction: column; gap: 20px; }
+
+.info-card, .side-card {
+  background: var(--vp-c-bg-soft);
+  padding: 24px;
+  border-radius: 5px;
+  border: 1px solid var(--vp-c-divider);
+}
+
+.info-card {
+  text-align: center;
+  top: 100px;
+  /* position: sticky; */
+  transition: all 0.3s ease;
+}
+.info-card:hover {
+  transform: translateY(0px); /* 轻轻上浮 */
+  /* box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12); 阴影加深，更有空间感 */
+}
+
+.info-card::after {
+  content: '江大爷'; /* 或者是您的博客名缩写 */
+		font-family: "STXingkai", "STKaiti", "Kaiti SC", "Kaiti", serif;
+  position: absolute;
+  bottom: -10px;
+  right: -5px;
+  font-size: 40px;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--vp-c-text-1);
+  opacity: 0.03; /* 极低透明度，若隐若现最迷人 */
+  pointer-events: none;
+}
+.name { font-size: 1.25rem; font-weight: bold; margin-bottom: 6px; }
+
+.bio { font-family: "Kaiti", "STXingkai", "STKaiti", "Kaiti SC", serif; font-size: 0.85rem; color: var(--vp-c-text-2); margin-bottom: 16px; }
+
+.stats { display: flex; justify-content: space-around; border-top: 1px solid var(--vp-c-divider); padding-top: 16px; }
+
+.stats strong { display: block; font-size: 1.1rem; color: var(--vp-c-text-1); }
+
+.stats span { font-size: 0.75rem; color: var(--vp-c-text-3); }
+
+.about-btn {
+  display: block; margin-top: 18px; padding: 10px;
+  background: var(--vp-c-brand); color: white !important;
+  border-radius: 8px; font-size: 0.9rem; transition: opacity 0.2s;
+}
+
+.about-btn:hover { opacity: 0.9; }
+
+/* 侧边栏标签云 */
+/* 窗口：固定高度，隐藏溢出，加遮罩 */
+.tag-scroll-window {
+  height: 200px; /* 固定高度，您可以根据喜好调整 */
   overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
+  /* 上下渐变遮罩，产生边缘消失的高级感 */
+  mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
 }
 
-.card-desc {
-  font-size: 11px;
-  color: #999;
-  margin: 0;
-  /* 重点 2：简介强制单行省略 */
-  white-space: nowrap; 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block; 
+/* 列表容器：设置布局和动画 */
+.tag-list.scroll-anim {
+  display: flex;
+  flex-wrap: wrap; /* 让标签能排开 */
+  gap: 8px;
+  padding: 10px 0;
+  /* 动画名称 时长 线性 循环 */
+  animation: slide-up 25s linear infinite; 
 }
 
-/* 🌙 黑暗模式 */
-.dark .nav-card {
-  background: #1a1a1a;
-  border-color: #333;
+/* 鼠标放上去停止滚动，方便大爷点击 */
+.tag-scroll-window:hover .scroll-anim {
+  animation-play-state: paused;
 }
-.dark .nav-card:hover { border-color: #ff5f56; }
-.dark .card-title { color: #eee; }
-.dark .card-desc { color: #777; }
 
-/* 📱 手机端：2 个一排 */
-@media (max-width: 640px) {
-  .nav-card {
-    flex: 1 1 calc(50% - 12px);
-    min-width: calc(50% - 12px);
+/* 关键帧：向上滚动到一半的位置 */
+/* 这里的 -50% 是因为我们放了两份一模一样的标签 */
+@keyframes slide-up {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+/* 稍微美化下标签，让它们像胶囊一样 */
+.tag-item {
+  padding: 4px 10px;
+  font-size: 13px;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap; /* 防止标签换行打乱动画 */
+}
+
+.tag-item:hover {
+  border-color: #ff5f56;
+  color: #ff5f56;
+}
+
+
+/* ============================================================
+   4. 分页器 (Pagination)
+   ============================================================ */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 50px; }
+
+.page-numbers { display: flex; gap: 8px; }
+
+.page-btn, .num-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  background: var(--vp-c-bg-soft);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.page-btn:not(:disabled):hover, .num-btn:hover {
+  border-color: var(--vp-c-brand);
+  color: var(--vp-c-brand);
+}
+
+.num-btn.active { background: var(--vp-c-brand); color: white; border-color: var(--vp-c-brand); }
+
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+
+/* ============================================================
+   5. 响应式布局 (适配手机端)
+   ============================================================ */
+@media (max-width: 960px) {
+  /* 1. 容器改为垂直排列 */
+  .blog-wrapper { 
+    flex-direction: column; 
+    padding: 0 15px;
+  }
+
+  /* 2. 核心：手机端隐藏右侧原本的标签卡片 */
+  /* 因为顶部已经有了横向滚动的标签，下面那个就不用显示了 */
+  .side-card.tags-card {
+    display: none; 
+  }
+
+  /* 3. 头像卡片处理：如果您觉得手机端最下面留个头像还有意义，就留着 */
+  /* 如果连头像也不想要，就直接把 .blog-aside 给 display: none */
+  .blog-aside { 
+    width: 100%; 
+    order: 2; 
+    margin-top: 30px;
+				/* display: none */
+  }
+.info-card {
+    display: none !important; /* 直接让它彻底消失，不占位 */
+  }
+  /* 4. 开启手机端横向滚动条 */
+  .mobile-tag-scroller {
+    display: flex; /* 刚才咱们写了这个逻辑，确保它是显示的 */
   }
 }
-#footer-console {
+/* ============================================================
+   查看样式
+   ============================================================ */
+/* 基础样式优化 */
+.filter-status {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background-color: var(--vp-c-bg-soft);
+  border-left: 4px solid var(--vp-c-brand-1);
+  border-radius: 12px; /* 稍微圆润一点更适合手机端 */
+  font-size: 14px;
+  line-height: 1.6; /* 增加行高，防止换行时文字打架 */
+  color: var(--vp-c-text-2);
+  box-shadow: var(--vp-shadow-1);
+}
+
+/* 标签文字增强 */
+.filter-status strong {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+/* 按钮样式 */
+.filter-status .clear-link {
+  margin-left: auto;
+  padding: 4px 14px;
+  font-size: 12px;
+  background-color: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 16px;
+  white-space: nowrap; /* 核心：禁止按钮文字换行 */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* --- 📱 手机端深度适配 --- */
+@media (max-width: 640px) {
+  .filter-status {
+    flex-direction: column; /* 变成垂直排列 */
+    align-items: center;    /* 内容整体居中 */
+    text-align: center;
+    padding: 16px;
+    border-left: none;      /* 手机端去掉左边条，改成顶边条更和谐 */
+    border-top: 4px solid var(--vp-c-brand-1);
+  }
+
+  .filter-status .clear-link {
+    margin-left: 0;         /* 去掉靠右偏移 */
+    margin-top: 10px;       /* 给按钮上方留点空隙 */
+    width: 100px;           /* 按钮宽度适中 */
+    padding: 6px 0;         /* 稍微加高一点，方便手指点击 */
+  }
+}
+/* ============================================================
+   桌面端特殊处理 (大于 960px)
+   ============================================================ */
+@media (min-width: 961px) {
+  /* 桌面端绝对不显示手机那个滚动条 */
+  .mobile-tag-scroller {
+    display: none;
+  }
+}
+/* 默认隐藏这个滚动条 */
+.mobile-tag-scroller {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .mobile-tag-scroller {
+    display: block; /* 改为 block 容器 */
+    overflow: hidden; /* 隐藏溢出，防止看到两份标签 */
+    padding: 12px 0;
+    margin-bottom: 15px;
+    /* 左右渐变遮罩 */
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .mobile-tag-list-inner {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    border: 2px solid #f1f1f5;
-    border-radius: 0 !important;
-    padding: 10px 20px;
-    margin: 60px auto 30px;
-    background: #f6f6f7;
-    max-width: fit-content;
-    box-shadow: 6px 6px #c8d2dd;
-    transition: all .3s ease;
-}
-
-/* 🌙 黑暗模式适配：当 html 包含 .dark 类时生效 */
-:slotted(.dark) #footer-console, 
-.dark #footer-console {
-  background: #1a1a1a !important;   /* 深色背景 */
-  border-color: #1e1e1e !important;    /* 边框稍微亮一点点 */
-  box-shadow: 6px 6px 0px #000 !important; /* 纯黑阴影更深邃 */
-}
-
-/* 内部的小组也可以强制直角 */
-#left-group img, 
-#right-group img {
-  border-radius: 0 !important; /* 强制徽章本身也变直角 */
-  border: 1px solid #eee;
-}
-
-/* 🌙 黑暗模式下的徽章边框 */
-.dark #left-group img, 
-.dark #right-group img {
-  border-color: #333;
-}
-
-.divider {
-  width: 2px;
-  height: 30px;
-  background: #333;
-}
-
-/* 🌙 黑暗模式下的分割线 */
-.dark .divider {
-  background: #555;
-}
-
-/* 适配手机端 */
-@media (max-width: 640px) {
-  #footer-console {
-    flex-direction: column;
-    box-shadow: 4px 4px 0px #c8d2dd;
+    gap: 10px;
+    width: max-content; /* 核心：让内容撑开宽度 */
+    /* 添加动画：40秒向左漂移一次 */
+    animation: mobile-slide-left 80s linear infinite;
   }
-  .dark #footer-console {
-    box-shadow: 4px 4px 0px #000;
+
+  /* 点击或长按时停下，方便大爷选中 */
+  .mobile-tag-scroller:active .mobile-tag-list-inner {
+    animation-play-state: paused;
   }
-  .divider {
-    width: 80%;
-    height: 2px;
+
+  .mobile-tag-item {
+    flex: 0 0 auto;
+    padding: 6px 14px;
+    background: var(--vp-c-bg-soft);
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px; /* 稍微圆润一点更漂亮 */
+    font-size: 13px;
+    color: var(--vp-c-text-2);
+    white-space: nowrap;
+    transition: all 0.2s;
   }
+
+  .mobile-tag-item.active {
+    background: #ff5f56 !important; /* 动力红 */
+    color: white !important;
+    border-color: #ff5f56 !important;
+  }
+
+  /* 手机端向左无限滚动的轨迹 */
+  @keyframes mobile-slide-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+}
+/* 1. 强制首页导航栏所有处于“活跃状态”的文字变回黑色 */
+:global(.VPCNavbar .active .text),
+:global(.VPCNavbar .active .vpi-chevron-down) {
+  color: var(--vp-c-text-1) !important;
+  fill: var(--vp-c-text-1) !important; /* 箭头可能是 SVG 图标 */
+}
+
+/* 2. 针对您截图里显示的 Flyout 菜单单独加固 */
+:global(.VPFlyout.active .text) {
+  color: var(--vp-c-text-1) !important;
+}
+
+/* 3. 保留鼠标悬停时的蓝色（反馈感不能丢） */
+:global(.VPNavBarMenuLink:hover .text),
+:global(.VPFlyout:hover .text) {
+  color: var(--vp-c-brand-1) !important;
+}
+
+/* 4. 隐藏底部那根讨厌的蓝线 */
+:global(.VPNavBarMenuLink.active::after) {
+  display: none !important;
 }
 </style>

@@ -1,6 +1,8 @@
 ---
 title: J-Git浏览器插件
 description: 图床拓展满足资源存储需求，是轻量场景下的优质工具。
+category: [💾 软件插件, 插件]
+date: 2026-01-18
 tags: [J-Git, 插件, 浏览器]
 outline: [2, 3]
 ---

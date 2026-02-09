@@ -2,6 +2,8 @@
 title: J-nav配套插件J-Mark
 description: 深度体验一款支持文件夹筛选的书签导出神器
 tags: [工具推荐, 浏览器插件, 开源项目, J-nav, J-Mark, 插件]
+category: [💾 软件插件, 插件]
+date: 2026-01-18
 outline: [2, 3]
 prev:
   text: 'J-nav纯静态导航'

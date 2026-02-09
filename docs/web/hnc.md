@@ -2,6 +2,8 @@
 title: cf创建无服务器带后台博客
 description: cloudflare-workers-blog纯cf部署的博客，用的cf免费的kv桶
 tags: [cf, cloudflare, 博客, workers, blog]
+category: [🌐 网站相关, 开源分享]
+date: 2026-01-18
 outline: [2, 3]
 ---
 
