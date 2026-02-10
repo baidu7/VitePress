@@ -22,10 +22,22 @@ const allTags = computed(() => {
   return Array.from(tags)
 })
 
-// 2. 核心过滤逻辑
+// 2. 核心过滤逻辑 + 日期排序
 const filteredPosts = computed(() => {
-  if (!selectedTag.value) return allPosts
-  return allPosts.filter(post => 
+  // 先把所有文章拿出来
+  let results = [...allPosts]
+
+  // --- 新增排序逻辑：日期最新的排前面 ---
+  results.sort((a, b) => {
+    // 假设日期字段叫 date，如果没写日期就当成 1970年（排最后）
+    const dateA = a.date ? new Date(a.date) : new Date(0)
+    const dateB = b.date ? new Date(b.date) : new Date(0)
+    return dateB - dateA // 倒序排：大的（新的）在前
+  })
+
+  // 如果有选中的标签，再进行过滤
+  if (!selectedTag.value) return results
+  return results.filter(post => 
     post.category === selectedTag.value || 
     (Array.isArray(post.tags) && post.tags.includes(selectedTag.value))
   )
@@ -222,16 +234,22 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 .post-card {
   display: flex;
   flex-direction: column;
-  background-color: var(--vp-c-bg-soft);
+  /* background-color: var(--vp-c-bg-soft); */
   border-radius: 5px;
   overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid transparent; /* 关键：默认透明，占好坑位 */
+  /* 移除掉所有 transform 位移 */
+  transform: none !important;
+  /* 过渡效果：只针对边框颜色和阴影 */
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
 }
 
 .post-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  /* 使用老江红（或者喜欢的颜色） */
+  border-color: #4761B8 !important; 
+  /* box-shadow: 0 0 0 0.5px #4761B8; */
+  transform: none !important;
 }
 
 /* 图片区域 */
@@ -257,13 +275,17 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 .post-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background-color: rgba(var(--vp-c-brand-rgb), 0.85);
+  background: linear-gradient(
+    to bottom, 
+    rgba(0, 0, 0, 0.4) 0%, 
+    rgba(0, 0, 0, 0.7) 100%
+  ) !important;
   display: flex; align-items: center; justify-content: center;
   padding: 20px;
   opacity: 0;
   transition: opacity 0.3s ease;
   backdrop-filter: blur(4px);
-  z-index: 2;
+  z-index: 1;
 }
 
 .post-card:hover .post-overlay { opacity: 1; }
@@ -332,7 +354,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 /* 头像容器 */
 .info-card .avatar-wrapper {
   position: relative; /* 确保子元素的 absolute 定位是相对于它 */
-  width: 90px; /* 根据您首页头像的实际大小调整 */
+  width: 90px; /* 根据首页头像的实际大小调整 */
   height: 90px; /* 保持宽高一致，确保圆形 */
   margin: 0 auto 20px; /* 居中并向下留白 */
 }
@@ -369,7 +391,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
   transform: rotate(360deg);
 }
 
-/* 如果您想让护盾本身也有动画，可以这样 */
+/* 如果想让护盾本身也有动画，可以这样 */
 /* .info-card .avatar-wrapper:hover .avatar-shield {
   background-color: rgba(var(--vp-c-brand-1-rgb), 0.2);
 } */
@@ -408,7 +430,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
     right: 2px;
   }
 }
-/* 其他 info-card 样式，根据您的需求调整 */
+/* 其他 info-card 样式，根据需求调整 */
 .info-card .name {
   font-size: 24px;
   font-weight: bold;
@@ -476,7 +498,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 }
 
 .info-card::after {
-  content: '江大爷'; /* 或者是您的博客名缩写 */
+  content: '江大爷'; /* 或者是博客名缩写 */
 		font-family: "STXingkai", "STKaiti", "Kaiti SC", "Kaiti", serif;
   position: absolute;
   bottom: -10px;
@@ -509,7 +531,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 /* 侧边栏标签云 */
 /* 窗口：固定高度，隐藏溢出，加遮罩 */
 .tag-scroll-window {
-  height: 200px; /* 固定高度，您可以根据喜好调整 */
+  height: 200px; /* 固定高度，可以根据喜好调整 */
   position: relative;
 		scroll-behavior: smooth;
 		overflow-y: auto;
@@ -604,7 +626,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
     display: none; 
   }
 
-  /* 3. 头像卡片处理：如果您觉得手机端最下面留个头像还有意义，就留着 */
+  /* 3. 头像卡片处理：如果觉得手机端最下面留个头像还有意义，就留着 */
   /* 如果连头像也不想要，就直接把 .blog-aside 给 display: none */
   .blog-aside { 
     width: 100%; 
@@ -758,7 +780,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
   fill: var(--vp-c-text-1) !important; /* 箭头可能是 SVG 图标 */
 }
 
-/* 2. 针对您截图里显示的 Flyout 菜单单独加固 */
+/* 2. 针对截图里显示的 Flyout 菜单单独加固 */
 :global(.VPFlyout.active .text) {
   color: var(--vp-c-text-1) !important;
 }
@@ -772,5 +794,68 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 /* 4. 隐藏底部那根讨厌的蓝线 */
 :global(.VPNavBarMenuLink.active::after) {
   display: none !important;
+}
+/* 1. 图片容器：作为背景基础 */
+.post-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px; /* 根据卡片高度调整 */
+  background-color: var(--vp-c-bg-soft); /* 底色：深灰/浅黑 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 2. 纯 CSS 极简加载动画：老江红呼吸环 */
+.post-image-wrapper::before {
+  content: "";
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(255, 95, 86, 0.1); /* 极淡的红圈底 */
+  border-top: 2px solid #ff5f56;           /* 鲜艳的老江红（转动头） */
+  border-radius: 50%;
+  
+  /* 让它一边转，一边还有点忽明忽暗的呼吸感 */
+  animation: 
+    spin 0.8s linear infinite,
+    pulse 1.5s ease-in-out infinite;
+    
+  position: absolute;
+  z-index: 1;
+}
+
+/* 3. 真实图片：加载完后直接盖在动画上面 */
+.post-image-wrapper img {
+  position: relative;
+  z-index: 2; /* 层级高于动画 */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background-color: var(--vp-c-bg-soft);
+  
+  /* 图片进场时来个 0.4 秒的淡入，遮住动画时不生硬 */
+  animation: imgFadeIn 0.4s ease-out;
+}
+
+/* --- 动画秘籍 --- */
+
+/* 旋转：基础动作 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 呼吸：增加灵动感 */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* 图片淡入：丝滑过渡 */
+@keyframes imgFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

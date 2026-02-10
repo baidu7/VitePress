@@ -3,6 +3,7 @@ title: Astro三端模仿苹果主题
 description: Astro三端模仿苹果主题
 tags: [Astro, 主题]
 category: [🌐 网站相关, 开源分享]
+cover: https://raw.githubusercontent.com/baidu8/J-os/refs/heads/main/Snipaste_2026-01-24_16-16-20.png
 date: 2026-01-18
 outline: [2, 3]
 ---

@@ -3,6 +3,7 @@ title: 免费二级域名
 description: 收录一些免费的二级域名
 tags: [域名, gv.uy, eu.org, stackryze.com]
 category: [🌐 网站相关, 信息分享]
+cover: https://image.thum.io/get/https://nic.eu.org/
 date: 2026-01-18
 outline: [2, 3]
 ---

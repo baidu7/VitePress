@@ -67,6 +67,7 @@ export default createContentLoader('**/*.md', {
           title: front.title || '无题',
           url: page.url,
           cover: finalCover,
+										rawDate: front.date ? new Date(front.date).getTime() : 0,
           date: formatDate(front.date),
           description: front.description || '点击阅读全文...',
           // 显示数组最后一个细分分类
@@ -74,7 +75,7 @@ export default createContentLoader('**/*.md', {
           tags: combinedTags 
         }
       })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .sort((a, b) => b.rawDate - a.rawDate)
   }
 })
 
