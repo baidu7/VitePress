@@ -93,6 +93,25 @@ const visiblePageNumbers = computed(() => {
 
 const prevPage = () => { if (currentPage.value > 1) updatePage(currentPage.value - 1) }
 const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(currentPage.value + 1) }
+const GITHUB_OWNER = 'baidu8'
+const GITHUB_REPO = 'VitePress'
+const latestShuo = ref('正在同步最新动态...')
+
+const latestIssues = ref([]) // 改为存数组
+
+onMounted(async () => {
+  try {
+    // 💡 改为获取 2 条最新说说
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?state=open&labels=shuo&per_page=5`)
+    const data = await res.json()
+    if (data && data.length > 0) {
+      latestIssues.value = data.map(item => ({
+        text: item.body.replace(/!\[.*?\]\((.*?)\)/g, '[图片]').substring(0, 40),
+        url: item.html_url
+      }))
+    }
+  } catch (e) { console.error(e) }
+})
 </script>
 
 <div class="blog-wrapper">
@@ -179,6 +198,14 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
       </div>
     </div>
 				<RandomQuote />
+				<div class="latest-shuo-container">
+				  <div v-for="(shuo, index) in latestIssues" :key="index" class="shuo-line">
+				    <span class="shuo-tag">📢</span>
+				    <span class="shuo-text">{{ shuo.text }}</span>
+				    <a v-if="index === 0" href="/shuo" class="shuo-link">查看说说 👉</a>
+				  </div>
+				  <div v-if="latestIssues.length === 0" class="shuo-line">正在同步最新动态...</div>
+				</div>
     <div class="side-card tags-card">
       <div class="card-title">🏷️ 标签</div>
       <div class="tag-scroll-window">
@@ -208,6 +235,63 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 
 
 <style scoped>
+.latest-shuo-container {
+  margin: 10px 0; /* 💡 调小上下间距 */
+  padding: 8px 14px; /* 💡 调小内部内边距 */
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-brand-soft);
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+.shuo-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.8; /* 控制两行之间的行高 */
+}
+.shuo-line:not(:last-child) {
+  border-bottom: 1px dashed var(--vp-c-divider); /* 两条说说之间加个虚线 */
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+}
+.shuo-tag { font-size: 0.9rem; }
+.shuo-text { 
+  flex: 1; 
+  font-size: 0.85rem; 
+  color: var(--vp-c-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 文字太长自动变省略号 */
+}
+.shuo-link {
+  font-size: 11px;               /* 💡 字号稍微调小，显得精致 */
+  color: var(--vp-c-brand);      /* 💡 用主题色 */
+  background: var(--vp-c-brand-soft); /* 💡 浅色背景 */
+  padding: 2px 10px;             /* 💡 撑开按钮形状 */
+  border-radius: 5px;           /* 💡 圆润的胶囊形 */
+  text-decoration: none !important;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;     /* 💡 丝滑的过渡动画 */
+}
+
+/* 💡 鼠标移上去的效果：颜色反转，更有交互感 */
+.shuo-link:hover {
+  background: var(--vp-c-brand);
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px var(--vp-c-brand-soft);
+  transform: translateY(-1px);   /* 💡 轻轻往上跳一下 */
+}
+
+/* 💡 适配移动端：防止按钮在小屏幕上挤在一起 */
+@media (max-width: 480px) {
+  .shuo-link {
+    padding: 1px 6px;
+    font-size: 10px;
+  }
+}
 /* ============================================================
    1. 基础布局
    ============================================================ */
