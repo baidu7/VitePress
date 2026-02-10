@@ -12,7 +12,7 @@ mail_host = "outlook.office365.com"
 def fetch_notes():
     try:
         # 连接 Outlook 邮箱
-        mail = imaplib.IMAP4_SSL(mail_host, 993
+        mail = imaplib.IMAP4_SSL(mail_host, 993)
         mail.debug = 4
         mail.login(mail_user, mail_pass)
         
