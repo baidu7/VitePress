@@ -1,0 +1,32 @@
+name: 同步便签到说说
+
+on:
+  schedule:
+    - cron: '0 * * * *' # 每小时自动运行一次
+  workflow_dispatch:      # 允许手动点运行按钮
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+
+      - name: 安装 Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: 运行同步脚本
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        run: python .github/scripts/fetch_notes.py
+
+      - name: 提交并推送更改
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/shuo.json
+          git commit -m "自动同步最新便签" || exit 0
+          git push
