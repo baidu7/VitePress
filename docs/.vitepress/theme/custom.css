@@ -235,5 +235,39 @@ iframe[src*="bilibili.com"] {
 .DocSearch-Button {
   /* 注意：!important 必须写在分号内部，不能跑出去 */
   background-color: var(--docsearch-searchbox-focus-background) !important;
-  border: 1px solid var(--vp-c-divider); /* 既然底色深了，加个细边框更有质感 */
+}
+/* 侧边栏标题：极简文雅流 */
+.VPSidebarItem.level-0 .item h2.text {
+  /* 基础：取消背景，用半透明边框 */
+  background: transparent !important;
+  color: #ff5f56 !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  padding: 4px 0 !important;
+  margin: 15px 0 10px 0 !important;
+  
+  /* 核心：底部一条虚线，像书签一样 */
+  border-bottom: 1px dashed rgba(255, 95, 86, 0.4) !important;
+  display: flex !important;
+  align-items: center;
+  transition: all 0.3s ease !important;
+}
+
+/* 装饰：给那个文件夹图标 [📂] 加点呼吸感 */
+.VPSidebarItem.level-0 .item h2.text::before {
+  margin-right: 8px;
+  font-size: 16px;
+  filter: grayscale(0.2); /* 让图标不那么扎眼 */
+}
+
+/* 悬停互动：虚线变实线，稍微长一点点 */
+.VPSidebarItem.level-0 .item:hover h2.text {
+  color: #d8433a !important; /* 悬停时稍微深一点的红 */
+  border-bottom: 1px solid #ff5f56 !important;
+  padding-left: 5px !important; /* 轻轻往右挪一点 */
+}
+
+/* 屏蔽自带的碍眼箭头 */
+.VPSidebarItem.level-0 .indicator {
+  display: none !important;
 }

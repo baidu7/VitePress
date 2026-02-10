@@ -510,13 +510,18 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
 /* 窗口：固定高度，隐藏溢出，加遮罩 */
 .tag-scroll-window {
   height: 200px; /* 固定高度，您可以根据喜好调整 */
-  overflow: hidden;
   position: relative;
+		scroll-behavior: smooth;
+		overflow-y: auto;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
   /* 上下渐变遮罩，产生边缘消失的高级感 */
   mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
 }
-
+.tag-scroll-window::-webkit-scrollbar {
+  display: none; /* 直接让滚动条不渲染 */
+}
 /* 列表容器：设置布局和动画 */
 .tag-list.scroll-anim {
   display: flex;
@@ -614,6 +619,19 @@ const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(cu
   .mobile-tag-scroller {
     display: flex; /* 刚才咱们写了这个逻辑，确保它是显示的 */
   }
+}
+/* 1. 外层容器：控制溢出并隐藏滚动条 */
+.mobile-tag-scroller {
+  overflow-x: auto !important; /* 开启横向滚动 */
+  -webkit-overflow-scrolling: touch; /* 让 iOS 滑起来有弹性感 */
+  
+  /* 隐藏滚动条 */
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
+}
+
+.mobile-tag-scroller::-webkit-scrollbar {
+  display: none; /* Chrome/Safari 隐藏滚动条 */
 }
 /* ============================================================
    查看样式
