@@ -49,18 +49,16 @@ const enableTransitions = () =>
   'startViewTransition' in document &&
   window.matchMedia('(prefers-reduced-motion: no-preference)').matches
 
-provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
+provide('toggle-appearance', async () => {
   if (!enableTransitions()) {
     isDark.value = !isDark.value
     return
   }
 
+  // 1. 定义卷轴展开的路径（从中间的一条线，向上下两端展开）
   const clipPath = [
-    `circle(0px at ${x}px ${y}px)`,
-    `circle(${Math.hypot(
-      Math.max(x, innerWidth - x),
-      Math.max(y, innerHeight - y)
-    )}px at ${x}px ${y}px)`
+    'inset(50% 0 50% 0)', // 起点：中间的一条横线（上下都缩进50%）
+    'inset(0 0 0 0)'      // 终点：完全展开
   ]
 
   await (document as any).startViewTransition(async () => {
@@ -68,11 +66,15 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
     await nextTick()
   }).ready
 
+  // 2. 执行动画
   document.documentElement.animate(
-    { clipPath: isDark.value ? clipPath.reverse() : clipPath },
     {
-      duration: 300,
-      easing: 'ease-in',
+      // 切换模式时，路径正反运行
+      clipPath: isDark.value ? clipPath.reverse() : clipPath
+    },
+    {
+      duration: 600, // 卷轴展开要慢一点才优雅
+      easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)', // 经典的平滑展开曲线
       fill: 'forwards',
       pseudoElement: `::view-transition-${isDark.value ? 'old' : 'new'}(root)`
     }
@@ -160,6 +162,24 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 </template>
 
 <style>
+/* 卷轴边缘的“发光”效果 */
+::view-transition-new(root) {
+  /* 在展开的边缘加一个白色的亮条，模拟卷轴的轴心 */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
 .sidebar-profile .avatar-box .status-badge {
   position: absolute;
   bottom: 1px;   /* 距离底部位置 */

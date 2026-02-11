@@ -1,5 +1,6 @@
 ---
 title: 我的说说
+layout: page
 ---
 
 <script setup>
@@ -79,7 +80,7 @@ function insertIframe() {
   console.log("视频模板已插入，记得改链接哦！");
 }
 function insertvideo() {
-  const template = `\n<video controls playsinline preload="metadata" style="width: 100%; aspect-ratio: 16/9; border-radius: 8px;">\n  <source src="/movie.mp4" type="video/mp4">\n  您的浏览器不支持播放该视频。\n</video>\n`;
+  const template = `\n<video controls playsinline preload="metadata" style="width: 100%; aspect-ratio: 16/9; border-radius: 5px;">\n  <source src="/movie.mp4" type="video/mp4">\n  您的浏览器不支持播放该视频。\n</video>\n`;
   
   // 别忘了把这行字塞进输入框里
   newContent.value += template;
@@ -88,7 +89,7 @@ function insertvideo() {
 const parseMD = (t) => {
   if (!t) return ''
   return t
-    .replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;" />')
+    .replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" style="max-width:100%; border-radius:5px; margin:10px 0; display:block;" />')
     .replace(/^## (.*$)/gm, '<h2 style="color:var(--vp-c-brand); margin:15px 0 10px;">$1</h2>')
     .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--vp-c-brand);">$1</strong>')
     .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:var(--vp-c-brand);">$1</a>')
@@ -116,12 +117,16 @@ const parseMD = (t) => {
       <button @click="publishShuo" :disabled="isPublishing" class="send-btn">发布</button>
     </div>
   </div>
-
   <div v-for="item in issues" :key="item.id" class="shuo-card">
+    <div class="shuo-header">
+      <img src="/img/avatar.png" class="shuo-avatar no-zoom" data-no-zoom /> <div class="shuo-meta">
+        <span class="shuo-author">江大爷</span>
+        <span class="shuo-time">{{ new Date(item.created_at).toLocaleString() }}</span>
+      </div>
+    </div>
     <div v-html="parseMD(item.body)" class="shuo-body"></div>
     <div class="shuo-footer">
-      <span>{{ new Date(item.created_at).toLocaleString() }}</span>
-      <div style="display:flex; gap:15px; align-items:center;">
+      <div style="display:flex; gap:15px; align-items:center; margin-left: auto;">
         <button v-if="token" @click="deleteShuo(item.number)" class="del-btn">🗑️ 删除</button>
         <a :href="item.html_url" target="_blank" class="cmt-btn">
           💬 评论 <span v-if="item.comments > 0" class="cnt">{{ item.comments }}</span>
@@ -129,7 +134,6 @@ const parseMD = (t) => {
       </div>
     </div>
   </div>
-
   <div v-if="hasMore" style="text-align:center; margin-top:20px;">
     <button @click="fetchIssues(true)" :disabled="loading" class="more-btn">
       {{ loading ? '加载中...' : '更多' }}
@@ -138,19 +142,75 @@ const parseMD = (t) => {
 </div>
 
 <style scoped>
+
+/* 头像栏布局 */
+.shuo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* 站长头像样式 */
+.shuo-avatar {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  object-fit: cover;
+  border: 1.5px solid var(--vp-c-brand-soft);
+  margin: 0 !important;
+}
+/* 鼠标悬停在说说卡片上时，头像轻微放大（不是看图插件那种放大，只是变大一点点） */
+.shuo-card:hover .shuo-avatar {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+/* 名字和时间的容器 */
+.shuo-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 名字样式 */
+.shuo-author {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: var(--vp-c-text-1);
+}
+
+/* 时间样式 */
+.shuo-time {
+  font-size: 0.85rem;
+  color: var(--vp-c-text-2);
+}
+
+/* 修正正文间距 */
+.shuo-body {
+  margin-left: 2px;
+  margin-bottom: 15px;
+}
+
+/* 底部操作栏对齐 */
+.shuo-footer {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 10px;
+  display: flex;
+  justify-content: flex-end; /* 让按钮靠右 */
+}
 .shuo-container { max-width: 600px; margin: 20px auto; }
-.toggle-btn { width: 100%; padding: 10px; border: 1px dashed var(--vp-c-brand); color: var(--vp-c-brand); border-radius: 8px; cursor: pointer; background: transparent; }
-.post-box { margin-top: 15px; padding: 15px; background: var(--vp-c-bg-soft); border-radius: 8px; border: 1px solid var(--vp-c-divider); }
+.toggle-btn { width: 100%; padding: 10px; border: 1px dashed var(--vp-c-brand); color: var(--vp-c-brand); border-radius: 5px; cursor: pointer; background: transparent; }
+.post-box { margin-top: 15px; padding: 15px; background: var(--vp-c-bg-soft); border-radius: 5px; border: 1px solid var(--vp-c-divider); }
 .quick-tags { margin-bottom: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
 .quick-tags span { font-size: 0.8rem; padding: 2px 8px; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); border-radius: 4px; cursor: pointer; }
 textarea { width: 100%; padding: 10px; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); color: inherit; margin-bottom: 10px; border-radius: 6px; }
 .token-input { flex: 1; padding: 5px 10px; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); color: inherit; border-radius: 4px; }
 .send-btn { background: var(--vp-c-brand); color: white; padding: 5px 20px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
-.shuo-card { background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider); border-radius: 12px; padding: 20px; margin-top: 20px; }
+.shuo-card { background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider); border-radius: 5px; padding: 20px; margin-top: 20px; }
 .shuo-body { line-height: 1.6; }
 .shuo-footer { margin-top: 15px; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--vp-c-text-2); border-top: 1px dashed var(--vp-c-divider); padding-top: 10px; }
 .del-btn { background: transparent; color: #ff4d4f; border: none; cursor: pointer; opacity: 0.7; }
 .cmt-btn { text-decoration: none !important; color: inherit; }
-.cnt { background: var(--vp-c-brand); color: white; padding: 0 4px; border-radius: 8px; font-size: 10px; }
+.cnt { background: var(--vp-c-brand); color: white; padding: 0 4px; border-radius: 5px; font-size: 10px; }
 .more-btn { padding: 8px 25px; border: 1px solid var(--vp-c-brand); color: var(--vp-c-brand); background: transparent; border-radius: 20px; cursor: pointer; }
 </style>

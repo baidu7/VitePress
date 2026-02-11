@@ -360,7 +360,7 @@
 				  );
 				}
     function insertVideo() { easyMDE.codemirror.replaceSelection(`\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n  <source src="/movie.mp4" type="video/mp4">\n  您的浏览器不支持播放该视频。\n</video>\n`); }
-    function insertIframe() { easyMDE.codemirror.replaceSelection(`\n<div class="iframe-container">\n  <iframe src="这里填链接" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n`); }
+    function insertIframe() { easyMDE.codemirror.replaceSelection(`\n<div class="iframe-container">\n  <iframe src="这里填链接&autoplay=0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n`); }
     function insertFrontmatter() {
         const cm = easyMDE.codemirror;
         const content = cm.getValue();

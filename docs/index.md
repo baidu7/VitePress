@@ -101,14 +101,27 @@ const latestIssues = ref([]) // 改为存数组
 
 onMounted(async () => {
   try {
-    // 💡 改为获取 2 条最新说说
     const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?state=open&labels=shuo&per_page=5`)
     const data = await res.json()
     if (data && data.length > 0) {
-      latestIssues.value = data.map(item => ({
-        text: item.body.replace(/!\[.*?\]\((.*?)\)/g, '[图片]').substring(0, 40),
-        url: item.html_url
-      }))
+      latestIssues.value = data.map(item => {
+        // 1. 先把 HTML 标签全部去掉（比如 <video>, <iframe>, <div> 等）
+        let cleanText = item.body.replace(/<[^>]+>/g, '');
+
+        // 2. 把 Markdown 的图片语法 ![alt](url) 替换成 [图片]
+        cleanText = cleanText.replace(/!\[.*?\]\((.*?)\)/g, '[图片]');
+
+        // 3. 把 Markdown 的链接语法 [text](url) 替换成里面的文字
+        cleanText = cleanText.replace(/\[(.*?)\]\(.*?\)/g, '$1');
+
+        // 4. 去掉多余的换行，只留 40 个字
+        cleanText = cleanText.replace(/\n/g, ' ').trim();
+        
+        return {
+          text: cleanText.length > 40 ? cleanText.substring(0, 40) + '...' : cleanText,
+          url: '/shuo' // 💡 建议首页点击直接跳转到你的说说页面，而不是 GitHub
+        }
+      })
     }
   } catch (e) { console.error(e) }
 })
@@ -341,7 +354,6 @@ onMounted(async () => {
 
 .post-image-wrapper {
   position: relative;
-		border-radius: 8px 8px 0 0; /* 只有顶部有圆角 */
   width: 100%;
   aspect-ratio: 16 / 9;
 }
@@ -392,7 +404,7 @@ onMounted(async () => {
   }
 }
 /* 文字信息区 */
-.post-info { padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+.post-info { padding: 18px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--vp-c-brand-soft); background-color: var(--vp-c-bg-soft); }
 
 .post-title-link { text-decoration: none; color: inherit; }
 
@@ -879,65 +891,24 @@ onMounted(async () => {
 :global(.VPNavBarMenuLink.active::after) {
   display: none !important;
 }
-/* 1. 图片容器：作为背景基础 */
 .post-image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 200px; /* 根据卡片高度调整 */
-  background-color: var(--vp-c-bg-soft); /* 底色：深灰/浅黑 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  /* 💡 核心：这是一段内联的 SVG，直接作为背景图 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='20' fill='none' stroke='%23ff5f56' stroke-width='4' stroke-dasharray='31.4 31.4' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 25 25' to='360 25 25' dur='0.8s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/svg%3E");
+  background-position: center;
+  background-size: 40px; /* 控制旋转圈圈的大小 */
+  background-repeat: no-repeat;
 }
 
-/* 2. 纯 CSS 极简加载动画：老江红呼吸环 */
-.post-image-wrapper::before {
-  content: "";
-  width: 30px;
-  height: 30px;
-  border: 2px solid rgba(255, 95, 86, 0.1); /* 极淡的红圈底 */
-  border-top: 2px solid #ff5f56;           /* 鲜艳的老江红（转动头） */
-  border-radius: 50%;
-  
-  /* 让它一边转，一边还有点忽明忽暗的呼吸感 */
-  animation: 
-    spin 0.8s linear infinite,
-    pulse 1.5s ease-in-out infinite;
-    
-  position: absolute;
-  z-index: 1;
-}
-
-/* 3. 真实图片：加载完后直接盖在动画上面 */
 .post-image-wrapper img {
-  position: relative;
-  z-index: 2; /* 层级高于动画 */
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  background-color: var(--vp-c-bg-soft);
   
-  /* 图片进场时来个 0.4 秒的淡入，遮住动画时不生硬 */
-  animation: imgFadeIn 0.4s ease-out;
+  /* 💡 可选：加个淡入，让图片出来时别太生硬 */
+  animation: imgFadeIn 0.5s ease-in;
 }
 
-/* --- 动画秘籍 --- */
-
-/* 旋转：基础动作 */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* 呼吸：增加灵动感 */
-@keyframes pulse {
-  0%, 100% { opacity: 0.4; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.1); }
-}
-
-/* 图片淡入：丝滑过渡 */
 @keyframes imgFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
