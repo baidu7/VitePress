@@ -433,11 +433,11 @@ import { onMounted, onUnmounted } from 'vue'
 onMounted(() => {
     (function() {
         const assets = {
-            spring: 'https://img.icons8.com/color/48/sakura.png',
-            summer: 'https://img.icons8.com/color/48/leaf.png',
-            autumn: 'https://img.icons8.com/color/48/maple-leaf.png',
-            winter: 'https://img.icons8.com/color/48/snow.png',
-            cloud:  'https://img.icons8.com/color/96/cloud.png' 
+            spring: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/樱花.png',
+            summer: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/绿叶.png',
+            autumn: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/枫叶.png',
+            winter: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/雪花.png',
+            cloud:  'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/cloud.png' 
         };
 
         const canvas = document.createElement('canvas');

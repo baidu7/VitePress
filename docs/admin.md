@@ -2,7 +2,7 @@
 layout: page
 title: 写作空间
 ---
-<div v-if="!fakeLoggedIn" class="fake-login-overlay">
+<div v-if="!fakeLoggedIn" class="fake-login-overlay" :class="{ 'mobile-preview-active': isMobilePreview }">
   <div class="fake-login-card">
     <transition name="pop">
       <div v-if="customAlert" class="custom-alert">
@@ -20,7 +20,7 @@ title: 写作空间
       </div>
       <div class="fake-btns">
         <button class="btn-cancel" @click="goBack">取消</button>
-        <button class="btn-login" @click="handleFakeLogin">进入系统</button>
+        <button class="btn-login" @click="handleFakeLogin">登录</button>
       </div>
     </div>
   </div>
@@ -65,6 +65,12 @@ title: 写作空间
     <button @click="insertTag('grid')">🖼️ 网格</button>
     <button @click="insertTag('jz')">🀄 居中</button>
     <button @click="insertTag('meta')">⚙️ 设置</button>
+				<ImageHelper 
+				  :token="token" 
+				  :owner="IMG_OWNER"  :repo="IMG_REPO"    @success="handleImageSuccess"
+				  @error="showAlert"
+				  @busy="showAlert"
+				/>
     <button @click="createNewFile" style="color:var(--vp-c-brand)">➕ 新建</button>
   </div>
 
@@ -87,6 +93,7 @@ title: 写作空间
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import ImageHelper from '@theme/components/ImageHelper.vue'
 
 const token = ref('')
 const tokenSaved = ref(false)
@@ -131,8 +138,39 @@ const handleFakeLogin = () => {
 
 const goBack = () => { window.location.href = '/' }
 
+const handleImageSuccess = (cdnUrl) => {
+  const cm = easyMDE.codemirror
+  let docValue = easyMDE.value()
+  
+  // 1. 检查有没有 cover: 标记
+  const hasCover = /cover:\s*.*?\n/.test(docValue)
+
+  if (hasCover) {
+    // 情况 A：已经有 cover 字段了，直接替换（不管后面有没有链接）
+    const newVal = docValue.replace(/cover:\s*.*?\n/, `cover: ${cdnUrl}\n`)
+    easyMDE.value(newVal)
+    showAlert('✅ 封面已更新')
+  } else if (docValue.trim().startsWith('---')) {
+    // 情况 B：有 Frontmatter（---开头），但里面没写 cover
+    // 我们把它插在第一个 --- 后面
+    const newVal = docValue.replace(/---\n/, `---\ncover: ${cdnUrl}\n`)
+    easyMDE.value(newVal)
+    showAlert('✨ 已自动创建封面字段')
+  } else {
+    // 情况 C：压根没写 Frontmatter，或者是在正文里
+    // 这种还是作为普通插图插在光标处最稳，免得破坏文章结构
+    cm.replaceSelection(`\n![描述](${cdnUrl})\n`)
+    showAlert('✅ 插图已插入')
+  }
+}
+
+// 主仓库（存文章的）
 const OWNER = 'baidu8'
-const REPO = 'docs-1'
+const REPO = 'VitePress' 
+
+// 图床仓库（存图片的）
+const IMG_OWNER = 'baidu8' // 如果是同一个账号，就还写你的名字
+const IMG_REPO = 'images'  // 这里填新仓库的名字
 
 onMounted(async () => {
   token.value = localStorage.getItem('gh_token') || ''
@@ -161,8 +199,10 @@ onMounted(async () => {
   // 实时同步预览
   easyMDE.codemirror.on("change", () => {
     const val = easyMDE.value()
+				// 【新增】用正则表达式把 --- 之间的内容替换掉，不让它显示在预览区
+				  const cleanVal = val.replace(/^---[\s\S]*?---\n/, '')
     // 模拟容器转换
-    previewHtml.value = window.marked.parse(val.replace(/:::\s(\w+).*\n/g, '> **$1**: \n\n'))
+    previewHtml.value = window.marked.parse(cleanVal.replace(/:::\s(\w+).*\n/g, '> **$1**: \n\n'))
   })
 
   if (token.value) fetchFiles('docs')
@@ -264,6 +304,27 @@ const insertTag = (type) => {
 </script>
 
 <style scoped>
+/* 强制压制编辑器内所有“伪标题”的大小 */
+:deep(.CodeMirror) .cm-header-1, 
+:deep(.CodeMirror) .cm-header-2, 
+:deep(.CodeMirror) .cm-header-3,
+:deep(.CodeMirror) .cm-header {
+    font-size: 1.1em !important; /* 强制变回普通大小 */
+    font-weight: normal !important; /* 取消加粗 */
+    line-height: 1.5 !important;
+    color: var(--vp-c-text-1) !important; /* 颜色也变回普通文本色 */
+}
+
+/* 专门给横线 --- 降温，不让它撑开距离 */
+:deep(.CodeMirror) .cm-hr {
+    line-height: 1 !important;
+    color: var(--vp-c-divider) !important;
+}
+/* 压缩每一行的高度，让它看起来更紧凑 */
+:deep(.CodeMirror-code) .CodeMirror-line {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
 .jdy-writer { max-width: 1000px; margin: 0 auto; padding: 20px; color: var(--vp-c-text-1); }
 
 /* 头部 */
