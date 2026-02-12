@@ -7,30 +7,41 @@ import { ref, computed, onMounted, watch } from 'vue' // 揉在一起写更简�
 import { data as allPosts } from './.vitepress/posts.data.mjs'
 import { useRouter } from 'vitepress'
 
-// 1. 先定义基础变量
 const pageSize = 9
 const currentPage = ref(1)
 const selectedTag = ref('')
 
-// 2. 引入路由
 const { route } = useRouter()
 
-// 🌟 核心修复：把逻辑包在 watch 里，并增加 inBrowser 判断
+// 🌟 核心：监听路由变化，并增加“环境检查”
 watch(
-  () => route.path, // 监听路径
+  () => route.path, 
   () => {
-    // 延迟到 DOM 更新后，确保能拿到最新的 window 对象信息
-    const params = new URLSearchParams(window.location.search)
-    selectedTag.value = params.get('tag') || ''
-    currentPage.value = parseInt(params.get('page')) || 1
-    console.log('👀 监听到路由变化，新标签:', selectedTag.value)
-  }
+    // 1. 只有在浏览器环境（window存在）时才执行
+    if (typeof window !== 'undefined') {
+      // 2. 检查是否在首页
+      if (route.path.endsWith('/') || route.path.includes('index.html')) {
+        const params = new URLSearchParams(window.location.search)
+        const tagFromUrl = params.get('tag') || ''
+        
+        // 3. 只有当值真的变了才更新，防止死循环
+        if (selectedTag.value !== tagFromUrl) {
+          selectedTag.value = tagFromUrl
+          currentPage.value = 1 // 切换分类时重置到第一页
+          console.log('✅ 顶栏分类同步:', tagFromUrl)
+        }
+      }
+    }
+  },
+  { immediate: true }
 )
 
+// 🌟 兜底：初次加载也跑一遍
 onMounted(() => {
-  const params = new URLSearchParams(window.location.search)
-  selectedTag.value = params.get('tag') || ''
-  currentPage.value = parseInt(params.get('page')) || 1
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search)
+    selectedTag.value = params.get('tag') || ''
+  }
 })
 
 // 1. 提取标签逻辑：确保即使是空也不会报错
