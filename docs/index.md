@@ -7,34 +7,34 @@ import { ref, computed, onMounted, watch } from 'vue' // 揉在一起写更简�
 import { data as allPosts } from './.vitepress/posts.data.mjs'
 import { useRouter } from 'vitepress'
 
-// 1. 定义变量（必须在最前面）
+// 1. 先定义基础变量
 const pageSize = 9
 const currentPage = ref(1)
 const selectedTag = ref('')
 
-// 2. 引入路由监工
+// 2. 引入路由
 const { route } = useRouter()
 
-// 🌟 终极监工：同时盯着路径和参数
+// 🌟 核心修复：把逻辑包在 watch 里，并增加 inBrowser 判断
 watch(
-  () => route.path + window.location.search, // 只要路径或参数变了，立马动手
+  () => route.path + (typeof window !== 'undefined' ? window.location.search : ''), 
   () => {
-    // 稍微等 50ms 确保浏览器地址栏已经更新完毕
-    setTimeout(() => {
-      const params = new URLSearchParams(window.location.search)
-      const newTag = params.get('tag') || ''
-      const newPage = parseInt(params.get('page')) || 1
-      
-      // 只有当值真的变了才更新，防止死循环
-      if (selectedTag.value !== newTag) selectedTag.value = newTag
-      if (currentPage.value !== newPage) currentPage.value = newPage
-      
-      console.log('🚀 顶栏切换成功，当前标签:', selectedTag.value)
-    }, 50)
+    // 只在浏览器环境下跑解析逻辑
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        const params = new URLSearchParams(window.location.search)
+        const newTag = params.get('tag') || ''
+        const newPage = parseInt(params.get('page')) || 1
+        
+        if (selectedTag.value !== newTag) selectedTag.value = newTag
+        if (currentPage.value !== newPage) currentPage.value = newPage
+        
+        console.log('🚀 导航同步成功:', selectedTag.value)
+      }, 50)
+    }
   },
   { immediate: true }
 )
-
 // 1. 提取标签逻辑：确保即使是空也不会报错
 const allTags = computed(() => {
   const tags = new Set()
