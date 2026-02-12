@@ -176,6 +176,7 @@ const parseMD = (t) => {
 .shuo-author {
   font-weight: bold;
   font-size: 1.05rem;
+		font-family: "STXingkai", "STKaiti", "Kaiti SC", "Kaiti", serif;
   color: var(--vp-c-text-1);
 }
 

@@ -15,14 +15,19 @@ const selectedTag = ref('')
 // 2. 引入路由并设置监工
 const { route } = useRouter()
 
+// 🌟 监听整个 route 对象（包含 query 参数）
 watch(
-  () => route.path + window.location.search,
+  () => route.data, // 监听路由数据的变化
   () => {
-    const params = new URLSearchParams(window.location.search)
-    selectedTag.value = params.get('tag') || ''
-    currentPage.value = parseInt(params.get('page')) || 1
-    console.log('✅ 分类已同步更新:', selectedTag.value)
-  }
+    // 延时一丁点执行，确保 URL 参数已经彻底写入 window 对象
+    setTimeout(() => {
+      const params = new URLSearchParams(window.location.search)
+      selectedTag.value = params.get('tag') || ''
+      currentPage.value = parseInt(params.get('page')) || 1
+      console.log('✅ 顶栏分类已同步:', selectedTag.value)
+    }, 50)
+  },
+  { immediate: true } // 初始化时也运行一次，省去部分 onMounted 逻辑
 )
 
 // 1. 提取标签逻辑：确保即使是空也不会报错
@@ -116,7 +121,7 @@ const latestIssues = ref([]) // 改为存数组
 
 onMounted(async () => {
   try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?state=open&labels=shuo&per_page=5`)
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?state=open&labels=shuo&per_page=1`)
     const data = await res.json()
     if (data && data.length > 0) {
       latestIssues.value = data.map(item => {
@@ -980,7 +985,7 @@ onMounted(async () => {
     padding: 6px 14px;
     background: var(--vp-c-bg-soft);
     border: 1px solid var(--vp-c-divider);
-    border-radius: 8px; /* 稍微圆润一点更漂亮 */
+    border-radius: 5px; /* 稍微圆润一点更漂亮 */
     font-size: 13px;
     color: var(--vp-c-text-2);
     white-space: nowrap;
