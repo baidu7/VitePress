@@ -18,17 +18,12 @@ const syncEverything = () => {
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search)
     const tag = params.get('tag') || ''
-    
     // 强制同步变量
     selectedTag.value = tag
     currentPage.value = 1
-    
-    console.log('🎯 成功捕获顶栏分类:', tag)
   }
 }
-
 // 2. 监听路由变化（对付顶栏点击）
-// 2. 监听路由变化
 watch(
   () => route.path + (typeof window !== 'undefined' ? window.location.search : ''), 
   () => {
@@ -741,7 +736,7 @@ onMounted(async () => {
 
 .post-card:hover {
   border-color: var(--vp-c-brand) !important;
-  transform: translateY(-3px);
+  /* transform: translateY(-3px); */
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 

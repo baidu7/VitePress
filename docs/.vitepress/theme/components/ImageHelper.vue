@@ -2,7 +2,7 @@
   <div class="image-helper-wrap">
     <button class="tool-btn" @click="$refs.fileInput.click()">
       <span v-if="loading">⏳</span>
-      <span v-else>📷 传图/封面</span>
+      <span v-else>📷 传图</span>
     </button>
     <input 
       type="file" 

@@ -18,6 +18,9 @@ export default withPwa(defineConfig({
     sidebarMenuLabel: '菜单',
     returnToTopLabel: '返回顶部',
     outline: { level: [2, 3], label: '本页目录' },
+				darkModeSwitchLabel: '外观',     // 对应 Appearance
+				lightModeSwitchTitle: '切换到亮色模式',
+				darkModeSwitchTitle: '切换到深色模式',
     // 【核心修复 2】只保留这一行自动导航，把下面那个手动写的 nav 删掉
     nav: getAutoNav(),
     sidebar: getCategorySidebar(),
