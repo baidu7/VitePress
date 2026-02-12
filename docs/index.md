@@ -13,28 +13,44 @@ const selectedTag = ref('')
 
 const { route } = useRouter()
 
-// 🌟 核心：监听路由变化，并增加“环境检查”
+// 1. 封装一个统一的同步函数
+const syncEverything = () => {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search)
+    const tag = params.get('tag') || ''
+    
+    // 强制同步变量
+    selectedTag.value = tag
+    currentPage.value = 1
+    
+    console.log('🎯 成功捕获顶栏分类:', tag)
+  }
+}
+
+// 2. 监听路由变化（对付顶栏点击）
+// 2. 监听路由变化
 watch(
-  () => route.path, 
+  () => route.path + (typeof window !== 'undefined' ? window.location.search : ''), 
   () => {
-    // 1. 只有在浏览器环境（window存在）时才执行
+    syncEverything()
+  }
+)
+
+// 3. 定时巡逻（每 500ms 检查一次地址栏，这是对付“顶栏不刷新”的终极保底）
+onMounted(() => {
+  syncEverything()
+  
+  setInterval(() => {
     if (typeof window !== 'undefined') {
-      // 2. 检查是否在首页
-      if (route.path.endsWith('/') || route.path.includes('index.html')) {
-        const params = new URLSearchParams(window.location.search)
-        const tagFromUrl = params.get('tag') || ''
-        
-        // 3. 只有当值真的变了才更新，防止死循环
-        if (selectedTag.value !== tagFromUrl) {
-          selectedTag.value = tagFromUrl
-          currentPage.value = 1 // 切换分类时重置到第一页
-          console.log('✅ 顶栏分类同步:', tagFromUrl)
-        }
+      const params = new URLSearchParams(window.location.search)
+      const tagFromUrl = params.get('tag') || ''
+      // 如果地址栏的标签和当前选中的不一致，说明用户点顶栏了，强制更新
+      if (tagFromUrl !== selectedTag.value) {
+        syncEverything()
       }
     }
-  },
-  { immediate: true }
-)
+  }, 500) // 0.5秒巡逻一次，性能损耗忽略不计
+})
 
 // 🌟 兜底：初次加载也跑一遍
 onMounted(() => {

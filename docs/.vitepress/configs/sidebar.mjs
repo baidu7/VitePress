@@ -57,8 +57,7 @@ export const getAutoNav = () => {
     if (indexB === -1) return -1
     return indexA - indexB
   })
-
-  // 构建菜单项
+// 构建菜单项
   sortedCategories.forEach(main => {
     const subCates = Array.from(navMap[main])
     if (subCates.length > 0) {
@@ -66,11 +65,12 @@ export const getAutoNav = () => {
         text: main,
         items: subCates.map(sub => ({
           text: sub,
-          link: `/index.html?tag=${encodeURIComponent(sub)}`
+          link: `/?tag=${encodeURIComponent(sub)}&refresh=true`
         }))
       })
     } else {
-      nav.push({ text: main, link: `/index.html?tag=${encodeURIComponent(main)}` })
+      // 🌟 这里要把 sub 改成 main，因为这个分类没有子级
+      nav.push({ text: main, link: `/?tag=${encodeURIComponent(main)}&refresh=true` })
     }
   })
 
