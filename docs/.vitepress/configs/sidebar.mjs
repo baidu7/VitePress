@@ -66,11 +66,11 @@ export const getAutoNav = () => {
         text: main,
         items: subCates.map(sub => ({
           text: sub,
-          link: `/?tag=${encodeURIComponent(sub)}` 
+          link: `/index.html?tag=${encodeURIComponent(sub)}`
         }))
       })
     } else {
-      nav.push({ text: main, link: `/?tag=${encodeURIComponent(main)}` })
+      nav.push({ text: main, link: `/index.html?tag=${encodeURIComponent(main)}` })
     }
   })
 
