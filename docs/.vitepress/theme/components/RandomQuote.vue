@@ -1,7 +1,7 @@
 <template>
   <div id="quote-box" @click="updateQuote">
     <div class="quote-header">
-      <span class="dot"></span>
+      <span class="dot" @click.stop="enterAdmin" ></span>
       <span class="system-title">LOG // {{ currentStatus }}</span>
     </div>
     
@@ -17,6 +17,12 @@
 import { ref, onMounted } from 'vue'
 import { quotes } from '../quotes.js' 
 
+// 如果您的后台地址是 /admin 或者某个特定路径
+const enterAdmin = () => {
+  // 加上一个简单的控制台 log，只有 F12 能看到，增加黑客感
+  console.log("Admin Access Granted. Redirecting...");
+  window.location.href = '/admin' // 这里换成您真正的后台地址
+}
 const currentQuote = ref('')
 const displayedText = ref('')
 const currentStatus = ref('SYSTEM READY')
@@ -53,6 +59,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.dot::before {
+  content: '';
+  position: absolute;
+  top: -10px; left: -10px; bottom: -10px; right: -10px; /* 扩大 20px 的点击范围 */
+}
 #quote-box {
   padding: 12px 16px;
   margin: 16px 0;

@@ -1,6 +1,34 @@
 export const pwaConfig = {
-  registerType: 'autoUpdate',
-  // ... manifest 部分保持不变 ...
+		registerType: 'autoUpdate',
+		  // 🌟 核心修复：添加 manifest 对象，解决您截图中所有的红字报错
+		  manifest: {
+      id: '/',
+      name: '老江',          // 对应报错：清单未包含 name
+      short_name: '老江',         // 桌面图标下的简短名字
+      description: '闲来无事，记点东西',
+      theme_color: '#ffffff',
+      background_color: '#ffffff',
+      display: 'standalone',       // 让博客像 App 一样独立运行
+      start_url: '/',              // 启动路径
+      icons: [                     // 对应报错：清单未包含合适的图标
+		      {
+		        src: '/pwa-192x192.png', // 💡 请确保 public 目录下真的有这张图！
+		        sizes: '192x192',
+		        type: 'image/png'
+		      },
+		      {
+		        src: '/pwa-512x512.png', // 💡 请确保 public 目录下真的有这张图！
+		        sizes: '512x512',
+		        type: 'image/png'
+		      },
+		      {
+		        src: '/pwa-512x512.png',
+		        sizes: '512x512',
+		        type: 'image/png',
+		        purpose: 'any maskable'  // 适配安卓圆角图标
+		      }
+		    ]
+		  },
   workbox: {
     skipWaiting: true,
     clientsClaim: true,

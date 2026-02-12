@@ -304,6 +304,23 @@ const insertTag = (type) => {
 </script>
 
 <style scoped>
+/* 1. 设置编辑器主体高度，溢出则显示内部滚动条 */
+:deep(.CodeMirror) {
+    height: 450px !important; /* 您可以根据屏幕高度调这个值，比如 500px */
+    min-height: 300px;
+}
+
+/* 2. 确保预览区（右侧）也是独立滚动的，且高度与左边对齐 */
+:deep(.editor-preview-side) {
+    height: 450px !important;
+    overflow-y: auto;
+}
+
+/* 3. 让编辑器里的内容不要贴边，留点呼吸感 */
+:deep(.CodeMirror-scroll) {
+    min-height: 300px;
+    padding-bottom: 50px;
+}
 /* 强制压制编辑器内所有“伪标题”的大小 */
 :deep(.CodeMirror) .cm-header-1, 
 :deep(.CodeMirror) .cm-header-2, 

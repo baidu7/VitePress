@@ -3,12 +3,27 @@ layout: home
 ---
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue' // 揉在一起写更简洁
 import { data as allPosts } from './.vitepress/posts.data.mjs'
+import { useRouter } from 'vitepress'
 
+// 1. 先定义变量（必须在 watch 使用它们之前定义）
 const pageSize = 9
 const currentPage = ref(1)
 const selectedTag = ref('')
+
+// 2. 引入路由并设置监工
+const { route } = useRouter()
+
+watch(
+  () => route.path + window.location.search,
+  () => {
+    const params = new URLSearchParams(window.location.search)
+    selectedTag.value = params.get('tag') || ''
+    currentPage.value = parseInt(params.get('page')) || 1
+    console.log('✅ 分类已同步更新:', selectedTag.value)
+  }
+)
 
 // 1. 提取标签逻辑：确保即使是空也不会报错
 const allTags = computed(() => {
@@ -318,30 +333,63 @@ onMounted(async () => {
 
 .blog-main { flex: 1; min-width: 0; }
 
-.blog-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-		gap: 24px;
-  margin-bottom: 40px;
-}
-
 /* ============================================================
    2. 文章卡片 (Post Card)
    ============================================================ */
-.post-card {
-  display: flex;
-  flex-direction: column;
-  /* background-color: var(--vp-c-bg-soft); */
-  border-radius: 5px;
-  overflow: hidden;
-  border: 1px solid transparent; /* 关键：默认透明，占好坑位 */
-  /* 移除掉所有 transform 位移 */
-  transform: none !important;
-  /* 过渡效果：只针对边框颜色和阴影 */
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  overflow: hidden;
+/* 1. 容器：让卡片不仅等高，还得“撑满” */
+.blog-container {
+    display: grid;
+    /* 核心修改：让每一行的高度由该行最高的卡片决定，并强制撑开 */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-auto-rows: 1fr; /* 🌟 关键：让同一行所有卡片物理高度绝对相等 */
+    gap: 24px;
+    align-items: stretch; /* 确保子项拉伸填满网格 */
 }
 
+/* 2. 卡片本体：不仅要等高，内部也要撑满 */
+.post-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* 🌟 关键：让卡片填满 Grid 单元格 */
+    background-color: var(--vp-c-bg-soft); /* 🌟 把背景色从 post-info 挪到这里 */
+    border-radius: 8px;
+    border: 1px solid var(--vp-c-divider);
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+/* 3. 信息区：负责把日期和标签“顶”到底部 */
+.post-info {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* 🌟 核心：让信息区自动吃掉剩下的空间，把内容撑开 */
+    gap: 10px;
+    /* 背景色已经在父级设过了，这里可以删掉背景色，保持干净 */
+    background: transparent !important; 
+    border-top: 1px solid var(--vp-c-divider);
+}
+
+/* 4. 标题：给个固定高度，防止1行和2行标题导致视觉参差 */
+.post-title {
+    font-size: 1.05rem;
+    line-height: 1.4;
+    height: 2.8em; /* 🌟 固定两行标题的高度 */
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 5. 底部行：日期和标签 */
+.post-meta-row {
+    margin-top: auto; /* 🌟 灵魂：不管标题多长，这行永远贴着卡片底边 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+}
 .post-card:hover {
   /* 使用老江红（或者喜欢的颜色） */
   border-color: #4761B8 !important; 
@@ -403,31 +451,10 @@ onMounted(async () => {
     grid-template-columns: repeat(3, 1fr); 
   }
 }
-/* 文字信息区 */
-.post-info { padding: 18px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--vp-c-brand-soft); background-color: var(--vp-c-bg-soft); }
 
 .post-title-link { text-decoration: none; color: inherit; }
 
-.post-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--vp-c-text-1);
-  transition: color 0.2s;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .post-title-link:hover .post-title { color: var(--vp-c-brand); }
-
-.post-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.85rem;
-  color: var(--vp-c-text-2);
-}
 
 .post-category-tag {
   cursor: pointer;
@@ -707,50 +734,150 @@ onMounted(async () => {
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
 
 /* ============================================================
-   5. 响应式布局 (适配手机端)
+   🌟 统一响应式布局方案
    ============================================================ */
-@media (max-width: 960px) {
-  /* 1. 容器改为垂直排列 */
-  .blog-wrapper { 
-    flex-direction: column; 
-    padding: 0 15px;
-  }
+/* ============================================================
+   1. 基础容器：始终保持 Flex 布局
+   ============================================================ */
+.blog-wrapper {
+  display: flex;
+  max-width: 1200px; /* 稍微放大一点点容器 */
+  margin: 20px auto;
+  gap: 25px;
+  padding: 0 20px;
+}
 
-  /* 2. 核心：手机端隐藏右侧原本的标签卡片 */
+.blog-main { 
+  flex: 1; 
+  min-width: 0; 
+}
+
+.blog-aside { 
+  width: 280px; 
+  flex-shrink: 0; /* 侧边栏宽度稳住，不被挤压 */
+}
+
+/* 核心网格 */
+.blog-container {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 40px;
+  grid-template-columns: repeat(3, 1fr); /* 默认 3 列 */
+  grid-auto-rows: 1fr; 
+  align-items: stretch;
+}
+
+/* ============================================================
+   2. 文章卡片 (保持高度对齐和背景撑满)
+   ============================================================ */
+.post-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 5px;
+  border: 1px solid var(--vp-c-divider);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.post-card:hover {
+  border-color: var(--vp-c-brand) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.post-image-wrapper {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background-color: var(--vp-c-bg-alt);
+  overflow: hidden;
+}
+
+.post-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-info {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* 关键：撑开背景色 */
+  gap: 10px;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.post-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
+  height: 2.8em; /* 统一标题占位 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-meta-row {
+  margin-top: auto; /* 日期标签贴底 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.post-category-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--vp-c-brand);
+  background-color: var(--vp-c-brand-soft);
+}
+
+/* ============================================================
+   3. 响应式魔法：精准控制平板端
+   ============================================================ */
+
+/* --- 🌟 平板端：侧边栏保留，卡片变 2 列 (850px - 1200px) --- */
+@media (max-width: 1200px) {
+  .blog-container {
+    grid-template-columns: repeat(2, 1fr) !important; /* 减掉一列 */
+  }
+}
+
+/* --- 🌟 手机端：侧边栏下移，卡片变 1 列 (小于 850px) --- */
+@media (max-width: 850px) {
+  .blog-wrapper {
+    flex-direction: column; /* 侧边栏去下面 */
+  }
+  .blog-aside {
+    width: 100%;
+				order: 2; 
+				margin-top: 30px;
+				/* display: none */
+  }
+  .blog-container {
+    grid-template-columns: 1fr !important; /* 变成 1 列 */
+  }
+  .info-card {
+    display: none !important; /* 手机端隐藏头像卡片，省地方 */
+  }
+  .mobile-tag-scroller {
+    display: block !important; /* 显示顶部滚动标签 */
+  }
+/* 2. 核心：手机端隐藏右侧原本的标签卡片 */
   /* 因为顶部已经有了横向滚动的标签，下面那个就不用显示了 */
   .side-card.tags-card {
     display: none; 
   }
-
-  /* 3. 头像卡片处理：如果觉得手机端最下面留个头像还有意义，就留着 */
-  /* 如果连头像也不想要，就直接把 .blog-aside 给 display: none */
-  .blog-aside { 
-    width: 100%; 
-    order: 2; 
-    margin-top: 30px;
-				/* display: none */
-  }
-.info-card {
-    display: none !important; /* 直接让它彻底消失，不占位 */
-  }
-  /* 4. 开启手机端横向滚动条 */
-  .mobile-tag-scroller {
-    display: flex; /* 刚才咱们写了这个逻辑，确保它是显示的 */
-  }
-}
-/* 1. 外层容器：控制溢出并隐藏滚动条 */
-.mobile-tag-scroller {
-  overflow-x: auto !important; /* 开启横向滚动 */
-  -webkit-overflow-scrolling: touch; /* 让 iOS 滑起来有弹性感 */
-  
-  /* 隐藏滚动条 */
-  scrollbar-width: none; 
-  -ms-overflow-style: none;
 }
 
-.mobile-tag-scroller::-webkit-scrollbar {
-  display: none; /* Chrome/Safari 隐藏滚动条 */
-}
+/* ============================================================
+   4. 其他功能项
+   ============================================================ */
+.mobile-tag-scroller { display: none; }
+.latest-shuo-container { margin-bottom: 20px; }
 /* ============================================================
    查看样式
    ============================================================ */
@@ -762,7 +889,7 @@ onMounted(async () => {
   margin-bottom: 20px;
   background-color: var(--vp-c-bg-soft);
   border-left: 4px solid var(--vp-c-brand-1);
-  border-radius: 12px; /* 稍微圆润一点更适合手机端 */
+  border-radius: 5px; /* 稍微圆润一点更适合手机端 */
   font-size: 14px;
   line-height: 1.6; /* 增加行高，防止换行时文字打架 */
   color: var(--vp-c-text-2);
@@ -783,7 +910,7 @@ onMounted(async () => {
   font-size: 12px;
   background-color: var(--vp-c-bg-alt);
   border: 1px solid var(--vp-c-divider);
-  border-radius: 16px;
+  border-radius: 5px;
   white-space: nowrap; /* 核心：禁止按钮文字换行 */
   cursor: pointer;
   transition: all 0.2s ease;
@@ -795,7 +922,7 @@ onMounted(async () => {
     flex-direction: column; /* 变成垂直排列 */
     align-items: center;    /* 内容整体居中 */
     text-align: center;
-    padding: 16px;
+    padding: 5px;
     border-left: none;      /* 手机端去掉左边条，改成顶边条更和谐 */
     border-top: 4px solid var(--vp-c-brand-1);
   }
@@ -824,7 +951,10 @@ onMounted(async () => {
 @media (max-width: 960px) {
   .mobile-tag-scroller {
     display: block; /* 改为 block 容器 */
-    overflow: hidden; /* 隐藏溢出，防止看到两份标签 */
+				overflow-x: auto !important;
+				scrollbar-width: none;
+				-ms-overflow-style: none;
+				-webkit-overflow-scrolling: touch;
     padding: 12px 0;
     margin-bottom: 15px;
     /* 左右渐变遮罩 */
@@ -837,7 +967,7 @@ onMounted(async () => {
     gap: 10px;
     width: max-content; /* 核心：让内容撑开宽度 */
     /* 添加动画：40秒向左漂移一次 */
-    animation: mobile-slide-left 80s linear infinite;
+    animation: mobile-slide-left 200s linear infinite;
   }
 
   /* 点击或长按时停下，方便大爷选中 */
