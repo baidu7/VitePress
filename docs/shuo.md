@@ -199,7 +199,7 @@ const parseMD = (t) => {
   display: flex;
   justify-content: flex-end; /* 让按钮靠右 */
 }
-.shuo-container { max-width: 600px; margin: 20px auto; }
+.shuo-container { max-width: 600px; margin: 20px auto; padding: 0 23px;}
 .toggle-btn { width: 100%; padding: 10px; border: 1px dashed var(--vp-c-brand); color: var(--vp-c-brand); border-radius: 5px; cursor: pointer; background: transparent; }
 .post-box { margin-top: 15px; padding: 15px; background: var(--vp-c-bg-soft); border-radius: 5px; border: 1px solid var(--vp-c-divider); }
 .quick-tags { margin-bottom: 8px; display: flex; gap: 8px; flex-wrap: wrap; }

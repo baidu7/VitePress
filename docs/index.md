@@ -7,27 +7,32 @@ import { ref, computed, onMounted, watch } from 'vue' // 揉在一起写更简�
 import { data as allPosts } from './.vitepress/posts.data.mjs'
 import { useRouter } from 'vitepress'
 
-// 1. 先定义变量（必须在 watch 使用它们之前定义）
+// 1. 定义变量（必须在最前面）
 const pageSize = 9
 const currentPage = ref(1)
 const selectedTag = ref('')
 
-// 2. 引入路由并设置监工
+// 2. 引入路由监工
 const { route } = useRouter()
 
-// 🌟 监听整个 route 对象（包含 query 参数）
+// 🌟 终极监工：同时盯着路径和参数
 watch(
-  () => route.data, // 监听路由数据的变化
+  () => route.path + window.location.search, // 只要路径或参数变了，立马动手
   () => {
-    // 延时一丁点执行，确保 URL 参数已经彻底写入 window 对象
+    // 稍微等 50ms 确保浏览器地址栏已经更新完毕
     setTimeout(() => {
       const params = new URLSearchParams(window.location.search)
-      selectedTag.value = params.get('tag') || ''
-      currentPage.value = parseInt(params.get('page')) || 1
-      console.log('✅ 顶栏分类已同步:', selectedTag.value)
+      const newTag = params.get('tag') || ''
+      const newPage = parseInt(params.get('page')) || 1
+      
+      // 只有当值真的变了才更新，防止死循环
+      if (selectedTag.value !== newTag) selectedTag.value = newTag
+      if (currentPage.value !== newPage) currentPage.value = newPage
+      
+      console.log('🚀 顶栏切换成功，当前标签:', selectedTag.value)
     }, 50)
   },
-  { immediate: true } // 初始化时也运行一次，省去部分 onMounted 逻辑
+  { immediate: true }
 )
 
 // 1. 提取标签逻辑：确保即使是空也不会报错
@@ -326,82 +331,8 @@ onMounted(async () => {
   }
 }
 /* ============================================================
-   1. 基础布局
-   ============================================================ */
-.blog-wrapper {
-  display: flex;
-  max-width: 1150px;
-  margin: 40px auto;
-  gap: 30px;
-  padding: 0 20px;
-}
-
-.blog-main { flex: 1; min-width: 0; }
-
-/* ============================================================
    2. 文章卡片 (Post Card)
    ============================================================ */
-/* 1. 容器：让卡片不仅等高，还得“撑满” */
-.blog-container {
-    display: grid;
-    /* 核心修改：让每一行的高度由该行最高的卡片决定，并强制撑开 */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    grid-auto-rows: 1fr; /* 🌟 关键：让同一行所有卡片物理高度绝对相等 */
-    gap: 24px;
-    align-items: stretch; /* 确保子项拉伸填满网格 */
-}
-
-/* 2. 卡片本体：不仅要等高，内部也要撑满 */
-.post-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* 🌟 关键：让卡片填满 Grid 单元格 */
-    background-color: var(--vp-c-bg-soft); /* 🌟 把背景色从 post-info 挪到这里 */
-    border-radius: 8px;
-    border: 1px solid var(--vp-c-divider);
-    transition: all 0.25s ease;
-    overflow: hidden;
-}
-
-/* 3. 信息区：负责把日期和标签“顶”到底部 */
-.post-info {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* 🌟 核心：让信息区自动吃掉剩下的空间，把内容撑开 */
-    gap: 10px;
-    /* 背景色已经在父级设过了，这里可以删掉背景色，保持干净 */
-    background: transparent !important; 
-    border-top: 1px solid var(--vp-c-divider);
-}
-
-/* 4. 标题：给个固定高度，防止1行和2行标题导致视觉参差 */
-.post-title {
-    font-size: 1.05rem;
-    line-height: 1.4;
-    height: 2.8em; /* 🌟 固定两行标题的高度 */
-    margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* 5. 底部行：日期和标签 */
-.post-meta-row {
-    margin-top: auto; /* 🌟 灵魂：不管标题多长，这行永远贴着卡片底边 */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 8px;
-}
-.post-card:hover {
-  /* 使用老江红（或者喜欢的颜色） */
-  border-color: #4761B8 !important; 
-  /* box-shadow: 0 0 0 0.5px #4761B8; */
-  transform: none !important;
-}
-
 /* 图片区域 */
 .post-image-link { display: block; overflow: hidden; }
 
@@ -700,7 +631,7 @@ onMounted(async () => {
   font-size: 13px;
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap; /* 防止标签换行打乱动画 */
@@ -740,9 +671,6 @@ onMounted(async () => {
 
 /* ============================================================
    🌟 统一响应式布局方案
-   ============================================================ */
-/* ============================================================
-   1. 基础容器：始终保持 Flex 布局
    ============================================================ */
 .blog-wrapper {
   display: flex;
@@ -855,6 +783,7 @@ onMounted(async () => {
 @media (max-width: 850px) {
   .blog-wrapper {
     flex-direction: column; /* 侧边栏去下面 */
+				padding: 0 0px;
   }
   .blog-aside {
     width: 100%;
