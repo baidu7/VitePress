@@ -17,24 +17,22 @@ const { route } = useRouter()
 
 // 🌟 核心修复：把逻辑包在 watch 里，并增加 inBrowser 判断
 watch(
-  () => route.path + (typeof window !== 'undefined' ? window.location.search : ''), 
+  () => route.path, // 监听路径
   () => {
-    // 只在浏览器环境下跑解析逻辑
-    if (typeof window !== 'undefined') {
-      setTimeout(() => {
-        const params = new URLSearchParams(window.location.search)
-        const newTag = params.get('tag') || ''
-        const newPage = parseInt(params.get('page')) || 1
-        
-        if (selectedTag.value !== newTag) selectedTag.value = newTag
-        if (currentPage.value !== newPage) currentPage.value = newPage
-        
-        console.log('🚀 导航同步成功:', selectedTag.value)
-      }, 50)
-    }
-  },
-  { immediate: true }
+    // 延迟到 DOM 更新后，确保能拿到最新的 window 对象信息
+    const params = new URLSearchParams(window.location.search)
+    selectedTag.value = params.get('tag') || ''
+    currentPage.value = parseInt(params.get('page')) || 1
+    console.log('👀 监听到路由变化，新标签:', selectedTag.value)
+  }
 )
+
+onMounted(() => {
+  const params = new URLSearchParams(window.location.search)
+  selectedTag.value = params.get('tag') || ''
+  currentPage.value = parseInt(params.get('page')) || 1
+})
+
 // 1. 提取标签逻辑：确保即使是空也不会报错
 const allTags = computed(() => {
   const tags = new Set()
