@@ -11,6 +11,10 @@ import { transformPageData } from './configs/plugins.mjs'
 export default withPwa(defineConfig({
   title: "老江",
   description: "闲来无事，记点东西",
+		sitemap: {
+		    hostname: 'https://828111.xyz'
+		  },
+		base: '/',
   cleanUrls: true,
   pwa: pwaConfig,
   transformPageData,
