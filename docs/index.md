@@ -139,7 +139,7 @@ const visiblePageNumbers = computed(() => {
 const prevPage = () => { if (currentPage.value > 1) updatePage(currentPage.value - 1) }
 const nextPage = () => { if (currentPage.value < totalPages.value) updatePage(currentPage.value + 1) }
 const GITHUB_OWNER = 'baidu8'
-const GITHUB_REPO = 'VitePress'
+const GITHUB_REPO = 'baidu8.github.io'
 const latestShuo = ref('正在同步最新动态...')
 
 const latestIssues = ref([]) // 改为存数组

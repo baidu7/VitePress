@@ -8,7 +8,7 @@ import { ref, onMounted, watch } from 'vue'
 import ImageHelper from '@theme/components/ImageHelper.vue'
 
 const GITHUB_OWNER = 'baidu8'
-const GITHUB_REPO = 'VitePress'
+const GITHUB_REPO = 'baidu8.github.io'
 const IMG_OWNER = 'baidu8' // 如果是同一个账号，就还写你的名字
 const IMG_REPO = 'images'  // 这里填新仓库的名字
 const LABEL = 'shuo'
@@ -49,31 +49,43 @@ async function fetchIssues(isMore = false) {
 async function publishShuo() {
   if (!newContent.value || !token.value) return
   isPublishing.value = true
+
+  // --- 🌟 标题优化逻辑开始 ---
+  const lines = newContent.value.trim().split('\n')
+  let firstLine = lines[0].replace(/[#*`]/g, '').trim() // 去掉 Markdown 符号
+  
+  // 如果第一行太长（超过 20 字），截取一下加省略号
+  const titleText = firstLine.length > 20 ? firstLine.slice(0, 20) + '...' : firstLine
+  
+  // 如果第一行是空的（比如只传了图），就还用时间保底
+  const finalTitle = titleText || `说说 ${new Date().toLocaleString()}`
+  // --- 🌟 标题优化逻辑结束 ---
+
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues`, {
       method: 'POST',
       headers: { 
-        'Authorization': `Bearer ${token.value.trim()}`, // 统一用 Bearer
+        'Authorization': `Bearer ${token.value.trim()}`,
         'Content-Type': 'application/json' 
       },
       body: JSON.stringify({ 
-        title: `说说 ${new Date().toLocaleString()}`, 
+        title: finalTitle, // 使用咱们新生成的标题
         body: newContent.value, 
         labels: [LABEL] 
       })
     })
+    
     if (res.ok) {
       const newItem = await res.json()
-      issues.value = [newItem, ...issues.value] // 把新发的插到最前面
+      issues.value = [newItem, ...issues.value]
       newContent.value = ''
-      showPostBox.value = false // 🌟 关键：发布成功，弹窗退场
-      // alert('✅ 发布成功') // 如果觉得弹窗消失太快没实感，可以留着
+      showPostBox.value = false
     } else {
       const err = await res.json()
       alert(`发布失败：${err.message}`)
     }
   } catch (e) { 
-    alert('发布出错，请检查网络') 
+    alert('网络错误') 
   } finally {
     isPublishing.value = false
   }
@@ -192,7 +204,7 @@ const parseMD = (t) => {
         <span class="shuo-time">{{ new Date(item.created_at).toLocaleString() }}</span>
       </div>
     </div>
-    <div v-html="parseMD(item.body)" class="shuo-body"></div>
+    <div v-html="parseMD(item.body)" class="shuo-body vp-doc"></div>
     <div class="shuo-footer">
       <div style="display:flex; gap:15px; align-items:center; margin-left: auto;">
         <button v-if="token" @click="deleteShuo(item.number)" class="del-btn">🗑️ 删除</button>

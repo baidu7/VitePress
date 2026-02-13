@@ -78,6 +78,7 @@ export const getAutoNav = () => {
   nav.push({
     text: '✨ 更多',
     items: [
+      { text: '🔗 友联', link: '/links' },
       { text: '🗺️ 站点地图', link: '/sitemap.xml' },
       { text: '👤 关于我', link: '/about' }
     ]
