@@ -10,10 +10,39 @@
     </div>
     
 				<div id="playlist-selector">
-				  <span class="selector-label">频道：</span>
-				  <button @click="changePlaylist('60198')" :class="{active: currentPid=='60198'}">经典</button>
-				  <button @click="changePlaylist('3778678')" :class="{active: currentPid=='3778678'}">热歌</button>
-				  <button @click="changePlaylist('local')" :class="{active: currentPid=='local'}">❤️ 我的收藏</button>
+				  <button 
+				    @click="changePlaylist('13714110383')" 
+				    :class="{ active: currentPid == '13714110383' }"
+				    class="selector-btn"
+				  >
+				    ❤️  小叶歌单
+				  </button>
+				<button 
+				    @click="changePlaylist('2232469985')" 
+				    :class="{ active: currentPid == '2232469985' }"
+				    class="selector-btn"
+				  >
+				    📻 欧美老歌
+				  </button>
+				  <div class="channel-container">
+				    <button class="channel-toggle" @click="showMenu = !showMenu">
+				      {{ showMenu ? '🔼 收起' : '◀️ 更多' }}
+				    </button>
+				    
+				    <Transition name="fade">
+				      <div v-if="showMenu" class="channel-menu">
+				        <div 
+				          v-for="ch in myChannels" 
+				          :key="ch.id" 
+				          class="channel-item"
+				          :class="{ active: currentPid === ch.id }"
+				          @click="changePlaylist(ch.id); showMenu = false"
+				        >
+				          {{ ch.name }}
+				        </div>
+				      </div>
+				    </Transition>
+				  </div>
 				</div>
 				
     <div class="drawer-content">
@@ -88,23 +117,33 @@ const currentLyricText = ref('')
 const lrcLines = ref([])
 const audioRef = ref(null)
 
-// 💡 改进：当前播放的歌曲对象，独立保存
-const activeSong = ref(null)
-const currentSong = computed(() => activeSong.value || fullList.value[index.value])
+// --- 频道配置区 ---
+const myChannels = [
+  { name: '❤️ 收藏', id: 'local' },
+  { name: '🚩 飙升榜', id: '19723756' },
+  { name: '🎸 新歌榜', id: '3779629' }, 
+  { name: '🔥 热歌榜', id: '3778678' },
+  { name: '🎐 古风单', id: '17645418779' }
+]
 
+const showMenu = ref(false) // 控制菜单显示
+
+// 💡 改进：正在播放的对象独立，它是音频流的“锚点”
+const activeSong = ref(null)
+const currentSong = computed(() => activeSong.value || fullList.value[index.value] || localList[0])
 const currentPid = ref('local'); 
 
 // --- 2. 核心功能 ---
 
+/**
+ * 切换频道：只换列表，不换歌
+ */
 const changePlaylist = async (id) => {
   if (currentPid.value === id && fullList.value.length > 0) return; 
   currentPid.value = id;
   
   isListOpen.value = true;
-  
-  // 💡 重点：这里不再执行 isPlaying = false，也不清空正在播的 activeSong
-  // 只清空列表显示，让用户觉得“频道换了”，但耳朵听着没断
-  fullList.value = [];
+  fullList.value = []; // 清空界面列表，准备装载新频道
   
   if (id === 'local') {
     fullList.value = [...localList];
@@ -112,8 +151,7 @@ const changePlaylist = async (id) => {
     await fetchCloudList(id); 
   }
   
-  // 💡 注意：这里不去调 playIndex(0, false)，因为那会强行切歌
-  // 咱们只重置滚动条
+  // 💡 换台后不调用 playIndex，确保当前音乐不断
   setTimeout(() => {
     const listEl = document.getElementById('p-list');
     if (listEl) listEl.scrollTop = 0;
@@ -127,10 +165,7 @@ const fetchCloudList = async (id = currentPid.value) => {
     const data = await res.json();
     const cloudSongs = data.map(s => ({
       name: s.title + ' - ' + s.author,
-      url: s.url,
-      lrc: s.lrc, 
-      pic: s.pic,
-      isCloud: true
+      url: s.url, lrc: s.lrc, pic: s.pic, isCloud: true
     }));
     fullList.value = [...fullList.value, ...cloudSongs];
   } catch (e) {
@@ -138,69 +173,31 @@ const fetchCloudList = async (id = currentPid.value) => {
   }
 }
 
-const parseLrc = async (path) => {
-  lrcLines.value = []; 
-  currentLyricText.value = '';
-  if (!path) return;
-  try {
-    const res = await fetch(path); 
-    const text = await res.text();
-    const lines = text.split('\n');
-    lines.forEach(line => {
-      const m = line.match(/\[(\d+):(\d+\.?\d*)\](.*)/);
-      if (m) lrcLines.value.push({ time: parseInt(m[1])*60 + parseFloat(m[2]), text: m[3].trim() });
-    });
-  } catch (e) { console.log('歌词解析失败'); }
-}
-
-const togglePlay = () => {
-  if (!currentSong.value) return;
-  // 第一次播放逻辑
-  if (currentTime.value === 0 && lrcLines.value.length === 0) {
-    playIndex(index.value, true);
-    return;
-  }
-  
-  if (isPlaying.value) {
-    audioRef.value.pause();
-  } else {
-    audioRef.value.play().catch(() => {});
-  }
-  isPlaying.value = !isPlaying.value;
-}
-
-const onUpdate = () => {
-  currentTime.value = audioRef.value.currentTime;
-  if (lrcLines.value.length) {
-    const line = lrcLines.value.findLast(item => item.time <= currentTime.value);
-    if (line) currentLyricText.value = line.text;
-  }
-}
-
-const onLoaded = () => { 
-  duration.value = audioRef.value.duration; 
-  // 剔出短曲目
-  if (duration.value > 0 && duration.value < 40) {
-    fullList.value.splice(index.value, 1); 
-    if (index.value >= fullList.value.length) index.value = 0;
-    playIndex(index.value, isPlaying.value); 
-    return;
-  }
-  if (currentPid.value !== 'local' && index.value >= fullList.value.length - 2) {
-    fetchCloudList(currentPid.value);
-  }
-}
-
-const onSeek = (e) => { 
-  if (audioRef.value) audioRef.value.currentTime = e.target.value; 
-}
-
+/**
+ * 播放指定索引：真正执行“切歌”动作
+ */
 const playIndex = async (i, autoPlay = true) => { 
   if (!fullList.value[i]) return;
   
   index.value = i;
-  activeSong.value = fullList.value[i]; // 💡 锁定当前播放的对象
+  activeSong.value = fullList.value[i]; 
 
+  // 🍎 苹果 Media Session：让 PWA 后台更稳，锁屏能看
+  if ('mediaSession' in navigator) {
+    const [title, artist] = activeSong.value.name.split(' - ');
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title,
+      artist: artist || '未知歌手',
+      artwork: [{ src: activeSong.value.pic, sizes: '512x512' }]
+    });
+    // 允许锁屏/耳机按键控制
+    navigator.mediaSession.setActionHandler('previoustrack', prev);
+    navigator.mediaSession.setActionHandler('nexttrack', next);
+    navigator.mediaSession.setActionHandler('play', () => { audioRef.value?.play(); isPlaying.value = true; });
+    navigator.mediaSession.setActionHandler('pause', () => { audioRef.value?.pause(); isPlaying.value = false; });
+  }
+
+  // 加载歌词
   if (activeSong.value.lrc) {
     await parseLrc(activeSong.value.lrc); 
   } else {
@@ -213,13 +210,73 @@ const playIndex = async (i, autoPlay = true) => {
       if (audioRef.value) {
         audioRef.value.play()
           .then(() => { isPlaying.value = true; })
-          .catch(() => { isPlaying.value = false; });
+          .catch((err) => { 
+            console.log("iOS 自动播放拦截，需手动点一下", err);
+            isPlaying.value = false; 
+          });
       }
     }, 150);
   } else {
     isPlaying.value = false; 
     if (audioRef.value) audioRef.value.pause();
   }
+}
+
+const parseLrc = async (path) => {
+  lrcLines.value = []; 
+  currentLyricText.value = '';
+  if (!path) return;
+  try {
+    const res = await fetch(path); 
+    const text = await res.text();
+    text.split('\n').forEach(line => {
+      const m = line.match(/\[(\d+):(\d+\.?\d*)\](.*)/);
+      if (m) lrcLines.value.push({ time: parseInt(m[1])*60 + parseFloat(m[2]), text: m[3].trim() });
+    });
+  } catch (e) { }
+}
+
+const togglePlay = () => {
+  if (!currentSong.value) return;
+  if (currentTime.value === 0 && lrcLines.value.length === 0) {
+    playIndex(index.value, true);
+    return;
+  }
+  if (isPlaying.value) {
+    audioRef.value.pause();
+  } else {
+    audioRef.value.play().catch(() => {});
+  }
+  isPlaying.value = !isPlaying.value;
+}
+
+const onUpdate = () => {
+  if (!audioRef.value) return;
+  currentTime.value = audioRef.value.currentTime;
+  if (lrcLines.value.length) {
+    const line = lrcLines.value.findLast(item => item.time <= currentTime.value);
+    if (line) currentLyricText.value = line.text;
+  }
+}
+
+const onLoaded = () => { 
+  if (!audioRef.value) return;
+  duration.value = audioRef.value.duration; 
+  // 🛡️ 剔出 30 秒试听垃圾歌曲
+  if (duration.value > 0 && duration.value < 60) {
+    fullList.value.splice(index.value, 1); 
+    if (index.value >= fullList.value.length) index.value = 0;
+    playIndex(index.value, isPlaying.value); 
+    return;
+  }
+  // 🔄 续杯：仅限云端
+  if (currentPid.value !== 'local' && index.value >= fullList.value.length - 2) {
+    fetchCloudList(currentPid.value);
+  }
+}
+
+const onSeek = (e) => { 
+  if (audioRef.value) audioRef.value.currentTime = e.target.value; 
 }
 
 const next = () => playIndex((index.value + 1) % fullList.value.length, true);
@@ -232,54 +289,92 @@ const formatTime = (s) => {
 }
 
 onMounted(async () => { 
-  // 初始化加载
-  if (currentPid.value === 'local') {
-    fullList.value = [...localList];
-  } else {
-    await fetchCloudList();
-  }
-  // 初始只加载数据，不出声
+  // 默认启动项：显示本地收藏
+  currentPid.value = 'local';
+  fullList.value = [...localList];
+  // 💡 初始化第一首歌的元数据（名片/歌词），但不自动出声
   await playIndex(0, false); 
+  
+  // 处理 iOS 切回 App 时的状态同步
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && isPlaying.value && audioRef.value?.paused) {
+      audioRef.value.play().catch(() => {});
+    }
+  });
 })
 </script>
 
 <style scoped>
+/* ============================================================
+   1. 布局容器 (Selectors & Headers)
+   ============================================================ */
 #playlist-selector {
-  padding: 10px;
+  padding: 6px;
   display: flex;
-  gap: 5px;
+  gap: 6px;
   align-items: center;
   border-bottom: 1px dashed var(--vp-c-divider);
 }
-.selector-label { font-size: 10px; opacity: 0.6; }
+
+.song-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.selector-label { 
+  font-size: 10px; 
+  opacity: 0.6; 
+}
+
+/* ============================================================
+   2. 按钮系统 (Buttons)
+   ============================================================ */
+/* 频道切换基础按钮 */
+.selector-btn, 
+.channel-toggle, 
 #playlist-selector button {
+  padding: 4px 10px;
   font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 10px;
   border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
+  border-radius: 5px;
+  background: var(--vp-c-bg-mute);
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--vp-c-text-1);
+  transition: all 0.2s ease;
 }
+
+.selector-btn, 
+.channel-toggle, 
+#playlist-selector button:hover {
+    border-color: #00b894;
+}
+
+/* 激活状态：统一使用大爷喜欢的绿色主题 */
+.selector-btn.active, 
 #playlist-selector button.active {
-  background: #00b894;
-  color: white;
-  border-color: #00b894;
+  background: #00b894 !important;
+  color: white !important;
+  border-color: #00b894 !important;
 }
-/* 按钮组基础排版 */
+
+/* 图标按钮组 (播放、上一首等) */
 .btn-group {
   display: flex;
   align-items: center;
-  justify-content: space-around; /* 均匀分布 */
+  justify-content: space-around;
   margin-top: 15px;
   gap: 10px;
 }
 
-/* 通用图标按钮样式 */
 .icon-btn {
   background: none !important;
   border: none !important;
   padding: 8px !important;
   cursor: pointer;
-  color: var(--vp-c-text-2); /* 默认用次要文字颜色，比较柔和 */
+  color: var(--vp-c-text-2);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -287,44 +382,88 @@ onMounted(async () => {
   border-radius: 50%;
 }
 
-.icon-btn:hover {
-  color: #00b894; /* 悬停变绿 */
+.icon-btn:hover, .list-toggle.active {
+  color: #00b894;
   background: rgba(0, 184, 148, 0.1) !important;
   transform: scale(1.1);
 }
 
-/* 播放按钮大一点，突出重点 */
 .play-main {
   color: #00b894;
   transform: scale(1.2);
 }
-.play-main:hover {
-  transform: scale(1.3);
+
+/* ============================================================
+   3. 频道下拉菜单 (Dropdown Menu)
+   ============================================================ */
+.channel-container {
+  position: relative;
+  display: inline-block;
 }
 
-/* 列表开启时的状态 */
-.list-toggle.active {
+.channel-menu {
+  position: absolute;
+  bottom: 130%; /* 向上弹出，留出空隙 */
+  right: 0;
+  width: 130px;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 5px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.channel-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.channel-item:hover {
+  background: rgba(0, 184, 148, 0.1);
   color: #00b894;
-  background: rgba(0, 184, 148, 0.1) !important;
 }
 
-/* 调整封面旋转动画，让它更有质感 */
+.channel-item.active {
+  color: #00b894;
+  font-weight: bold;
+  background: var(--vp-c-default-soft);
+}
+
+/* ============================================================
+   4. 动画与特效 (Animations)
+   ============================================================ */
+/* 封面旋转 */
 .album-cover {
+  width: 40px; height: 40px; border-radius: 50%; overflow: hidden;
+  border: 2px solid #333; flex-shrink: 0; transition: transform 0.5s;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-/* 保持原有样式，新增/修改部分： */
-.song-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.album-cover { 
-  width: 40px; height: 40px; border-radius: 50%; overflow: hidden; 
-  border: 2px solid #333; flex-shrink: 0; transition: transform 0.5s;
-}
 .album-cover img { width: 100%; height: 100%; object-fit: cover; }
-.rotate { animation: disk-rotate 10s linear infinite; }
-@keyframes disk-rotate { from {transform: rotate(0deg)} to {transform: rotate(360deg)} }
 
-.tag-cloud { font-size: 8px; background: #00b89422; color: #00b894; padding: 1px 3px; border-radius: 3px; margin-left: 5px; }
-.dot.playing { background: #00b894; box-shadow: 0 0 8px #00b894; animation: pulse 1s infinite; }
+.rotate { animation: disk-rotate 10s linear infinite; }
+@keyframes disk-rotate { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+
+/* 呼吸灯效果 */
+.dot.playing {
+  background: #00b894;
+  box-shadow: 0 0 8px #00b894;
+  animation: pulse 1s infinite;
+}
 @keyframes pulse { 0% {opacity: 1} 50% {opacity: 0.5} 100% {opacity: 1} }
+
+/* 其它小装饰 */
+.tag-cloud { 
+  font-size: 8px; background: rgba(0, 184, 148, 0.13); color: #00b894; 
+  padding: 1px 3px; border-radius: 3px; margin-left: 5px; 
+}
+
+/* 渐变过渡 */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 /* ============================================================
    1. 电脑端默认样式 (顶部悬浮)
    ============================================================ */
@@ -397,7 +536,8 @@ onMounted(async () => {
   background: var(--vp-c-bg); 
   border: 1px solid var(--vp-c-divider); 
   transform: translateX(-100%); 
-  transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+		transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  /* transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); */
   box-shadow: var(--vp-shadow-3);
 }
 
