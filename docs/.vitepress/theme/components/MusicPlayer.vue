@@ -5,25 +5,47 @@
 
   <div id="music-drawer" :class="{ 'open': isDrawerOpen }">
     <div id="drawer-handle" @click="isDrawerOpen = !isDrawerOpen">
-      <div class="dot"></div>
+      <div class="dot" :class="{ 'playing': isPlaying }"></div>
       <span class="handle-text">播放器</span>
     </div>
     
+				<div id="playlist-selector">
+				  <span class="selector-label">频道：</span>
+				  <button @click="changePlaylist('60198')" :class="{active: currentPid=='60198'}">经典</button>
+				  <button @click="changePlaylist('3778678')" :class="{active: currentPid=='3778678'}">热歌</button>
+				  <button @click="changePlaylist('local')" :class="{active: currentPid=='local'}">❤️ 我的收藏</button>
+				</div>
+				
     <div class="drawer-content">
-      <div class="song-title">{{ currentSong?.name || '等待加载...' }}</div>
+      <div class="song-header">
+        <div class="album-cover" :class="{ 'rotate': isPlaying }">
+          <img :src="currentSong?.pic || '/img/avatar.png'" alt="cover">
+        </div>
+        <div class="song-title">{{ currentSong?.name || '等待加载...' }}</div>
+      </div>
       
       <div class="progress-box">
-        <span class="time">{{ formatTime(currentTime) }}</span>
+        <span class="time">{{ formatTime(currentTime) }}</span>🔊
         <input type="range" :max="duration" :value="currentTime" @input="onSeek" step="0.1">
         <span class="time">{{ formatTime(duration) }}</span>
       </div>
 
       <div class="btn-group">
-        <button @click="prev">上曲</button>
-        <button @click="togglePlay">{{ isPlaying ? '停止' : '播放' }}</button>
-        <button @click="next">下曲</button>
-        <button class="list-btn" @click="isListOpen = !isListOpen">
-          {{ isListOpen ? '收起歌单 ↑' : '歌单列表 ↓' }}
+        <button class="icon-btn" @click="prev" title="上一曲">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 18V6h2v12H6m3.5-6L18 18V6l-8.5 6Z"/></svg>
+        </button>
+        
+        <button class="icon-btn play-main" @click="togglePlay" :title="isPlaying ? '停止' : '播放'">
+          <svg v-if="!isPlaying" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M8 5.14v14l11-7l-11-7Z"/></svg>
+          <svg v-else viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M14 19h4V5h-4v14M6 19h4V5H6v14Z"/></svg>
+        </button>
+      
+        <button class="icon-btn" @click="next" title="下一曲">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M16 18h2V6h-2v12M6 18l8.5-6L6 6v12Z"/></svg>
+        </button>
+      
+        <button class="icon-btn list-toggle" :class="{ 'active': isListOpen }" @click="isListOpen = !isListOpen" title="歌单">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3 13h2v-2H3v2m0 4h2v-2H3v2m0-8h2V7H3v2m4 4h14v-2H7v2m0 4h14v-2H7v2m0-8h14V7H7v2Z"/></svg>
         </button>
       </div>
 
@@ -31,7 +53,7 @@
         <div v-for="(s, i) in fullList" :key="i" 
              :class="['s-item', { 'active': index === i }]"
              @click="playIndex(i)">
-          {{ i + 1 }}. {{ s.name }} <span v-if="s.isCloud" style="font-size:9px;opacity:0.5;">(云)</span>
+          {{ i + 1 }}. {{ s.name }} <span v-if="s.isCloud" class="tag-cloud">云</span>
         </div>
       </div>
     </div>
@@ -45,12 +67,17 @@ import { ref, computed, onMounted } from 'vue'
 
 // --- 1. 配置区 ---
 const localList = [
-  { name: "Stars", url: "https://mr1.doubanio.com/484a8df54b09620ae3c9eeb48875f1a7/1/fm/song/p195694_128k.mp4", lrc: "/Janis-Ian-Stars.lrc", isCloud: false }
+  { 
+    name: "Stars - Janis Ian", 
+    url: "https://mr1.doubanio.com/484a8df54b09620ae3c9eeb48875f1a7/1/fm/song/p195694_128k.mp4", 
+    lrc: "/Janis-Ian-Stars.lrc", 
+    pic: "https://gcore.jsdelivr.net/gh/baidu8/images@main/img/img-1771058961517.jpg",
+    isCloud: false 
+  }
 ]
-const NETEASE_PLAYLIST_ID = '60198' // 👈 这里换成您自己的网易云歌单 ID
 const API_BASE = 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id='
 
-const fullList = ref([...localList])
+const fullList = ref([]) 
 const index = ref(0)
 const isPlaying = ref(false)
 const isDrawerOpen = ref(false)
@@ -61,44 +88,84 @@ const currentLyricText = ref('')
 const lrcLines = ref([])
 const audioRef = ref(null)
 
-const currentSong = computed(() => fullList.value[index.value])
+// 💡 改进：当前播放的歌曲对象，独立保存
+const activeSong = ref(null)
+const currentSong = computed(() => activeSong.value || fullList.value[index.value])
+
+const currentPid = ref('local'); 
 
 // --- 2. 核心功能 ---
-const formatTime = (s) => {
-  let m = Math.floor(s / 60); s = Math.floor(s % 60);
-  return (m < 10 ? '0' : '') + m + ":" + (s < 10 ? '0' : '') + s;
+
+const changePlaylist = async (id) => {
+  if (currentPid.value === id && fullList.value.length > 0) return; 
+  currentPid.value = id;
+  
+  isListOpen.value = true;
+  
+  // 💡 重点：这里不再执行 isPlaying = false，也不清空正在播的 activeSong
+  // 只清空列表显示，让用户觉得“频道换了”，但耳朵听着没断
+  fullList.value = [];
+  
+  if (id === 'local') {
+    fullList.value = [...localList];
+  } else {
+    await fetchCloudList(id); 
+  }
+  
+  // 💡 注意：这里不去调 playIndex(0, false)，因为那会强行切歌
+  // 咱们只重置滚动条
+  setTimeout(() => {
+    const listEl = document.getElementById('p-list');
+    if (listEl) listEl.scrollTop = 0;
+  }, 100);
 }
 
-const fetchCloudList = async () => {
+const fetchCloudList = async (id = currentPid.value) => { 
+  if (id === 'local') return;
   try {
-    const res = await fetch(API_BASE + NETEASE_PLAYLIST_ID);
+    const res = await fetch(API_BASE + id); 
     const data = await res.json();
     const cloudSongs = data.map(s => ({
       name: s.title + ' - ' + s.author,
       url: s.url,
-      lrc: s.lrc, // 接口自带歌词地址
+      lrc: s.lrc, 
+      pic: s.pic,
       isCloud: true
     }));
-    fullList.value = [...localList, ...cloudSongs]; // 本地在上，云端在下
+    fullList.value = [...fullList.value, ...cloudSongs];
   } catch (e) {
-    console.error('云端歌单加载失败，仅显示本地曲目');
+    console.error('云端加载失败');
   }
 }
 
 const parseLrc = async (path) => {
-  lrcLines.value = []; if (!path) { currentLyricText.value = ''; return; }
+  lrcLines.value = []; 
+  currentLyricText.value = '';
+  if (!path) return;
   try {
-    const res = await fetch(path); const text = await res.text();
-    text.split('\n').forEach(line => {
+    const res = await fetch(path); 
+    const text = await res.text();
+    const lines = text.split('\n');
+    lines.forEach(line => {
       const m = line.match(/\[(\d+):(\d+\.?\d*)\](.*)/);
       if (m) lrcLines.value.push({ time: parseInt(m[1])*60 + parseFloat(m[2]), text: m[3].trim() });
     });
-  } catch (e) { currentLyricText.value = ''; }
+  } catch (e) { console.log('歌词解析失败'); }
 }
 
 const togglePlay = () => {
-  if (!audioRef.value.src) { playIndex(0); return; }
-  isPlaying.value ? audioRef.value.pause() : audioRef.value.play();
+  if (!currentSong.value) return;
+  // 第一次播放逻辑
+  if (currentTime.value === 0 && lrcLines.value.length === 0) {
+    playIndex(index.value, true);
+    return;
+  }
+  
+  if (isPlaying.value) {
+    audioRef.value.pause();
+  } else {
+    audioRef.value.play().catch(() => {});
+  }
   isPlaying.value = !isPlaying.value;
 }
 
@@ -110,24 +177,154 @@ const onUpdate = () => {
   }
 }
 
-const onLoaded = () => { duration.value = audioRef.value.duration; }
-const onSeek = (e) => { audioRef.value.currentTime = e.target.value; }
-
-const playIndex = (i) => {
-  index.value = i;
-  parseLrc(currentSong.value.lrc);
-  setTimeout(() => { audioRef.value.play(); isPlaying.value = true; }, 100);
+const onLoaded = () => { 
+  duration.value = audioRef.value.duration; 
+  // 剔出短曲目
+  if (duration.value > 0 && duration.value < 40) {
+    fullList.value.splice(index.value, 1); 
+    if (index.value >= fullList.value.length) index.value = 0;
+    playIndex(index.value, isPlaying.value); 
+    return;
+  }
+  if (currentPid.value !== 'local' && index.value >= fullList.value.length - 2) {
+    fetchCloudList(currentPid.value);
+  }
 }
 
-const next = () => playIndex((index.value + 1) % fullList.value.length);
-const prev = () => playIndex((index.value - 1 + fullList.value.length) % fullList.value.length);
+const onSeek = (e) => { 
+  if (audioRef.value) audioRef.value.currentTime = e.target.value; 
+}
 
-onMounted(() => { 
-  fetchCloudList(); // 初始化获取歌单
+const playIndex = async (i, autoPlay = true) => { 
+  if (!fullList.value[i]) return;
+  
+  index.value = i;
+  activeSong.value = fullList.value[i]; // 💡 锁定当前播放的对象
+
+  if (activeSong.value.lrc) {
+    await parseLrc(activeSong.value.lrc); 
+  } else {
+    lrcLines.value = [];
+    currentLyricText.value = '';
+  }
+
+  if (autoPlay) {
+    setTimeout(() => {
+      if (audioRef.value) {
+        audioRef.value.play()
+          .then(() => { isPlaying.value = true; })
+          .catch(() => { isPlaying.value = false; });
+      }
+    }, 150);
+  } else {
+    isPlaying.value = false; 
+    if (audioRef.value) audioRef.value.pause();
+  }
+}
+
+const next = () => playIndex((index.value + 1) % fullList.value.length, true);
+const prev = () => playIndex((index.value - 1 + fullList.value.length) % fullList.value.length, true);
+
+const formatTime = (s) => {
+  if (isNaN(s)) return "00:00";
+  let m = Math.floor(s / 60); s = Math.floor(s % 60);
+  return (m < 10 ? '0' : '') + m + ":" + (s < 10 ? '0' : '') + s;
+}
+
+onMounted(async () => { 
+  // 初始化加载
+  if (currentPid.value === 'local') {
+    fullList.value = [...localList];
+  } else {
+    await fetchCloudList();
+  }
+  // 初始只加载数据，不出声
+  await playIndex(0, false); 
 })
 </script>
 
 <style scoped>
+#playlist-selector {
+  padding: 10px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  border-bottom: 1px dashed var(--vp-c-divider);
+}
+.selector-label { font-size: 10px; opacity: 0.6; }
+#playlist-selector button {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+}
+#playlist-selector button.active {
+  background: #00b894;
+  color: white;
+  border-color: #00b894;
+}
+/* 按钮组基础排版 */
+.btn-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-around; /* 均匀分布 */
+  margin-top: 15px;
+  gap: 10px;
+}
+
+/* 通用图标按钮样式 */
+.icon-btn {
+  background: none !important;
+  border: none !important;
+  padding: 8px !important;
+  cursor: pointer;
+  color: var(--vp-c-text-2); /* 默认用次要文字颜色，比较柔和 */
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.icon-btn:hover {
+  color: #00b894; /* 悬停变绿 */
+  background: rgba(0, 184, 148, 0.1) !important;
+  transform: scale(1.1);
+}
+
+/* 播放按钮大一点，突出重点 */
+.play-main {
+  color: #00b894;
+  transform: scale(1.2);
+}
+.play-main:hover {
+  transform: scale(1.3);
+}
+
+/* 列表开启时的状态 */
+.list-toggle.active {
+  color: #00b894;
+  background: rgba(0, 184, 148, 0.1) !important;
+}
+
+/* 调整封面旋转动画，让它更有质感 */
+.album-cover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+/* 保持原有样式，新增/修改部分： */
+.song-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.album-cover { 
+  width: 40px; height: 40px; border-radius: 50%; overflow: hidden; 
+  border: 2px solid #333; flex-shrink: 0; transition: transform 0.5s;
+}
+.album-cover img { width: 100%; height: 100%; object-fit: cover; }
+.rotate { animation: disk-rotate 10s linear infinite; }
+@keyframes disk-rotate { from {transform: rotate(0deg)} to {transform: rotate(360deg)} }
+
+.tag-cloud { font-size: 8px; background: #00b89422; color: #00b894; padding: 1px 3px; border-radius: 3px; margin-left: 5px; }
+.dot.playing { background: #00b894; box-shadow: 0 0 8px #00b894; animation: pulse 1s infinite; }
+@keyframes pulse { 0% {opacity: 1} 50% {opacity: 0.5} 100% {opacity: 1} }
 /* ============================================================
    1. 电脑端默认样式 (顶部悬浮)
    ============================================================ */
@@ -230,7 +427,7 @@ onMounted(() => {
 .time { font-size: 9px; opacity: 0.6; width: 30px; font-family: monospace; }
 input[type="range"] { flex: 1; accent-color: #ff5f56; height: 3px; cursor: pointer; }
 .btn-group { display: flex; flex-wrap: wrap; gap: 3px; }
-.btn-group button { flex: 1; padding: 5px; border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-soft); color: var(--vp-c-text-1); font-size: 11px; cursor: pointer; }
+.btn-group button { padding: 5px; border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg-soft); color: var(--vp-c-text-1); font-size: 11px; cursor: pointer; }
 .list-btn { flex: 100% !important; margin-top: 3px; }
 #p-list { max-height: 0; overflow: hidden; transition: 0.3s ease-out; }
 #p-list.show { max-height: 200px; overflow-y: auto; margin-top: 8px; border-top: 1px solid var(--vp-c-divider); }

@@ -4,8 +4,25 @@ import DefaultTheme from 'vitepress/theme'
 import { nextTick, provide, watch, onMounted, onUnmounted, ref } from 'vue' // 增加了 onUnmounted 和 ref
 import WelcomeToast from './components/WelcomeToast.vue'
 
-const { frontmatter, isDark } = useData()
+const { frontmatter, isDark, page } = useData()
 const { Layout } = DefaultTheme
+
+// 在 script setup 里的逻辑
+const getRelativeTime = (date: string | number) => {
+  const dateSource = date || page.value.lastUpdated;
+  if (!dateSource) return '最近';
+
+  const targetDate = new Date(dateSource);
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - targetDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (isNaN(diff)) return dateSource; 
+  if (diff <= 0) return '今天';
+  if (diff < 7) return `${diff} 天前`;
+  if (diff < 30) return `${Math.floor(diff / 7)} 周前`;
+  if (diff < 365) return `${Math.floor(diff / 30)} 个月前`;
+  return `${Math.floor(diff / 365)} 年前`;
+}
 
 // --- 1. 运行计时逻辑 (新增) ---
 const runTime = ref({ d: 0, h: 0, m: 0, s: 0 })
@@ -99,26 +116,25 @@ provide('toggle-appearance', async () => {
 			  </div>
 			</template>
     <template #doc-before>
-      <div class="article-top-box">
-          <div class="custom-breadcrumb">
-            <a href="/">🏠 首页</a> 
-            <span class="sep"> / </span> 
-            
-            <span v-if="frontmatter.category" class="curr-cat">
-              <a 
-                :href="'/?tag=' + (Array.isArray(frontmatter.category) ? frontmatter.category[frontmatter.category.length - 1] : frontmatter.category)" 
-                class="cat-link"
-              >
-                {{ Array.isArray(frontmatter.category) ? frontmatter.category[frontmatter.category.length - 1] : frontmatter.category }}
-              </a>
-            </span>
-            <span v-else class="curr-cat">📝 正文</span>
-          </div>
-          
-          <div class="article-subtitle-meta">
-             <span>最后更新：{{ new Date().toLocaleDateString() }}</span>
-          </div>
-        </div>
+          <div class="article-top-box">
+              <div class="custom-breadcrumb">
+                <a href="/">🏠 首页</a> 
+                <span class="sep"> / </span> 
+                
+                <span v-if="frontmatter.category" class="curr-cat">
+                  <a 
+                    :href="'/?tag=' + (Array.isArray(frontmatter.category) ? frontmatter.category[frontmatter.category.length - 1] : frontmatter.category)" 
+                    class="cat-link"
+                  >
+                    {{ Array.isArray(frontmatter.category) ? frontmatter.category[frontmatter.category.length - 1] : frontmatter.category }}
+                  </a>
+                </span>
+                <span v-else class="curr-cat">📝 正文</span>
+              </div>
+              <div class="article-subtitle-meta">
+                <span>最后更新：{{ getRelativeTime(frontmatter.date) }}</span>
+              </div>
+												</div>
     </template>
 
     <template #doc-footer-before>

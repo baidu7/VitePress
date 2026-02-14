@@ -25,7 +25,7 @@ export default createContentLoader('**/*.md', {
     return raw
       .filter(page => {
         const isIndex = page.url === '/' || page.url.endsWith('/') || page.url.includes('index.html')
-        const isExclude = ['/admin', '/links', '/about'].some(path => page.url.includes(path))
+        const isExclude = ['/admin', '/links', '/shuo', '/about'].some(path => page.url.includes(path))
         return !isIndex && !isExclude
       })
       .map(page => {
