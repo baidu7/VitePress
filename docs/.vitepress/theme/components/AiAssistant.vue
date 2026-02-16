@@ -102,7 +102,7 @@ const askAI = async () => {
 .ai-wrapper {
   position: fixed;
   right: 0;
-  bottom: 180px; /* 抬高一点，别跟右下角的返回顶部撞车 */
+  bottom: 190px; /* 抬高一点，别跟右下角的返回顶部撞车 */
   z-index: 2000;
   display: flex;
   align-items: flex-start;
@@ -116,12 +116,12 @@ const askAI = async () => {
 
 /* 2. 侧边拉手：完全复刻音乐插件 #drawer-handle 风格 */
 .ai-side-tab {
-  position: absolute;
-  left: -23px;
-  /* top: 0; */
-		bottom: 10px;
-  width: 22px;
-  height: 90px;
+    position: absolute;
+    left: -21px;
+    /* top: 0; */
+    bottom: 0px;
+    width: 22px;
+    height: 90px;
   background: var(--vp-c-divider);
   border: 1px solid var(--vp-c-divider);
   color: var(--vp-c-text-1);
