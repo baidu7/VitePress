@@ -3,6 +3,7 @@ import { useData } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import { nextTick, provide, watch, onMounted, onUnmounted, ref } from 'vue' // 增加了 onUnmounted 和 ref
 import WelcomeToast from './components/WelcomeToast.vue'
+import AiAssistant from './components/AiAssistant.vue'
 
 const { frontmatter, isDark, page } = useData()
 const { Layout } = DefaultTheme
@@ -174,6 +175,7 @@ provide('toggle-appearance', async () => {
       <MusicPlayer />
     </template>
   </Layout>
+		<AiAssistant />
   <WelcomeToast />
 </template>
 
