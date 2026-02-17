@@ -3,10 +3,17 @@ title: jsDelivr链接收集与优缺点对比
 description: jsDelivr收集与优缺点对比，安全提醒和强制刷新方法
 tags: [jsDelivr, cdn, npm, github]
 category: [🌐 网站相关, 信息分享]
-cover: https://gcore.jsdelivr.net/gh/baidu8/images@main/img/img-1771268004506.jpg
+cover: https://gcore.jsdelivr.net/gh/baidu8/images@main/img/img-1771337298105.jpg
 date: 2026-02-17
 outline: [2, 3]
 ---
+
+<RAudio 
+  src="https://v.828111.xyz/js-cdn.m4a" 
+  title="聊一聊：jsDelivr" 
+  subtitle="sDelivr收集与优缺点对比，安全提醒和强制刷新方法" 
+/>
+
 
 这些链接主要围绕 **jsDelivr** 的不同节点和 **GitHub 原始地址**。它们的核心用途是作为“图床”或“脚本加速器”，将 GitHub 仓库里的文件转化为可以直接访问的链接。
 
@@ -90,7 +97,7 @@ jsDelivr: 虽然它的首页简洁，但如果你进入某个包的具体页面�
 2. 使用在线生成工具（最方便）
 如果你手头已经有一个 GitHub 加速链接，想给它配个指纹，可以使用专门的生成器网站：
 
-推荐：SRI Hash Generator
+推荐：[SRI Hash Generator](https://srihash.org/)
 
 用法： 把你的 `https://cdn.jsdelivr.net/...` 链接往里一粘贴，它就会立刻算出 sha256、sha384 或 sha512 的完整 HTML 代码，你直接复制即可。
 

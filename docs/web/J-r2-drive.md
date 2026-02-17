@@ -3,7 +3,7 @@ title: J-R2-drive Cloudflare R2
 description: 告别繁琐配置，只需一个 Worker 即可打造带暗号验证、磨砂玻璃视觉效果的私人云盘。支持一键部署，让 R2 像空气一样简单。
 tags: [Cloudflare, R2, 网盘, 开源项目, 教程]
 category: [🌐 网站相关, 开源分享]
-cover: https://images.unsplash.com/photo-1614850523296-d8c1af93d400?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80
+cover: https://gcore.jsdelivr.net/gh/baidu8/images@main/img/img-1771268004506.jpg
 date: 2026-02-16
 outline: [2, 3]
 ---
