@@ -18,8 +18,8 @@
 <script setup>
 defineProps({
   src: String,
-  title: { type: String, default: '音频收听' },
-  subtitle: { type: String, default: 'Hosted on Cloudflare R2' }
+  title: { type: String, default: '本页音频' },
+  subtitle: { type: String, default: '相关的' }
 })
 </script>
 
