@@ -145,7 +145,12 @@ provide('toggle-appearance', async () => {
     <template #layout-bottom>
 					<footer v-if="frontmatter.layout === 'home'" class="custom-footer">
 					    <div class="footer-container">
-					      
+											<div class="footer-links">
+											      <a href="https://www.baidu.com/s?wd=828111.xyz" target="_blank">baidu</a>
+											      <span class="sep">|</span>
+											      <a href="/links" class="more-link">更多...</a>
+											</div>
+											
 					      <div class="footer-badges">
 					        <img class="no-zoom" src="/img/badges/jdy.svg" />
 					        <img class="no-zoom" src="/img/badges/sy.svg" />

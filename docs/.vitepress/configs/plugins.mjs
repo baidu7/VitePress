@@ -34,7 +34,7 @@ export const transformPageData = (pageData) => {
 
   // 把元数据塞进 head
   pageData.frontmatter.head.push(
-    ['meta', { name: 'wlhlauth', content: 'd3f1bc58c0daecdc337dc84a483b47fd' }],
+    ['meta', { name: 'baidu-site-verification', content: 'codeva-sPPB7tmo0c' }],
     ['meta', { property: 'og:type', content: 'article' }],
     ['meta', { property: 'og:title', content: title }],
     ['meta', { property: 'og:description', content: description }],
