@@ -79,6 +79,7 @@ export const getAutoNav = () => {
     text: '✨ 更多',
     items: [
       { text: '🔗 友联', link: '/links' },
+						{ text: '🍉 合成水果', link: '/hecheng' },
       { text: '🗺️ 站点地图', link: '/sitemap.xml' },
       { text: '👤 关于我', link: '/about' }
     ]

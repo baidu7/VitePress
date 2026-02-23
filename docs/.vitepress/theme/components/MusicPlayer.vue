@@ -11,11 +11,11 @@
     
 				<div id="playlist-selector">
 				  <button 
-				    @click="changePlaylist('13714110383')" 
-				    :class="{ active: currentPid == '13714110383' }"
+				    @click="changePlaylist('988690134')" 
+				    :class="{ active: currentPid == '988690134' }"
 				    class="selector-btn"
 				  >
-				    ❤️  小叶歌单
+				    ❤️  经典老歌
 				  </button>
 				<button 
 				    @click="changePlaylist('2232469985')" 
