@@ -72,22 +72,34 @@ const playSfx = (url) => {
 
 const toggleMute = () => {
   isMuted.value = !isMuted.value;
-  if (bgm.value) {
-    // 如果静音，音量设为 0，否则恢复 0.15
-    bgm.value.volume = isMuted.value ? 0 : 0.15;
+  if (!bgm.value) return;
+
+  if (isMuted.value) {
+    bgm.value.pause(); // 彻底停止声音
+  } else {
+    bgm.value.volume = 0.15;
+    bgm.value.play().catch(() => {});
   }
 };
 
-// 同时确保 startBgm 启动时也遵循这个状态
 const startBgm = () => {
   if (!bgm.value) {
+    // 这里的链接换回你自己的 bgm 路径
     bgm.value = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'); 
     bgm.value.loop = true;
-    bgm.value.volume = isMuted.value ? 0 : 0.15; // 启动时检查
   }
-  if (bgm.value.paused) bgm.value.play().catch(() => {});
-};
+  
+  // 如果当前是静音状态，直接暂停并返回，不许播放
+  if (isMuted.value) {
+    bgm.value.pause();
+    return;
+  }
 
+  bgm.value.volume = 0.15;
+  if (bgm.value.paused) {
+    bgm.value.play().catch(() => {});
+  }
+};
 // --- 全局变量 ---
 let engine, render, runner, mjs;
 let lastX = 0, width, height, lastSpawnTime = 0;
@@ -95,7 +107,23 @@ let countdownTimer = null;
 let checkTimer = null; // 死亡判定的轮询计时器
 
 onMounted(() => {
+  // 1. 原有的逻辑：读取最高分
   highScore.value = parseInt(localStorage.getItem('watermelon_best') || 0);
+
+  // 2. 新增的逻辑：优化手机端手感（禁用缩放，消除点击延迟）
+  const meta = document.querySelector('meta[name="viewport"]');
+  if (meta) {
+    // 备份原本的设置，以便退出页面时还原
+    const oldContent = meta.getAttribute('content');
+    
+    // 强制设置为：禁止用户手动缩放，从而触发浏览器的响应加速
+    meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+
+    // 3. 离开页面时的清理工作
+    onUnmounted(() => {
+      meta.setAttribute('content', oldContent);
+    });
+  }
 });
 
 watch(score, (newVal) => {
@@ -114,7 +142,13 @@ const initGame = () => {
   width = container.clientWidth || 360;
   height = 600;
 
-  engine = mjs.Engine.create({ enableSleeping: false, gravity: { x: 0, y: 1.5 } });
+  // 修改 initGame 里的 engine 创建
+  engine = mjs.Engine.create({ 
+    enableSleeping: true, // 开启睡眠模式，大幅降低 CPU 占用
+    positionIterations: 6, // 默认是 6，如果卡顿可以调到 4
+    velocityIterations: 4, 
+    gravity: { x: 0, y: 1.5 } 
+  });
   // 找到 initGame 里的 render 创建部分，修改如下：
   render = mjs.Render.create({
     element: container,
@@ -124,6 +158,7 @@ const initGame = () => {
       height: 600,
       wireframes: false,
       background: 'transparent',
+						showSleeping: false,    // ✨ 关键！设置为 false，睡眠中的球就不会变色了
       pixelRatio: window.devicePixelRatio || 1 // 核心：解决高清屏下的像素偏移
     }
   });
@@ -139,6 +174,7 @@ const initGame = () => {
   // 自定义渲染
   mjs.Events.on(render, 'afterRender', () => {
     const context = render.context;
+				context.shadowBlur = 0;
     const deadline = 80;
     if (isTouching.value && !isGameOver.value) {
       context.save();
@@ -309,20 +345,29 @@ onUnmounted(() => {
     }
   });
 const toggleFullScreen = () => {
-  // 获取游戏外层容器
   const elem = document.querySelector('.game-wrapper');
+  const isIOS = /iPhone|iPod/.test(navigator.userAgent);
 
+  // 1. 先检查是否处于 iOS 伪全屏状态，如果是，点击就退出
+  if (elem.classList.contains('ios-fake-fullscreen')) {
+    elem.classList.remove('ios-fake-fullscreen');
+    return;
+  }
+
+  // 2. 如果是 iOS 设备且不在伪全屏状态，进入伪全屏
+  if (isIOS) {
+    elem.classList.add('ios-fake-fullscreen');
+    return;
+  }
+
+  // 3. 非 iOS 设备走标准 API
   if (!document.fullscreenElement) {
-    // 进入全屏
     if (elem.requestFullscreen) {
       elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) { /* Safari (iOS 12+ 并不完全支持真全屏，通常只在安卓生效) */
+    } else if (elem.webkitRequestFullscreen) {
       elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      elem.msRequestFullscreen();
     }
   } else {
-    // 退出全屏
     if (document.exitFullscreen) {
       document.exitFullscreen();
     }
@@ -418,5 +463,61 @@ const toggleFullScreen = () => {
   animation: setup-glow 4s infinite alternate;
   /* 增加这一行，防止内部 canvas 溢出产生线条 */
   overflow: hidden; 
+}
+/* --- iOS 专项沉浸式补丁 (整理压缩版) --- */
+.ios-fake-fullscreen {
+  position: fixed !important;
+  top: 0 !important; left: 0 !important;
+  width: 100vw !important; height: 100vh !important;
+  z-index: 99999 !important;
+  background: radial-gradient(circle at center, #1a2a3a 0%, #050505 100%) !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  /* 避开刘海并整体下移，增强长屏视觉平衡 */
+  padding-top: calc(env(safe-area-inset-top) + 60px);
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+.ios-fake-fullscreen #game-container {
+  width: 360px; height: 600px;
+  display: block; margin: 0 auto;
+  /* 比例缩放：以顶部中心为原点，配合 padding 实现精准定位 */
+  transform: scale(1.15);
+  transform-origin: top center;
+  border: 3px solid rgba(66, 184, 131, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 0 50px rgba(0,0,0,0.8);
+		/* 解决裂缝的核心：不要直接缩放容器，而是让容器背景颜色一致 */
+		border: 6px solid #1A1A1A;
+		border-radius: 20px;
+		box-shadow: 0 0 50px rgba(66, 184, 131, 0.4);
+		transform: scale(1.15); /* 稍微减小一点缩放，留出 UI 空间 */
+		animation: setup-glow 4s infinite alternate;
+		/* 增加这一行，防止内部 canvas 溢出产生线条 */
+		overflow: hidden; 
+}
+
+.ios-fake-fullscreen .ui-layer {
+  position: absolute;
+  /* UI 浮动在安全区下方，不与灵动岛/刘海重叠 */
+  top: calc(env(safe-area-inset-top) + 20px) !important;
+  width: 90%; max-width: 340px;
+  left: 50%; transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* 强制横屏提示 */
+@media screen and (orientation: landscape) {
+  .ios-fake-fullscreen::after {
+    content: "请竖屏锁定手机以获得最佳体验";
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    color: #fff; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100000;
+  }
 }
 </style>
