@@ -15,6 +15,13 @@ export default withPwa(defineConfig({
 		    hostname: 'https://828111.xyz'
 		  },
 		base: '/',
+		head: [
+		    // 1. 给现代浏览器（Chrome, Safari, Firefox）用 SVG，清晰且支持换色
+		    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+		    
+		    // 2. 给老掉牙的浏览器留个保底，放个旧款 ico
+		    ['link', { rel: 'alternate icon', href: '/favicon.ico', type: 'image/png' }],
+		  ],
   cleanUrls: true,
   pwa: pwaConfig,
   transformPageData,
