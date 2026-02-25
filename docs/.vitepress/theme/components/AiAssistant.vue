@@ -9,7 +9,6 @@ const inputRef = ref(null)
 const chatHistory = ref([{ role: 'ai', text: '我是江大爷的助理，有事您吩咐。' }])
 const loading = ref(false)
 const contentRef = ref(null)
-const visitorSeed = ref(Math.random().toString(36).substring(7))
 
 const scrollToBottom = async () => {
   await nextTick()
@@ -18,10 +17,12 @@ const scrollToBottom = async () => {
   }
 }
 
-// 【已修改】取消了 newVal 为 true 时的 focus()，只保留滚动
+// 监听打开动作
 watch(isOpen, async (newVal) => {
   if (newVal) {
     scrollToBottom()
+    // 💡 建议：打开时自动聚焦到输入框，省得再点一下
+    setTimeout(() => inputRef.value?.focus(), 100)
   }
 })
 
@@ -45,7 +46,8 @@ const askAI = async () => {
         prompt: userText, 
         pageTitle: title.value,
         description: frontmatter.value.description,
-        history: chatHistory.value.slice(1, -1)
+        // 💡 优化点：只取最近 6 条历史，防止请求头过大
+        history: chatHistory.value.slice(-7, -1) 
       })
     })
     
@@ -56,6 +58,14 @@ const askAI = async () => {
   } finally {
     loading.value = false
     scrollToBottom()
+  }
+}
+
+// 💡 新增：处理回车发送
+const handleEnter = (e) => {
+  if (!e.shiftKey) { // 如果不是按住 Shift，直接发送
+    e.preventDefault()
+    askAI()
   }
 }
 
@@ -104,11 +114,12 @@ const askAI = async () => {
 
       <div class="ai-footer">
         <input 
-          ref="inputRef"
-          v-model="inputMsg" 
-          @keyup.enter="askAI" 
-          placeholder="给助理递个话..." 
-        />
+            ref="inputRef"
+            v-model="inputMsg" 
+            :disabled="loading"
+            @keydown.enter.prevent="askAI" 
+            :placeholder="loading ? '助理正在思考中...' : '给助理递个话...'" 
+          />
         <button class="send-btn" @click="askAI" :disabled="!inputMsg.trim() || loading">
           <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
         </button>
@@ -347,7 +358,11 @@ const askAI = async () => {
   line-height: 1.6;
   box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
-
+@keyframes blink {
+  0% { opacity: .2; }
+  20% { opacity: 1; }
+  100% { opacity: .2; }
+}
 .msg.user { align-self: flex-end; }
 .msg.user .msg-inner {
   background: var(--vp-c-brand);

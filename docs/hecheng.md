@@ -1,4 +1,8 @@
 ---
+title: 合成水果
+description: 合成水果小游戏
+cover: https://gcore.jsdelivr.net/gh/baidu8/images@main/img/img-1772024908412.jpg
+date: 2026-02-25
 layout: page
 outline: false        # 顺便把右侧大纲也关了，更清爽
 breadcrumb: false     # 如果插件支持面包屑开关

@@ -116,6 +116,10 @@ const duration = ref(0)
 const currentLyricText = ref('')
 const lrcLines = ref([])
 const audioRef = ref(null)
+const currentPid = ref('local'); 
+
+// 💡 侦察兵：预检下一首的隐藏播放器
+const scoutAudio = typeof Audio !== 'undefined' ? new Audio() : null;
 
 // --- 频道配置区 ---
 const myChannels = [
@@ -126,32 +130,32 @@ const myChannels = [
   { name: '🎐 古风单', id: '17645418779' }
 ]
 
-const showMenu = ref(false) // 控制菜单显示
-
-// 💡 改进：正在播放的对象独立，它是音频流的“锚点”
+const showMenu = ref(false) 
 const activeSong = ref(null)
 const currentSong = computed(() => activeSong.value || fullList.value[index.value] || localList[0])
-const currentPid = ref('local'); 
 
 // --- 2. 核心功能 ---
 
-/**
- * 切换频道：只换列表，不换歌
- */
 const changePlaylist = async (id) => {
   if (currentPid.value === id && fullList.value.length > 0) return; 
   currentPid.value = id;
-  
   isListOpen.value = true;
-  fullList.value = []; // 清空界面列表，准备装载新频道
+  fullList.value = []; 
   
   if (id === 'local') {
     fullList.value = [...localList];
+    // 💡 重点：加载完本地列表，聚焦到第一首
+    playIndex(0, false); 
   } else {
     await fetchCloudList(id); 
+    // 💡 重点：加载完云端列表，聚焦到第一首
+    // 咱们加个判断，确保列表里有歌再聚焦
+    if (fullList.value.length > 0) {
+      playIndex(0, false);
+    }
   }
   
-  // 💡 换台后不调用 playIndex，确保当前音乐不断
+  // 列表滚动回顶部
   setTimeout(() => {
     const listEl = document.getElementById('p-list');
     if (listEl) listEl.scrollTop = 0;
@@ -173,16 +177,11 @@ const fetchCloudList = async (id = currentPid.value) => {
   }
 }
 
-/**
- * 播放指定索引：真正执行“切歌”动作
- */
 const playIndex = async (i, autoPlay = true) => { 
   if (!fullList.value[i]) return;
-  
   index.value = i;
   activeSong.value = fullList.value[i]; 
 
-  // 🍎 苹果 Media Session：让 PWA 后台更稳，锁屏能看
   if ('mediaSession' in navigator) {
     const [title, artist] = activeSong.value.name.split(' - ');
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -190,14 +189,10 @@ const playIndex = async (i, autoPlay = true) => {
       artist: artist || '未知歌手',
       artwork: [{ src: activeSong.value.pic, sizes: '512x512' }]
     });
-    // 允许锁屏/耳机按键控制
     navigator.mediaSession.setActionHandler('previoustrack', prev);
     navigator.mediaSession.setActionHandler('nexttrack', next);
-    navigator.mediaSession.setActionHandler('play', () => { audioRef.value?.play(); isPlaying.value = true; });
-    navigator.mediaSession.setActionHandler('pause', () => { audioRef.value?.pause(); isPlaying.value = false; });
   }
 
-  // 加载歌词
   if (activeSong.value.lrc) {
     await parseLrc(activeSong.value.lrc); 
   } else {
@@ -210,15 +205,9 @@ const playIndex = async (i, autoPlay = true) => {
       if (audioRef.value) {
         audioRef.value.play()
           .then(() => { isPlaying.value = true; })
-          .catch((err) => { 
-            console.log("iOS 自动播放拦截，需手动点一下", err);
-            isPlaying.value = false; 
-          });
+          .catch(() => { isPlaying.value = false; });
       }
     }, 150);
-  } else {
-    isPlaying.value = false; 
-    if (audioRef.value) audioRef.value.pause();
   }
 }
 
@@ -238,10 +227,6 @@ const parseLrc = async (path) => {
 
 const togglePlay = () => {
   if (!currentSong.value) return;
-  if (currentTime.value === 0 && lrcLines.value.length === 0) {
-    playIndex(index.value, true);
-    return;
-  }
   if (isPlaying.value) {
     audioRef.value.pause();
   } else {
@@ -262,25 +247,66 @@ const onUpdate = () => {
 const onLoaded = () => { 
   if (!audioRef.value) return;
   duration.value = audioRef.value.duration; 
-  // 🛡️ 剔出 30 秒试听垃圾歌曲
-  if (duration.value > 0 && duration.value < 60) {
-    fullList.value.splice(index.value, 1); 
-    if (index.value >= fullList.value.length) index.value = 0;
-    playIndex(index.value, isPlaying.value); 
-    return;
-  }
   // 🔄 续杯：仅限云端
   if (currentPid.value !== 'local' && index.value >= fullList.value.length - 2) {
     fetchCloudList(currentPid.value);
   }
 }
 
+// --- 💡 核心：侦察兵预检逻辑 ---
+const preCheckSong = (targetIdx, direction = 'next') => {
+  return new Promise((resolve) => {
+    if (fullList.value.length === 0) return resolve(targetIdx);
+    let safeIdx = (targetIdx + fullList.value.length) % fullList.value.length;
+    const song = fullList.value[safeIdx];
+    
+    // 如果没有侦察兵或这首歌是本地的，直接放行
+    if (!song || !scoutAudio || !song.isCloud) return resolve(safeIdx);
+
+    scoutAudio.src = song.url;
+    scoutAudio.muted = true;
+
+    const cleanup = () => {
+      scoutAudio.removeEventListener('loadedmetadata', onMetadata);
+      scoutAudio.removeEventListener('error', onError);
+    };
+
+    const onMetadata = () => {
+      cleanup();
+      if (scoutAudio.duration > 0 && scoutAudio.duration < 60) {
+        console.log(`江大爷巡检：剔除短歌 [${song.name}]`);
+        fullList.value.splice(safeIdx, 1);
+        if (fullList.value.length === 0) return resolve(0);
+        let nextTarget = direction === 'next' ? safeIdx : safeIdx - 1;
+        resolve(preCheckSong(nextTarget, direction));
+      } else {
+        resolve(safeIdx);
+      }
+    };
+
+    const onError = () => { cleanup(); resolve(safeIdx); };
+
+    scoutAudio.addEventListener('loadedmetadata', onMetadata);
+    scoutAudio.addEventListener('error', onError);
+    setTimeout(() => { cleanup(); resolve(safeIdx); }, 2500); // 2.5秒超时
+  });
+};
+
+const next = async () => {
+  let targetIdx = (index.value + 1) % fullList.value.length;
+  const finalIdx = await preCheckSong(targetIdx, 'next');
+  playIndex(finalIdx, true);
+};
+
+const prev = async () => {
+  let targetIdx = (index.value - 1 + fullList.value.length) % fullList.value.length;
+  const finalIdx = await preCheckSong(targetIdx, 'prev');
+  playIndex(finalIdx, true);
+};
+
 const onSeek = (e) => { 
   if (audioRef.value) audioRef.value.currentTime = e.target.value; 
 }
-
-const next = () => playIndex((index.value + 1) % fullList.value.length, true);
-const prev = () => playIndex((index.value - 1 + fullList.value.length) % fullList.value.length, true);
 
 const formatTime = (s) => {
   if (isNaN(s)) return "00:00";
@@ -289,13 +315,10 @@ const formatTime = (s) => {
 }
 
 onMounted(async () => { 
-  // 默认启动项：显示本地收藏
   currentPid.value = 'local';
   fullList.value = [...localList];
-  // 💡 初始化第一首歌的元数据（名片/歌词），但不自动出声
   await playIndex(0, false); 
   
-  // 处理 iOS 切回 App 时的状态同步
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && isPlaying.value && audioRef.value?.paused) {
       audioRef.value.play().catch(() => {});
