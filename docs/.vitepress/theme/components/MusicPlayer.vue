@@ -22,11 +22,11 @@
 				    :class="{ active: currentPid == '2232469985' }"
 				    class="selector-btn"
 				  >
-				    📻 欧美老歌
+				    ?? 欧美老歌
 				  </button>
 				  <div class="channel-container">
 				    <button class="channel-toggle" @click="showMenu = !showMenu">
-				      {{ showMenu ? '🔼 收起' : '◀️ 更多' }}
+				      {{ showMenu ? '?? 收起' : '◀️ 更多' }}
 				    </button>
 				    
 				    <Transition name="fade">
@@ -54,7 +54,7 @@
       </div>
       
       <div class="progress-box">
-        <span class="time">{{ formatTime(currentTime) }}</span>🔊
+        <span class="time">{{ formatTime(currentTime) }}</span>??
         <input type="range" :max="duration" :value="currentTime" @input="onSeek" step="0.1">
         <span class="time">{{ formatTime(duration) }}</span>
       </div>
@@ -100,7 +100,7 @@ const localList = [
     name: "Stars - Janis Ian", 
     url: "https://mr1.doubanio.com/484a8df54b09620ae3c9eeb48875f1a7/1/fm/song/p195694_128k.mp4", 
     lrc: "/Janis-Ian-Stars.lrc", 
-    pic: "https://gcore.jsdelivr.net/gh/baidu8/images@main/img/img-1771058961517.jpg",
+    pic: "https://gcore.jsdelivr.net/gh/baidu7/images@main/img/img-1771058961517.jpg",
     isCloud: false 
   }
 ]
@@ -118,16 +118,16 @@ const lrcLines = ref([])
 const audioRef = ref(null)
 const currentPid = ref('local'); 
 
-// 💡 侦察兵：预检下一首的隐藏播放器
+// ?? 侦察兵：预检下一首的隐藏播放器
 const scoutAudio = typeof Audio !== 'undefined' ? new Audio() : null;
 
 // --- 频道配置区 ---
 const myChannels = [
   { name: '❤️ 收藏', id: 'local' },
-  { name: '🚩 飙升榜', id: '19723756' },
-  { name: '🎸 新歌榜', id: '3779629' }, 
-  { name: '🔥 热歌榜', id: '3778678' },
-  { name: '🎐 古风单', id: '17645418779' }
+  { name: '?? 飙升榜', id: '19723756' },
+  { name: '?? 新歌榜', id: '3779629' }, 
+  { name: '?? 热歌榜', id: '3778678' },
+  { name: '?? 古风单', id: '17645418779' }
 ]
 
 const showMenu = ref(false) 
@@ -144,11 +144,11 @@ const changePlaylist = async (id) => {
   
   if (id === 'local') {
     fullList.value = [...localList];
-    // 💡 重点：加载完本地列表，聚焦到第一首
+    // ?? 重点：加载完本地列表，聚焦到第一首
     playIndex(0, false); 
   } else {
     await fetchCloudList(id); 
-    // 💡 重点：加载完云端列表，聚焦到第一首
+    // ?? 重点：加载完云端列表，聚焦到第一首
     // 咱们加个判断，确保列表里有歌再聚焦
     if (fullList.value.length > 0) {
       playIndex(0, false);
@@ -247,13 +247,13 @@ const onUpdate = () => {
 const onLoaded = () => { 
   if (!audioRef.value) return;
   duration.value = audioRef.value.duration; 
-  // 🔄 续杯：仅限云端
+  // ?? 续杯：仅限云端
   if (currentPid.value !== 'local' && index.value >= fullList.value.length - 2) {
     fetchCloudList(currentPid.value);
   }
 }
 
-// --- 💡 核心：侦察兵预检逻辑 ---
+// --- ?? 核心：侦察兵预检逻辑 ---
 const preCheckSong = (targetIdx, direction = 'next') => {
   return new Promise((resolve) => {
     if (fullList.value.length === 0) return resolve(targetIdx);
@@ -519,7 +519,7 @@ onMounted(async () => {
 }
 
 /* ============================================================
-   2. 📱 手机端适配 (屏幕底部浮动)
+   2. ?? 手机端适配 (屏幕底部浮动)
    ============================================================ */
 @media (max-width: 768px) {
   #lyric-island {

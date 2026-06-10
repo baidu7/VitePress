@@ -11,7 +11,7 @@ editLink: false       # 关掉编辑链接
 * **兴趣**：折腾 这个、研究 那个、打打 游戏、说说 梦话。
 
 ### 📩 联系方式
-- **GitHub**: [baidu8](https://github.com/baidu8)
+- **GitHub**: [baidu7](https://github.com/baidu7)
 - **Email**: [1@828111.xyz](mailto:1@828111.xyz)
 
 ### 🚀 折腾足迹

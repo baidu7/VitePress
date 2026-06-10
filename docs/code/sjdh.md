@@ -2,7 +2,7 @@
 title: 四季动画js
 description: 随四季变化显示不同特效js
 tags: [canvas, js, 特效]
-category: [🌐 网站相关, 代码片段]
+category: [?? 网站相关, 代码片段]
 date: 2026-01-18
 outline: [2, 3]
 ---
@@ -433,11 +433,11 @@ import { onMounted, onUnmounted } from 'vue'
 onMounted(() => {
     (function() {
         const assets = {
-            spring: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/樱花.png',
-            summer: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/绿叶.png',
-            autumn: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/枫叶.png',
-            winter: 'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/雪花.png',
-            cloud:  'https://gcore.jsdelivr.net/gh/baidu8/images@main/img/cloud.png' 
+            spring: 'https://gcore.jsdelivr.net/gh/baidu7/images@main/img/樱花.png',
+            summer: 'https://gcore.jsdelivr.net/gh/baidu7/images@main/img/绿叶.png',
+            autumn: 'https://gcore.jsdelivr.net/gh/baidu7/images@main/img/枫叶.png',
+            winter: 'https://gcore.jsdelivr.net/gh/baidu7/images@main/img/雪花.png',
+            cloud:  'https://gcore.jsdelivr.net/gh/baidu7/images@main/img/cloud.png' 
         };
 
         const canvas = document.createElement('canvas');

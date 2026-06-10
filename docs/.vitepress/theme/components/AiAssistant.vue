@@ -21,7 +21,7 @@ const scrollToBottom = async () => {
 watch(isOpen, async (newVal) => {
   if (newVal) {
     scrollToBottom()
-    // 💡 建议：打开时自动聚焦到输入框，省得再点一下
+    // ?? 建议：打开时自动聚焦到输入框，省得再点一下
     setTimeout(() => inputRef.value?.focus(), 100)
   }
 })
@@ -39,14 +39,14 @@ const askAI = async () => {
   scrollToBottom()
 
   try {
-    const res = await fetch('https://baidu8.indevs.in/', {
+    const res = await fetch('https://baidu7.indevs.in/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         prompt: userText, 
         pageTitle: title.value,
         description: frontmatter.value.description,
-        // 💡 优化点：只取最近 6 条历史，防止请求头过大
+        // ?? 优化点：只取最近 6 条历史，防止请求头过大
         history: chatHistory.value.slice(-7, -1) 
       })
     })
@@ -61,7 +61,7 @@ const askAI = async () => {
   }
 }
 
-// 💡 新增：处理回车发送
+// ?? 新增：处理回车发送
 const handleEnter = (e) => {
   if (!e.shiftKey) { // 如果不是按住 Shift，直接发送
     e.preventDefault()
@@ -76,7 +76,7 @@ const handleEnter = (e) => {
     <div class="ai-side-tab" @click="isOpen = !isOpen">
       <div v-if="!isOpen" class="unread-dot">1</div>
       
-      <span class="tab-icon">{{ isOpen ? '✕' : '🤖' }}</span>
+      <span class="tab-icon">{{ isOpen ? '✕' : '??' }}</span>
       <span class="tab-text">{{ isOpen ? '隐藏' : '助理' }}</span>
     </div>
 

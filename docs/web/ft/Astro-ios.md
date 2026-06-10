@@ -2,8 +2,8 @@
 title: Astro三端模仿苹果主题
 description: Astro三端模仿苹果主题
 tags: [Astro, 主题]
-category: [🌐 网站相关, 开源分享]
-cover: https://raw.githubusercontent.com/baidu8/J-os/refs/heads/main/Snipaste_2026-01-24_16-16-20.png
+category: [?? 网站相关, 开源分享]
+cover: https://raw.githubusercontent.com/baidu7/J-os/refs/heads/main/Snipaste_2026-01-24_16-16-20.png
 date: 2026-01-18
 outline: [2, 3]
 ---
@@ -20,22 +20,22 @@ outline: [2, 3]
 
 ## 电脑端
 浏览器相册便签音乐dock栏都弄好了，感觉还挺像那回事的
-![图片描述](https://raw.githubusercontent.com/baidu8/J-os/refs/heads/main/Snipaste_2026-01-24_16-14-57.png)
-![图片描述](https://raw.githubusercontent.com/baidu8/J-os/refs/heads/main/Snipaste_2026-01-24_16-15-41.png)
-![图片描述](https://raw.githubusercontent.com/baidu8/J-os/refs/heads/main/Snipaste_2026-01-24_16-16-20.png)
+![图片描述](https://raw.githubusercontent.com/baidu7/J-os/refs/heads/main/Snipaste_2026-01-24_16-14-57.png)
+![图片描述](https://raw.githubusercontent.com/baidu7/J-os/refs/heads/main/Snipaste_2026-01-24_16-15-41.png)
+![图片描述](https://raw.githubusercontent.com/baidu7/J-os/refs/heads/main/Snipaste_2026-01-24_16-16-20.png)
 ## 平板端
 几个按钮没弄
-![图片描述](https://raw.githubusercontent.com/baidu8/J-os/refs/heads/main/Snipaste_2026-01-24_16-17-10.png)
+![图片描述](https://raw.githubusercontent.com/baidu7/J-os/refs/heads/main/Snipaste_2026-01-24_16-17-10.png)
 ## 手机端
 几乎没怎么弄
 
-有点丑🤨
-![图片描述](https://raw.githubusercontent.com/baidu8/J-os/refs/heads/main/Snipaste_2026-01-24_16-16-44.png)
+有点丑??
+![图片描述](https://raw.githubusercontent.com/baidu7/J-os/refs/heads/main/Snipaste_2026-01-24_16-16-44.png)
 
 
 ---
 
-仓库地址：[https://github.com/baidu8/J-os](https://github.com/baidu8/J-os)
+仓库地址：[https://github.com/baidu7/J-os](https://github.com/baidu7/J-os)
 
 ---
 

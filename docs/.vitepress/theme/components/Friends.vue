@@ -14,7 +14,7 @@
     <hr class="divider" />
 <div class="my-info-card">
   <div class="card-header">
-    <span class="icon">🏠</span> <b>本站信息（欢迎互换）</b>
+    <span class="icon">??</span> <b>本站信息（欢迎互换）</b>
   </div>
   <div class="info-content">
     <div class="info-item"><span>名称：</span><code>江大爷</code></div>
@@ -25,7 +25,7 @@
   <p class="copy-hint">直接复制上面的内容挂到贵站即可</p>
 </div>
     <div class="apply-section">
-      <h3>🤝 申请友链</h3>
+      <h3>?? 申请友链</h3>
       <p class="hint">请先在贵站挂好本站链接：<b>828111.xyz</b></p>
       
       <div class="form-group">
@@ -46,8 +46,8 @@
 import { ref, onMounted } from 'vue'
 
 // 配置区域
-const DATA_REPO = "baidu8/links"
-const CF_WORKER_URL = "https://daye.gv.uy" // 👈 记得换成你的CF地址！
+const DATA_REPO = "baidu7/links"
+const CF_WORKER_URL = "https://daye.gv.uy" // ?? 记得换成你的CF地址！
 
 const links = ref([])
 const loading = ref(true)

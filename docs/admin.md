@@ -9,7 +9,7 @@ title: 写作空间
         {{ alertMsg }}
       </div>
     </transition>
-    <div class="card-icon">🔐</div>
+    <div class="card-icon">??</div>
     <p>请输入账号密码</p>
     <div class="fake-form">
       <div class="input-group">
@@ -43,27 +43,27 @@ title: 写作空间
       <button class="btn-pub" @click="submitFile" :disabled="loading">
         {{ loading ? '...' : '发布' }}
       </button>
-      <button class="btn-del" @click="deleteFile">🗑️</button>
+      <button class="btn-del" @click="deleteFile">??️</button>
     </div>
   </div>
 
   <div class="file-scroller">
-    <div class="file-chip root" @click="fetchFiles('docs')">🏠 根目录</div>
+    <div class="file-chip root" @click="fetchFiles('docs')">?? 根目录</div>
     <div v-for="file in fileList" :key="file.path" 
          class="file-chip" :class="{ active: filePath === file.path }"
          @click="handleFileClick(file)">
-      {{ file.type === 'dir' ? '📁' : '' }} {{ file.name }}
+      {{ file.type === 'dir' ? '??' : '' }} {{ file.name }}
     </div>
   </div>
 
   <div class="fast-tools">
     <button @click="insertTag('warning')">⚠️ 警告</button>
-    <button @click="insertTag('tip')">💡 提示</button>
-    <button @click="insertTag('details')">📁 折叠</button>
-    <button @click="insertTag('video')">📹 视频</button>
-				<button @click="insertTag('iframe')">🎞️️ iframe</button>
-    <button @click="insertTag('grid')">🖼️ 网格</button>
-    <button @click="insertTag('jz')">🀄 居中</button>
+    <button @click="insertTag('tip')">?? 提示</button>
+    <button @click="insertTag('details')">?? 折叠</button>
+    <button @click="insertTag('video')">?? 视频</button>
+				<button @click="insertTag('iframe')">??️️ iframe</button>
+    <button @click="insertTag('grid')">??️ 网格</button>
+    <button @click="insertTag('jz')">?? 居中</button>
     <button @click="insertTag('meta')">⚙️ 设置</button>
 				<ImageHelper 
 				  :token="token" 
@@ -85,7 +85,7 @@ title: 写作空间
   </div>
 
   <button class="mobile-preview-btn" @click="isMobilePreview = !isMobilePreview">
-    {{ isMobilePreview ? '✍️ 返回编辑' : '👁️ 查看预览' }}
+    {{ isMobilePreview ? '✍️ 返回编辑' : '??️ 查看预览' }}
   </button>
 </div>
 
@@ -165,11 +165,11 @@ const handleImageSuccess = (cdnUrl) => {
 }
 
 // 主仓库（存文章的）
-const OWNER = 'baidu8'
+const OWNER = 'baidu7'
 const REPO = 'VitePress' 
 
 // 图床仓库（存图片的）
-const IMG_OWNER = 'baidu8' // 如果是同一个账号，就还写你的名字
+const IMG_OWNER = 'baidu7' // 如果是同一个账号，就还写你的名字
 const IMG_REPO = 'images'  // 这里填新仓库的名字
 
 onMounted(async () => {
@@ -290,7 +290,7 @@ const deleteFile = async () => {
 const insertTag = (type) => {
   const cm = easyMDE.codemirror
   const map = {
-    tip: '\n::: tip 💡\n\n:::\n',
+    tip: '\n::: tip ??\n\n:::\n',
     warning: '\n::: warning ⚠\n\n:::\n',
     details: '\n::: details 点击展开\n\n:::\n',
 				video: '\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n<source src="/movie.mp4" type="video/mp4">\n您的浏览器不支持播放该视频。\n</video>\n',

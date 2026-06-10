@@ -7,9 +7,9 @@ layout: page
 import { ref, onMounted, watch } from 'vue'
 import ImageHelper from '@theme/components/ImageHelper.vue'
 
-const GITHUB_OWNER = 'baidu8'
-const GITHUB_REPO = 'baidu8.github.io'
-const IMG_OWNER = 'baidu8' // 如果是同一个账号，就还写你的名字
+const GITHUB_OWNER = 'baidu7'
+const GITHUB_REPO = 'baidu7.github.io'
+const IMG_OWNER = 'baidu7' // 如果是同一个账号，就还写你的名字
 const IMG_REPO = 'images'  // 这里填新仓库的名字
 const LABEL = 'shuo'
 
@@ -50,7 +50,7 @@ async function publishShuo() {
   if (!newContent.value || !token.value) return
   isPublishing.value = true
 
-  // --- 🌟 标题优化逻辑开始 ---
+  // --- ?? 标题优化逻辑开始 ---
   const lines = newContent.value.trim().split('\n')
   let firstLine = lines[0].replace(/[#*`]/g, '').trim() // 去掉 Markdown 符号
   
@@ -59,7 +59,7 @@ async function publishShuo() {
   
   // 如果第一行是空的（比如只传了图），就还用时间保底
   const finalTitle = titleText || `说说 ${new Date().toLocaleString()}`
-  // --- 🌟 标题优化逻辑结束 ---
+  // --- ?? 标题优化逻辑结束 ---
 
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues`, {
@@ -98,7 +98,7 @@ async function deleteShuo(num) {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues/${num}`, {
       method: 'PATCH',
       headers: { 
-        'Authorization': `Bearer ${token.value.trim()}`, // 🌟 跟发布保持一致
+        'Authorization': `Bearer ${token.value.trim()}`, // ?? 跟发布保持一致
         'Content-Type': 'application/json' 
       },
       body: JSON.stringify({ state: 'closed' })
@@ -142,7 +142,7 @@ const handleImageSuccess = (cdnUrl) => {
     newContent.value += imgMd
   }
 }
-// 🌟 重点优化：支持视频和 iframe 的渲染
+// ?? 重点优化：支持视频和 iframe 的渲染
 const parseMD = (t) => {
   if (!t) return ''
   return t
@@ -151,9 +151,9 @@ const parseMD = (t) => {
     .replace(/^## (.*$)/gm, '<h2 style="color:var(--vp-c-brand); margin:15px 0 10px;">$1</h2>')
     .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--vp-c-brand);">$1</strong>')
     .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:var(--vp-c-brand);">$1</a>')
-    // 🌟 2. 处理换行：视频标签后的换行不应该变 <br>
+    // ?? 2. 处理换行：视频标签后的换行不应该变 <br>
     .replace(/\n/g, '<br>')
-    // 🌟 3. 特殊处理：修复某些情况下被多加的 br
+    // ?? 3. 特殊处理：修复某些情况下被多加的 br
     .replace(/<\/div><br>/g, '</div>')
     .replace(/<\/video><br>/g, '</video>')
 }
@@ -168,13 +168,13 @@ const parseMD = (t) => {
   <div v-if="showPostBox" class="modal-mask" @click.self="showPostBox = false">
     <div class="post-box modal-content">
       <span class="close-x" @click="showPostBox = false">×</span>
-      <h3 style="margin: 0 0 15px 0; font-size: 18px;">📝 发布说说</h3>
+      <h3 style="margin: 0 0 15px 0; font-size: 18px;">?? 发布说说</h3>
       <div class="quick-tags">
         <span @click="newContent += '✨ '">✨ 闪光</span>
-        <span @click="newContent += '![插图]() '">🖼️ 插图</span>
-        <span @click="insertIframe" style="color: #00a1d6;">📺 iframe</span>
-        <span @click="insertvideo" style="color: #00a1d6;">📹 视频</span>
-        <span @click="newContent += '[链接]() '">🔗 链接</span>
+        <span @click="newContent += '![插图]() '">??️ 插图</span>
+        <span @click="insertIframe" style="color: #00a1d6;">?? iframe</span>
+        <span @click="insertvideo" style="color: #00a1d6;">?? 视频</span>
+        <span @click="newContent += '[链接]() '">?? 链接</span>
         <ImageHelper 
           :token="token" 
           :owner="IMG_OWNER" 
@@ -183,7 +183,7 @@ const parseMD = (t) => {
           @error="showAlert"
           @busy="showAlert"
         />
-        <span @click="newContent = ''" style="color:#ff4d4f">🧹 清空</span>
+        <span @click="newContent = ''" style="color:#ff4d4f">?? 清空</span>
       </div>
       <textarea v-model="newContent" placeholder="此时此刻想说点啥？" rows="6"></textarea>
       <div style="display:flex; gap:10px; margin-top: 15px;">
@@ -207,9 +207,9 @@ const parseMD = (t) => {
     <div v-html="parseMD(item.body)" class="shuo-body vp-doc"></div>
     <div class="shuo-footer">
       <div style="display:flex; gap:15px; align-items:center; margin-left: auto;">
-        <button v-if="token" @click="deleteShuo(item.number)" class="del-btn">🗑️ 删除</button>
+        <button v-if="token" @click="deleteShuo(item.number)" class="del-btn">??️ 删除</button>
         <a :href="item.html_url" target="_blank" class="cmt-btn">
-          💬 评论 <span v-if="item.comments > 0" class="cnt">{{ item.comments }}</span>
+          ?? 评论 <span v-if="item.comments > 0" class="cnt">{{ item.comments }}</span>
         </a>
       </div>
     </div>

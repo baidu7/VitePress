@@ -73,7 +73,7 @@ export function useBlog(allPosts) {
   const latestIssues = ref([])
   onMounted(async () => {
     try {
-      const res = await fetch(`https://api.github.com/repos/baidu8/baidu8.github.io/issues?state=open&labels=shuo&per_page=1`)
+      const res = await fetch(`https://api.github.com/repos/baidu7/baidu7.github.io/issues?state=open&labels=shuo&per_page=1`)
       const data = await res.json()
       if (data?.length > 0) {
         latestIssues.value = data.map(item => {
