@@ -1,7 +1,7 @@
 ---
 title: 合成水果
 description: 合成水果小游戏
-cover: https://gcore.jsdelivr.net/gh/baidu7/images@main/img/img-1772024908412.jpg
+cover: https://gcore.jsdelivr.net/gh/baidu7/images@main/img/img-1781092057063.jpg
 date: 2026-02-25
 layout: page
 outline: false        # 顺便把右侧大纲也关了，更清爽
@@ -23,7 +23,7 @@ editLink: false       # 关掉编辑链接
         <div class="action-icons">
 								<div class="fullscreen-icon" @click="toggleFullScreen">⛶</div>
           <div class="mute-icon" @click="toggleMute">
-            {{ isMuted ? '??' : '??' }}
+            {{ isMuted ? '🔇' : '🔊' }}
           </div>
           <div class="reset-icon" @click="restartGame">♻️</div>
         </div>
@@ -61,7 +61,7 @@ const countdown = ref(0);
 const bgm = ref(null);
 const isMuted = ref(false); // 是否静音
 
-const EMOJIS = ['??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??'];
+const EMOJIS = ["🍒", "🍓", "🍇", "🍊", "🍋", "🍎", "🍐", "🍑", "🍍", "🥥", "🍉"];
 const SOUNDS = {
   pop: '/audio/combine.mp3', 
   drop: '/audio/drop.mp3', 

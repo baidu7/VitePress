@@ -2,7 +2,7 @@
 title: J-log极简博客
 description: J-log 是一个基于 GitHub Gist API 开发的轻量级、响应式个人博客系统。无需数据库，无需服务器
 tags: [博客, 极简, 开源项目, GitHub, J-log, Token]
-category: [?? 网站相关, 开源分享]
+category: [🌐 网站相关, 开源分享]
 cover: https://cdn.jsdelivr.net/gh/baidu7/J-log@main/Snipaste_2026-02-05_23-32-41.png
 date: 2026-01-19
 outline: [2, 3]

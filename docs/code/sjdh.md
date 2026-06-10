@@ -2,7 +2,7 @@
 title: 四季动画js
 description: 随四季变化显示不同特效js
 tags: [canvas, js, 特效]
-category: [?? 网站相关, 代码片段]
+category: [🌐 网站相关, 代码片段]
 date: 2026-01-18
 outline: [2, 3]
 ---

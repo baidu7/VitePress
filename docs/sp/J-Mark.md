@@ -2,7 +2,7 @@
 title: J-nav配套插件J-Mark
 description: 深度体验一款支持文件夹筛选的书签导出神器
 tags: [工具推荐, 浏览器插件, 开源项目, J-nav, J-Mark, 插件]
-category: [?? 软件插件, 插件]
+category: [💾 软件插件, 插件]
 cover: https://cdn.jsdelivr.net/gh/baidu7/J-Mark@main/Snipaste_2026-02-04_01-19-40.png
 date: 2026-01-18
 outline: [2, 3]

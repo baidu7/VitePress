@@ -168,13 +168,13 @@ const parseMD = (t) => {
   <div v-if="showPostBox" class="modal-mask" @click.self="showPostBox = false">
     <div class="post-box modal-content">
       <span class="close-x" @click="showPostBox = false">×</span>
-      <h3 style="margin: 0 0 15px 0; font-size: 18px;">?? 发布说说</h3>
+      <h3 style="margin: 0 0 15px 0; font-size: 18px;">✍ 发布说说</h3>
       <div class="quick-tags">
         <span @click="newContent += '✨ '">✨ 闪光</span>
-        <span @click="newContent += '![插图]() '">??️ 插图</span>
-        <span @click="insertIframe" style="color: #00a1d6;">?? iframe</span>
-        <span @click="insertvideo" style="color: #00a1d6;">?? 视频</span>
-        <span @click="newContent += '[链接]() '">?? 链接</span>
+        <span @click="newContent += '![插图]() '">📷️ 插图</span>
+        <span @click="insertIframe" style="color: #00a1d6;">🎞 iframe</span>
+        <span @click="insertvideo" style="color: #00a1d6;">📽 视频</span>
+        <span @click="newContent += '[链接]() '">🔗 链接</span>
         <ImageHelper 
           :token="token" 
           :owner="IMG_OWNER" 
@@ -183,7 +183,7 @@ const parseMD = (t) => {
           @error="showAlert"
           @busy="showAlert"
         />
-        <span @click="newContent = ''" style="color:#ff4d4f">?? 清空</span>
+        <span @click="newContent = ''" style="color:#ff4d4f">🧹 清空</span>
       </div>
       <textarea v-model="newContent" placeholder="此时此刻想说点啥？" rows="6"></textarea>
       <div style="display:flex; gap:10px; margin-top: 15px;">
@@ -207,9 +207,9 @@ const parseMD = (t) => {
     <div v-html="parseMD(item.body)" class="shuo-body vp-doc"></div>
     <div class="shuo-footer">
       <div style="display:flex; gap:15px; align-items:center; margin-left: auto;">
-        <button v-if="token" @click="deleteShuo(item.number)" class="del-btn">??️ 删除</button>
+        <button v-if="token" @click="deleteShuo(item.number)" class="del-btn">🗑️ 删除</button>
         <a :href="item.html_url" target="_blank" class="cmt-btn">
-          ?? 评论 <span v-if="item.comments > 0" class="cnt">{{ item.comments }}</span>
+          🗯 评论 <span v-if="item.comments > 0" class="cnt">{{ item.comments }}</span>
         </a>
       </div>
     </div>

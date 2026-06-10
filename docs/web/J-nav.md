@@ -2,7 +2,7 @@
 title: J-nav纯静态导航
 description: 配合 J-Mark 插件，实现书签到导航站的零手工同步
 tags: [工具推荐, 极简, 开源项目, J-nav, J-Mark]
-category: [?? 网站相关, 开源分享]
+category: [🌐 网站相关, 开源分享]
 date: 2026-01-19
 outline: [2, 3]
 next:

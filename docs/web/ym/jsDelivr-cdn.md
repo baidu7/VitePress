@@ -3,7 +3,7 @@ title: jsDelivr链接收集与优缺点对比
 description: jsDelivr收集与优缺点对比，安全提醒和强制刷新方法
 tags: [jsDelivr, cdn, npm, github]
 category: [🌐 网站相关, 信息分享]
-cover: https://gcore.jsdelivr.net/gh/baidu7/images@main/img/img-1771337298105.jpg
+cover: https://gcore.jsdelivr.net/gh/baidu7/images@main/img/img-1781092597468.jpg
 date: 2026-02-17
 outline: [2, 3]
 ---

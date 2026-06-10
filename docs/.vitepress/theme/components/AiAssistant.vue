@@ -76,7 +76,7 @@ const handleEnter = (e) => {
     <div class="ai-side-tab" @click="isOpen = !isOpen">
       <div v-if="!isOpen" class="unread-dot">1</div>
       
-      <span class="tab-icon">{{ isOpen ? '✕' : '??' }}</span>
+      <span class="tab-icon">{{ isOpen ? '✕' : '🤖' }}</span>
       <span class="tab-text">{{ isOpen ? '隐藏' : '助理' }}</span>
     </div>
 
@@ -133,7 +133,7 @@ const handleEnter = (e) => {
 .unread-dot {
   position: absolute;
   top: -0px;
-  right: -5px;
+  right: 6px;
   background: #ff4757; /* 醒目的红色 */
   color: white;
   font-size: 8px;

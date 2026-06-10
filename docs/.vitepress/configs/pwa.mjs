@@ -3,8 +3,8 @@ export const pwaConfig = {
 		  // 🌟 核心修复：添加 manifest 对象，解决您截图中所有的红字报错
 		  manifest: {
       id: '/',
-      name: '老江',          // 对应报错：清单未包含 name
-      short_name: '老江',         // 桌面图标下的简短名字
+      name: '江大爷',          // 对应报错：清单未包含 name
+      short_name: '江大爷',         // 桌面图标下的简短名字
       description: '闲来无事，记点东西',
       theme_color: '#ffffff',
       background_color: '#ffffff',

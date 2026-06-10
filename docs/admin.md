@@ -9,7 +9,7 @@ title: 写作空间
         {{ alertMsg }}
       </div>
     </transition>
-    <div class="card-icon">??</div>
+    <div class="card-icon">🔐</div>
     <p>请输入账号密码</p>
     <div class="fake-form">
       <div class="input-group">
@@ -43,7 +43,7 @@ title: 写作空间
       <button class="btn-pub" @click="submitFile" :disabled="loading">
         {{ loading ? '...' : '发布' }}
       </button>
-      <button class="btn-del" @click="deleteFile">??️</button>
+      <button class="btn-del" @click="deleteFile">🗑️</button>
     </div>
   </div>
 
@@ -58,12 +58,12 @@ title: 写作空间
 
   <div class="fast-tools">
     <button @click="insertTag('warning')">⚠️ 警告</button>
-    <button @click="insertTag('tip')">?? 提示</button>
-    <button @click="insertTag('details')">?? 折叠</button>
-    <button @click="insertTag('video')">?? 视频</button>
-				<button @click="insertTag('iframe')">??️️ iframe</button>
-    <button @click="insertTag('grid')">??️ 网格</button>
-    <button @click="insertTag('jz')">?? 居中</button>
+    <button @click="insertTag('tip')">💡 提示</button>
+    <button @click="insertTag('details')">📁 折叠</button>
+    <button @click="insertTag('video')">📽️ 视频</button>
+				<button @click="insertTag('iframe')">🎞️️ iframe</button>
+    <button @click="insertTag('grid')">🖼️ 网格</button>
+    <button @click="insertTag('jz')">🀄 居中</button>
     <button @click="insertTag('meta')">⚙️ 设置</button>
 				<ImageHelper 
 				  :token="token" 
@@ -85,7 +85,7 @@ title: 写作空间
   </div>
 
   <button class="mobile-preview-btn" @click="isMobilePreview = !isMobilePreview">
-    {{ isMobilePreview ? '✍️ 返回编辑' : '??️ 查看预览' }}
+    {{ isMobilePreview ? '✍️ 返回编辑' : '👁️ 查看预览' }}
   </button>
 </div>
 
