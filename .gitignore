@@ -18,3 +18,10 @@ Thumbs.db
 *.log
 
 # --- 注意：不要忽略 package-lock.json，它是版本定海神针 ---
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
