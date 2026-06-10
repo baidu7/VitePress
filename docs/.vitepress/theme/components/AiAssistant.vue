@@ -39,7 +39,7 @@ const askAI = async () => {
   scrollToBottom()
 
   try {
-    const res = await fetch('https://baidu7.indevs.in/', {
+    const res = await fetch('https://baidu8.indevs.in/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
