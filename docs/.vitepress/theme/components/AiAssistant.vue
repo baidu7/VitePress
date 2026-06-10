@@ -6,9 +6,12 @@ const { title, frontmatter } = useData()
 const isOpen = ref(false)
 const inputMsg = ref('')
 const inputRef = ref(null) 
-const chatHistory = ref([{ role: 'ai', text: '我是江大爷的助理，有事您吩咐。' }])
+const chatHistory = ref([{ role: 'ai', text: '我是江大爷的助理，有事您吩咐。✨' }])
 const loading = ref(false)
 const contentRef = ref(null)
+
+// 💡 修复：定义访客头像的随机种子，防止前端渲染报错导致白屏
+const visitorSeed = ref(Math.random().toString(36).substring(7))
 
 const scrollToBottom = async () => {
   await nextTick()
@@ -21,8 +24,7 @@ const scrollToBottom = async () => {
 watch(isOpen, async (newVal) => {
   if (newVal) {
     scrollToBottom()
-    // ?? 建议：打开时自动聚焦到输入框，省得再点一下
-    setTimeout(() => inputRef.value?.focus(), 100)
+    // 💡 遵循江大爷之前的习惯：移除自动 focus 聚焦输入框的代码，保持清爽，仅滚动到底部
   }
 })
 
@@ -33,26 +35,33 @@ const askAI = async () => {
     return
   }
 
+  // 1. 先把用户的话塞进历史记录
   chatHistory.value.push({ role: 'user', text: userText })
   inputMsg.value = '' 
   loading.value = true
   scrollToBottom()
 
   try {
+    // 💡 优化：提取出需要发送给后端的历史上下文
+    // 排除掉最初的第一条欢迎语（index 0），并且确保包含刚加进去的最后一条用户消息
+    const sendHistory = chatHistory.value
+      .slice(1) // 别把“我是江大爷助理”这句欢迎语发给后端，浪费 token
+      .slice(-6) // 只取最近 6 条对话交锋
+
     const res = await fetch('https://baidu8.indevs.in/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         prompt: userText, 
         pageTitle: title.value,
-        description: frontmatter.value.description,
-        // ?? 优化点：只取最近 6 条历史，防止请求头过大
-        history: chatHistory.value.slice(-7, -1) 
+        description: frontmatter.value.description || '',
+        history: sendHistory
       })
     })
     
     const data = await res.json()
-    chatHistory.value.push({ role: 'ai', text: data.response })
+    const aiReply = data.response || '小的刚才走神了，没听清大爷您说什么...'
+    chatHistory.value.push({ role: 'ai', text: aiReply })
   } catch (e) {
     chatHistory.value.push({ role: 'ai', text: '哎哟，估计是江大爷没缴网费，小的断网了...' })
   } finally {
@@ -60,22 +69,12 @@ const askAI = async () => {
     scrollToBottom()
   }
 }
-
-// ?? 新增：处理回车发送
-const handleEnter = (e) => {
-  if (!e.shiftKey) { // 如果不是按住 Shift，直接发送
-    e.preventDefault()
-    askAI()
-  }
-}
-
 </script>
 
 <template>
   <div class="ai-wrapper" :class="{ 'is-open': isOpen }">
     <div class="ai-side-tab" @click="isOpen = !isOpen">
       <div v-if="!isOpen" class="unread-dot">1</div>
-      
       <span class="tab-icon">{{ isOpen ? '✕' : '🤖' }}</span>
       <span class="tab-text">{{ isOpen ? '隐藏' : '助理' }}</span>
     </div>
@@ -99,7 +98,7 @@ const handleEnter = (e) => {
           <img v-if="msg.role === 'ai'" class="chat-avatar" src="/img/aitx.svg" alt="助理">
           
           <div class="msg-content">
-            <div class="msg-inner">{{ msg.text }}</div>
+            <div class="msg-inner" style="white-space: pre-wrap; word-break: break-all;">{{ msg.text }}</div>
           </div>
         
           <img v-if="msg.role === 'user'" 
@@ -107,8 +106,13 @@ const handleEnter = (e) => {
                :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${visitorSeed}`" 
                alt="访客">
         </div>
-        <div v-if="loading" class="msg ai thinking">
-           <span class="dot-ani">...</span> 小的琢磨中
+        <div v-if="loading" class="msg-row ai">
+           <img class="chat-avatar" src="/img/aitx.svg" alt="助理">
+           <div class="msg-content">
+              <div class="msg-inner thinking-text">
+                <span class="dot-ani">...</span> 小的琢磨中💨
+              </div>
+           </div>
         </div>
       </div>
 
@@ -127,7 +131,6 @@ const handleEnter = (e) => {
     </div>
   </div>
 </template>
-
 <style scoped>
 /* 消息红点样式 */
 .unread-dot {
