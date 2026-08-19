@@ -2,7 +2,6 @@
   <div id="lyric-island" :class="{ 'show': isPlaying && currentLyricText }">
     <div class="lyric-text">{{ currentLyricText }}</div>
   </div>
-
   <div id="music-drawer" :class="{ 'open': isDrawerOpen }">
     <div id="drawer-handle" @click="isDrawerOpen = !isDrawerOpen">
       <div class="dot" :class="{ 'playing': isPlaying }"></div>
@@ -22,11 +21,11 @@
 				    :class="{ active: currentPid == '2232469985' }"
 				    class="selector-btn"
 				  >
-				    ?? 欧美老歌
+				   📻 欧美老歌 
 				  </button>
 				  <div class="channel-container">
 				    <button class="channel-toggle" @click="showMenu = !showMenu">
-				      {{ showMenu ? '?? 收起' : '◀️ 更多' }}
+				      {{ showMenu ? '🔼️ 收起' : '◀️ 更多' }}
 				    </button>
 				    
 				    <Transition name="fade">
@@ -54,11 +53,20 @@
       </div>
       
       <div class="progress-box">
-        <span class="time">{{ formatTime(currentTime) }}</span>??
-        <input type="range" :max="duration" :value="currentTime" @input="onSeek" step="0.1">
-        <span class="time">{{ formatTime(duration) }}</span>
+        <span class="time">{{ formatTime(currentTime) }}</span>
+        <input 
+          v-if="!isLiveStream"
+          type="range" 
+          :max="duration || 0" 
+          :value="currentTime" 
+          @input="onSeek" 
+          @mousedown="isDragging=true"
+          @mouseup="isDragging=false"
+          @mouseleave="isDragging=false"
+          step="0.1"
+        >
+        <span class="time">{{ isLiveStream ? '♾️' : formatTime(duration) }}</span>
       </div>
-
       <div class="btn-group">
         <button class="icon-btn" @click="prev" title="上一曲">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 18V6h2v12H6m3.5-6L18 18V6l-8.5 6Z"/></svg>
@@ -77,37 +85,33 @@
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3 13h2v-2H3v2m0 4h2v-2H3v2m0-8h2V7H3v2m4 4h14v-2H7v2m0 4h14v-2H7v2m0-8h14V7H7v2Z"/></svg>
         </button>
       </div>
-
       <div id="p-list" :class="{ 'show': isListOpen }">
         <div v-for="(s, i) in fullList" :key="i" 
-             :class="['s-item', { 'active': index === i }]"
+             :class="['s-item', { 'active': playingIndex === i }]"
              @click="playIndex(i)">
           {{ i + 1 }}. {{ s.name }} <span v-if="s.isCloud" class="tag-cloud">云</span>
         </div>
       </div>
     </div>
   </div>
-
   <audio ref="audioRef" :src="currentSong?.url" @timeupdate="onUpdate" @loadedmetadata="onLoaded" @ended="next"></audio>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
 // --- 1. 配置区 ---
 const localList = [
   { 
-    name: "Stars - Janis Ian", 
-    url: "https://mr1.doubanio.com/484a8df54b09620ae3c9eeb48875f1a7/1/fm/song/p195694_128k.mp4", 
-    lrc: "/Janis-Ian-Stars.lrc", 
-    pic: "https://gcore.jsdelivr.net/gh/baidu7/images@main/img/img-1771058961517.jpg",
+    name: "FM", 
+    url: "http://lhttp.qingting.fm/live/1671/64k.mp3", 
+    lrc: "", 
+    pic: "/img/avatar.png",
     isCloud: false 
   }
 ]
 const API_BASE = 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id='
-
 const fullList = ref([]) 
 const index = ref(0)
+const playingIndex = ref(-1) // -1 = 无高亮
 const isPlaying = ref(false)
 const isDrawerOpen = ref(false)
 const isListOpen = ref(false)
@@ -117,51 +121,40 @@ const currentLyricText = ref('')
 const lrcLines = ref([])
 const audioRef = ref(null)
 const currentPid = ref('local'); 
-
+const isLiveStream = ref(false)
+const isDragging = ref(false)
 // ?? 侦察兵：预检下一首的隐藏播放器
 const scoutAudio = typeof Audio !== 'undefined' ? new Audio() : null;
-
 // --- 频道配置区 ---
 const myChannels = [
   { name: '❤️ 收藏', id: 'local' },
-  { name: '?? 飙升榜', id: '19723756' },
-  { name: '?? 新歌榜', id: '3779629' }, 
-  { name: '?? 热歌榜', id: '3778678' },
-  { name: '?? 古风单', id: '17645418779' }
+  { name: '🚩 飙升榜', id: '19723756' },
+  { name: '🎸 新歌榜', id: '3779629' }, 
+  { name: '🔥 热歌榜', id: '3778678' },
+  { name: '🎐 古风单', id: '17645418779' }
 ]
-
 const showMenu = ref(false) 
 const activeSong = ref(null)
 const currentSong = computed(() => activeSong.value || fullList.value[index.value] || localList[0])
-
 // --- 2. 核心功能 ---
-
 const changePlaylist = async (id) => {
   if (currentPid.value === id && fullList.value.length > 0) return; 
   currentPid.value = id;
   isListOpen.value = true;
   fullList.value = []; 
+  playingIndex.value = -1; //切换列表清空高亮！！
   
   if (id === 'local') {
     fullList.value = [...localList];
-    // ?? 重点：加载完本地列表，聚焦到第一首
-    playIndex(0, false); 
   } else {
     await fetchCloudList(id); 
-    // ?? 重点：加载完云端列表，聚焦到第一首
-    // 咱们加个判断，确保列表里有歌再聚焦
-    if (fullList.value.length > 0) {
-      playIndex(0, false);
-    }
   }
   
-  // 列表滚动回顶部
   setTimeout(() => {
     const listEl = document.getElementById('p-list');
     if (listEl) listEl.scrollTop = 0;
   }, 100);
 }
-
 const fetchCloudList = async (id = currentPid.value) => { 
   if (id === 'local') return;
   try {
@@ -176,12 +169,11 @@ const fetchCloudList = async (id = currentPid.value) => {
     console.error('云端加载失败');
   }
 }
-
 const playIndex = async (i, autoPlay = true) => { 
   if (!fullList.value[i]) return;
   index.value = i;
+  playingIndex.value = i; //点击播放才开启高亮
   activeSong.value = fullList.value[i]; 
-
   if ('mediaSession' in navigator) {
     const [title, artist] = activeSong.value.name.split(' - ');
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -192,14 +184,12 @@ const playIndex = async (i, autoPlay = true) => {
     navigator.mediaSession.setActionHandler('previoustrack', prev);
     navigator.mediaSession.setActionHandler('nexttrack', next);
   }
-
   if (activeSong.value.lrc) {
     await parseLrc(activeSong.value.lrc); 
   } else {
     lrcLines.value = [];
     currentLyricText.value = '';
   }
-
   if (autoPlay) {
     setTimeout(() => {
       if (audioRef.value) {
@@ -210,7 +200,6 @@ const playIndex = async (i, autoPlay = true) => {
     }, 150);
   }
 }
-
 const parseLrc = async (path) => {
   lrcLines.value = []; 
   currentLyricText.value = '';
@@ -224,7 +213,6 @@ const parseLrc = async (path) => {
     });
   } catch (e) { }
 }
-
 const togglePlay = () => {
   if (!currentSong.value) return;
   if (isPlaying.value) {
@@ -234,25 +222,36 @@ const togglePlay = () => {
   }
   isPlaying.value = !isPlaying.value;
 }
-
 const onUpdate = () => {
   if (!audioRef.value) return;
-  currentTime.value = audioRef.value.currentTime;
+  if(!isDragging.value){
+      currentTime.value = audioRef.value.currentTime;
+  }
+  
+  if(!isFinite(audioRef.value.duration)){
+    isLiveStream.value = true;
+  }else{
+    isLiveStream.value = false;
+  }
+
   if (lrcLines.value.length) {
     const line = lrcLines.value.findLast(item => item.time <= currentTime.value);
     if (line) currentLyricText.value = line.text;
   }
 }
-
 const onLoaded = () => { 
   if (!audioRef.value) return;
-  duration.value = audioRef.value.duration; 
-  // ?? 续杯：仅限云端
+  if(isFinite(audioRef.value.duration)){
+    duration.value = audioRef.value.duration;
+    isLiveStream.value = false;
+  }else{
+    isLiveStream.value = true;
+  }
+
   if (currentPid.value !== 'local' && index.value >= fullList.value.length - 2) {
     fetchCloudList(currentPid.value);
   }
 }
-
 // --- ?? 核心：侦察兵预检逻辑 ---
 const preCheckSong = (targetIdx, direction = 'next') => {
   return new Promise((resolve) => {
@@ -262,15 +261,12 @@ const preCheckSong = (targetIdx, direction = 'next') => {
     
     // 如果没有侦察兵或这首歌是本地的，直接放行
     if (!song || !scoutAudio || !song.isCloud) return resolve(safeIdx);
-
     scoutAudio.src = song.url;
     scoutAudio.muted = true;
-
     const cleanup = () => {
       scoutAudio.removeEventListener('loadedmetadata', onMetadata);
       scoutAudio.removeEventListener('error', onError);
     };
-
     const onMetadata = () => {
       cleanup();
       if (scoutAudio.duration > 0 && scoutAudio.duration < 60) {
@@ -283,37 +279,34 @@ const preCheckSong = (targetIdx, direction = 'next') => {
         resolve(safeIdx);
       }
     };
-
     const onError = () => { cleanup(); resolve(safeIdx); };
-
     scoutAudio.addEventListener('loadedmetadata', onMetadata);
     scoutAudio.addEventListener('error', onError);
     setTimeout(() => { cleanup(); resolve(safeIdx); }, 2500); // 2.5秒超时
   });
 };
-
 const next = async () => {
   let targetIdx = (index.value + 1) % fullList.value.length;
   const finalIdx = await preCheckSong(targetIdx, 'next');
   playIndex(finalIdx, true);
 };
-
 const prev = async () => {
   let targetIdx = (index.value - 1 + fullList.value.length) % fullList.value.length;
   const finalIdx = await preCheckSong(targetIdx, 'prev');
   playIndex(finalIdx, true);
 };
-
 const onSeek = (e) => { 
   if (audioRef.value) audioRef.value.currentTime = e.target.value; 
 }
-
 const formatTime = (s) => {
-  if (isNaN(s)) return "00:00";
-  let m = Math.floor(s / 60); s = Math.floor(s % 60);
-  return (m < 10 ? '0' : '') + m + ":" + (s < 10 ? '0' : '') + s;
+  // 同时拦截：undefined、null、NaN、Infinity、-Infinity、负数
+  if (s == null || isNaN(s) || !isFinite(s) || s < 0) {
+    return "00:00";
+  }
+  let m = Math.floor(s / 60);
+  let sec = Math.floor(s % 60);
+  return (m < 10 ? '0' : '') + m + ":" + (sec < 10 ? '0' : '') + sec;
 }
-
 onMounted(async () => { 
   currentPid.value = 'local';
   fullList.value = [...localList];
