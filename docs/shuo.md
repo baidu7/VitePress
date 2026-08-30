@@ -2,17 +2,14 @@
 title: 我的说说
 layout: page
 ---
-
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import ImageHelper from '@theme/components/ImageHelper.vue'
-
 const GITHUB_OWNER = 'baidu7'
 const GITHUB_REPO = 'baidu7.github.io'
-const IMG_OWNER = 'baidu7' // 如果是同一个账号，就还写你的名字
-const IMG_REPO = 'images'  // 这里填新仓库的名字
+const IMG_OWNER = 'baidu7'
+const IMG_REPO = 'images'
 const LABEL = 'shuo'
-
 const issues = ref([])
 const loading = ref(false)
 const hasMore = ref(true)
@@ -22,13 +19,39 @@ const newContent = ref('')
 const token = ref('')
 const isPublishing = ref(false)
 
+// ========== 新增：视频互斥暂停功能 ==========
+function pauseAllOtherVideos(currentEl) {
+  // 暂停所有原生mp4视频
+  document.querySelectorAll('video').forEach(vid => {
+    if (vid !== currentEl && !vid.paused) {
+      vid.pause()
+    }
+  })
+  // 发送暂停指令给支持postMessage的iframe播放器(Youtube)
+  document.querySelectorAll('iframe').forEach(iframe => {
+    if (iframe !== currentEl && iframe.contentWindow) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*')
+    }
+  })
+}
+
+// 给页面所有video绑定play监听，防止重复绑定
+function bindVideoMutualPause() {
+  document.querySelectorAll('video').forEach(vid => {
+    if (vid.dataset.bindPlay) return
+    vid.dataset.bindPlay = "1"
+    vid.addEventListener('play', (e) => {
+      pauseAllOtherVideos(e.target)
+    })
+  })
+}
+
 onMounted(() => {
   if (typeof window !== 'undefined') {
     token.value = localStorage.getItem('gh_token') || ''
     fetchIssues()
   }
 })
-
 watch(token, (v) => { if (typeof window !== 'undefined') localStorage.setItem('gh_token', v) })
 
 async function fetchIssues(isMore = false) {
@@ -40,66 +63,64 @@ async function fetchIssues(isMore = false) {
     const data = await res.json()
     if (isMore) issues.value = [...issues.value, ...data]
     else issues.value = data
-    hasMore.value = data.length === 10
+
+    // DOM渲染完成后，给新加载出来的视频绑定互斥暂停事件
+    setTimeout(() => {
+      bindVideoMutualPause()
+    }, 100)
+
   } catch (e) { console.error(e) }
   loading.value = false
 }
 
-// 1. 发布说说：成功后自动关窗
 async function publishShuo() {
   if (!newContent.value || !token.value) return
   isPublishing.value = true
-
-  // --- ?? 标题优化逻辑开始 ---
   const lines = newContent.value.trim().split('\n')
-  let firstLine = lines[0].replace(/[#*`]/g, '').trim() // 去掉 Markdown 符号
-  
-  // 如果第一行太长（超过 20 字），截取一下加省略号
+  let firstLine = lines[0].replace(/[#*`]/g, '').trim()
   const titleText = firstLine.length > 20 ? firstLine.slice(0, 20) + '...' : firstLine
-  
-  // 如果第一行是空的（比如只传了图），就还用时间保底
   const finalTitle = titleText || `说说 ${new Date().toLocaleString()}`
-  // --- ?? 标题优化逻辑结束 ---
-
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Authorization': `Bearer ${token.value.trim()}`,
-        'Content-Type': 'application/json' 
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ 
-        title: finalTitle, // 使用咱们新生成的标题
-        body: newContent.value, 
-        labels: [LABEL] 
+      body: JSON.stringify({
+        title: finalTitle,
+        body: newContent.value,
+        labels: [LABEL]
       })
     })
-    
+
     if (res.ok) {
       const newItem = await res.json()
       issues.value = [newItem, ...issues.value]
       newContent.value = ''
       showPostBox.value = false
+      // 刚发布的内容也要绑定视频暂停事件
+      setTimeout(() => {
+        bindVideoMutualPause()
+      }, 100)
     } else {
       const err = await res.json()
       alert(`发布失败：${err.message}`)
     }
-  } catch (e) { 
-    alert('网络错误') 
+  } catch (e) {
+    alert('网络错误')
   } finally {
     isPublishing.value = false
   }
 }
-
-// 2. 删除说说：也建议改成 Bearer 格式
 async function deleteShuo(num) {
   if (!confirm('确定删除？')) return
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues/${num}`, {
       method: 'PATCH',
-      headers: { 
-        'Authorization': `Bearer ${token.value.trim()}`, // ?? 跟发布保持一致
-        'Content-Type': 'application/json' 
+      headers: {
+        'Authorization': `Bearer ${token.value.trim()}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ state: 'closed' })
     })
@@ -108,54 +129,50 @@ async function deleteShuo(num) {
     } else {
       alert('删除失败，可能权限不足')
     }
-  } catch (e) { 
-    alert('删除过程中发生错误') 
+  } catch (e) {
+    alert('删除过程中发生错误')
   }
 }
-
 function insertIframe() {
   const template = `\n<div class="iframe-container">\n<iframe src="这里填链接&autoplay=0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n`;
-  // 直接追加到内容后面
   newContent.value += template;
-  // 提示一下大爷，别忘了改链接
-  console.log("视频模板已插入，记得改链接哦！");
 }
 function insertvideo() {
   const template = `\n<video controls playsinline preload="metadata" style="width: 100%; aspect-ratio: 16/9; border-radius: 5px;">\n  <source src="/movie.mp4" type="video/mp4">\n  您的浏览器不支持播放该视频。\n</video>\n`;
-  
-  // 别忘了把这行字塞进输入框里
   newContent.value += template;
 }
-
 const handleImageSuccess = (cdnUrl) => {
   const el = document.querySelector('.post-box textarea')
   const imgMd = `\n![插图](${cdnUrl})\n`
-  
   if (el) {
     const start = el.selectionStart
     const end = el.selectionEnd
     const text = newContent.value
-    // 把图片插在光标位置
     newContent.value = text.substring(0, start) + imgMd + text.substring(end)
   } else {
-    // 没找到光标就老老实实补在最后
     newContent.value += imgMd
   }
 }
-// ?? 重点优化：支持视频和 iframe 的渲染
 const parseMD = (t) => {
   if (!t) return ''
+  t = t.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
+    const videoExt = /\.(mp4|webm)$/i
+    if (videoExt.test(url)) {
+      return `<video controls playsinline preload="metadata" style="width: 100%; border-radius: 5px; margin: 10px 0; display:block;">
+        <source src="${url}" type="video/mp4">
+        浏览器不支持播放视频
+      </video>`
+    } else {
+      return `<img src="${url}" style="max-width:100%; border-radius:5px; margin:10px 0; display:block;" />`
+    }
+  })
+  t = t.replace(/^## (.*$)/gm, '<h2 style="color:var(--vp-c-brand); margin:15px 0 10px;">$1</h2>')
+  t = t.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--vp-c-brand);">$1</strong>')
+  t = t.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:var(--vp-c-brand);">$1</a>')
+  t = t.replace(/\n/g, '<br>')
+  t = t.replace(/<\/div><br>/g, '</div>')
+  t = t.replace(/<\/video><br>/g, '</video>')
   return t
-    // 1. 先保留视频和 iframe 标签（不被转义）
-    .replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" style="max-width:100%; border-radius:5px; margin:10px 0; display:block;" />')
-    .replace(/^## (.*$)/gm, '<h2 style="color:var(--vp-c-brand); margin:15px 0 10px;">$1</h2>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--vp-c-brand);">$1</strong>')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:var(--vp-c-brand);">$1</a>')
-    // ?? 2. 处理换行：视频标签后的换行不应该变 <br>
-    .replace(/\n/g, '<br>')
-    // ?? 3. 特殊处理：修复某些情况下被多加的 br
-    .replace(/<\/div><br>/g, '</div>')
-    .replace(/<\/video><br>/g, '</video>')
 }
 </script>
 
@@ -163,7 +180,6 @@ const parseMD = (t) => {
   <button @click="showPostBox = true" class="float-post-btn" title="点我写说说">
     ✍️
   </button>
-
 <transition name="fade">
   <div v-if="showPostBox" class="modal-mask" @click.self="showPostBox = false">
     <div class="post-box modal-content">
@@ -175,13 +191,11 @@ const parseMD = (t) => {
         <span @click="insertIframe" style="color: #00a1d6;">🎞 iframe</span>
         <span @click="insertvideo" style="color: #00a1d6;">📽 视频</span>
         <span @click="newContent += '[链接]() '">🔗 链接</span>
-        <ImageHelper 
-          :token="token" 
-          :owner="IMG_OWNER" 
-          :repo="IMG_REPO" 
+        <ImageHelper
+          :token="token"
+          :owner="IMG_OWNER"
+          :repo="IMG_REPO"
           @success="handleImageSuccess"
-          @error="showAlert"
-          @busy="showAlert"
         />
         <span @click="newContent = ''" style="color:#ff4d4f">🧹 清空</span>
       </div>
@@ -195,10 +209,9 @@ const parseMD = (t) => {
     </div>
   </div>
 </transition>
-
   <div v-for="item in issues" :key="item.id" class="shuo-card">
     <div class="shuo-header">
-      <img src="/img/avatar.png" class="shuo-avatar no-zoom" data-no-zoom /> 
+      <img src="/img/avatar.png" class="shuo-avatar no-zoom" data-no-zoom />
       <div class="shuo-meta">
         <span class="shuo-author">江大爷</span>
         <span class="shuo-time">{{ new Date(item.created_at).toLocaleString() }}</span>
@@ -214,7 +227,6 @@ const parseMD = (t) => {
       </div>
     </div>
   </div>
-
   <div v-if="hasMore" style="text-align:center; margin-top:20px;">
     <button @click="fetchIssues(true)" :disabled="loading" class="more-btn">
       {{ loading ? '加载中...' : '更多' }}
@@ -223,25 +235,20 @@ const parseMD = (t) => {
 </div>
 
 <style scoped>
-/* 确保说说卡片不会乱跑 */
 .shuo-card {
   background: var(--vp-c-bg-soft);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
   border: 1px solid var(--vp-c-divider);
-  /* 增加这一行，防止内容溢出 */
-  word-break: break-word; 
+  word-break: break-word;
 }
-/* 头像栏布局 */
 .shuo-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
-
-/* 站长头像样式 */
 .shuo-avatar {
   width: 42px !important;
   height: 42px !important;
@@ -250,44 +257,33 @@ const parseMD = (t) => {
   border: 1.5px solid var(--vp-c-brand-soft);
   margin: 0 !important;
 }
-/* 鼠标悬停在说说卡片上时，头像轻微放大（不是看图插件那种放大，只是变大一点点） */
 .shuo-card:hover .shuo-avatar {
   transform: scale(1.05);
   transition: transform 0.3s ease;
 }
-
-/* 名字和时间的容器 */
 .shuo-meta {
   display: flex;
   flex-direction: column;
 }
-
-/* 名字样式 */
 .shuo-author {
   font-weight: bold;
   font-size: 1.05rem;
-		font-family: "STXingkai", "STKaiti", "Kaiti SC", "Kaiti", serif;
+	font-family: "STXingkai", "STKaiti", "Kaiti SC", "Kaiti", serif;
   color: var(--vp-c-text-1);
 }
-
-/* 时间样式 */
 .shuo-time {
   font-size: 0.85rem;
   color: var(--vp-c-text-2);
 }
-
-/* 修正正文间距 */
 .shuo-body {
   margin-left: 2px;
   margin-bottom: 15px;
 }
-
-/* 底部操作栏对齐 */
 .shuo-footer {
   border-top: 1px solid var(--vp-c-divider);
   padding-top: 10px;
   display: flex;
-  justify-content: flex-end; /* 让按钮靠右 */
+  justify-content: flex-end;
 }
 .shuo-container { max-width: 600px; margin: 20px auto; padding: 0 23px;}
 .toggle-btn { width: 100%; padding: 10px; border: 1px dashed var(--vp-c-brand); color: var(--vp-c-brand); border-radius: 5px; cursor: pointer; background: transparent; }
@@ -297,12 +293,10 @@ const parseMD = (t) => {
     display: flex;
     gap: 8px;
     align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
 }
 .quick-tags span { font-size: 0.8rem; padding: 2px 8px; border: 1px solid var(--vp-c-divider); border-radius: 5px; cursor: pointer; }
 .quick-tags span:hover { border-color: var(--vp-c-brand); color: var(--vp-c-brand); }
-/* 悬浮写说说按钮 */
 .float-post-btn {
   position: fixed;
   bottom: 40px;
@@ -322,21 +316,17 @@ const parseMD = (t) => {
   transition: transform 0.2s;
 }
 .float-post-btn:hover { transform: scale(1.1); }
-
-/* 弹窗遮罩层 */
 .modal-mask {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
   background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(5px); /* 背景模糊效果 */
+  backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
-
-/* 居中对话框本体 */
 .modal-content {
   width: 90%;
   max-width: 550px;
@@ -348,12 +338,10 @@ const parseMD = (t) => {
 }
 @media (max-width: 768px) {
   .modal-content {
-    /* 手机端让弹窗靠上一点，给键盘留地方 */
     align-self: flex-start;
     margin-top: 50px;
   }
 }
-/* 叉号关闭 */
 .close-x {
   position: absolute;
   top: 15px; right: 20px;
@@ -362,8 +350,6 @@ const parseMD = (t) => {
   color: var(--vp-c-text-2);
 }
 .close-x:hover { color: #ff4d4f; }
-
-/* 动画 */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 textarea { width: 100%; padding: 10px; background: var(--vp-c-bg); border: 1px solid var(--vp-c-divider); color: inherit; margin-bottom: 10px; border-radius: 6px; }
