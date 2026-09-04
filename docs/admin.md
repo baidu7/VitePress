@@ -48,11 +48,11 @@ title: 写作空间
   </div>
 
   <div class="file-scroller">
-    <div class="file-chip root" @click="fetchFiles('docs')">?? 根目录</div>
+    <div class="file-chip root" @click="fetchFiles('docs')">🏠 根目录</div>
     <div v-for="file in fileList" :key="file.path" 
          class="file-chip" :class="{ active: filePath === file.path }"
          @click="handleFileClick(file)">
-      {{ file.type === 'dir' ? '??' : '' }} {{ file.name }}
+      {{ file.type === 'dir' ? '📂' : '' }} {{ file.name }}
     </div>
   </div>
 
@@ -290,7 +290,7 @@ const deleteFile = async () => {
 const insertTag = (type) => {
   const cm = easyMDE.codemirror
   const map = {
-    tip: '\n::: tip ??\n\n:::\n',
+    tip: '\n::: tip 💡\n\n:::\n',
     warning: '\n::: warning ⚠\n\n:::\n',
     details: '\n::: details 点击展开\n\n:::\n',
 				video: '\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n<source src="/movie.mp4" type="video/mp4">\n您的浏览器不支持播放该视频。\n</video>\n',
