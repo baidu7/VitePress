@@ -8,6 +8,32 @@ import AiAssistant from './components/AiAssistant.vue'
 const { frontmatter, isDark, page } = useData()
 const { Layout } = DefaultTheme
 
+// --- 0. 按时间自动切换主题 + 手动偏好记忆 ---
+const MANUAL_KEY = 'jdy-appearance-manual' // 用户手动设置过主题的标记
+const DARK_START_HOUR = 19 // 晚上 19 点起进入暗色
+const DARK_END_HOUR = 6    // 早上 6 点起恢复亮色
+let lastThemeHour = -1
+
+const isNightHour = (hour: number) => hour >= DARK_START_HOUR || hour < DARK_END_HOUR
+
+// 检查是否需要按时间调整（仅当用户从未手动设置过主题时生效）
+const checkTimeTheme = () => {
+  const hour = new Date().getHours()
+  if (hour === lastThemeHour) return
+  lastThemeHour = hour
+  if (typeof localStorage === 'undefined') return
+  if (localStorage.getItem(MANUAL_KEY)) return // 用户手动选过，尊重手动选择
+  const expected = isNightHour(hour)
+  if (isDark.value !== expected) isDark.value = expected
+}
+
+// 页面加载时立即按时间应用（同步执行，避免首屏闪烁）
+const applyTimeTheme = () => {
+  lastThemeHour = -1
+  checkTimeTheme()
+}
+applyTimeTheme()
+
 // 在 script setup 里的逻辑
 const getRelativeTime = (date: string | number) => {
   const dateSource = date || page.value.lastUpdated;
@@ -53,7 +79,10 @@ const updateThemeColor = () => {
 onMounted(() => {
   updateThemeColor()
   updateRunTime()
-  timerId = setInterval(updateRunTime, 1000)
+  timerId = setInterval(() => {
+    updateRunTime()
+    checkTimeTheme()
+  }, 1000)
 })
 
 onUnmounted(() => {
@@ -62,42 +91,55 @@ onUnmounted(() => {
 
 watch(isDark, updateThemeColor)
 
+provide('toggle-appearance', async () => {
+  // 手动切换过：记住用户选择，之后不再按时间干预
+  const rememberManual = () => {
+    localStorage.setItem(MANUAL_KEY, isDark.value ? 'dark' : 'light')
+  }
+
+  if (!enableTransitions()) {
+    isDark.value = !isDark.value
+    rememberManual()
+    return
+  }
+
+  let toggled = false
+  try {
+    const transition = (document as any).startViewTransition(async () => {
+      isDark.value = !isDark.value
+      toggled = true
+      await nextTick()
+    })
+    await transition.ready
+
+    // 切到暗色：旧视图（亮色）从全屏收起成一条线
+    // 切到亮色：新视图（亮色）从一条线展开到全屏
+    const clipPath = isDark.value
+      ? ['inset(0 0 0 0)', 'inset(50% 0 50% 0)']
+      : ['inset(50% 0 50% 0)', 'inset(0 0 0 0)']
+
+    document.documentElement.animate(
+      { clipPath },
+      {
+        duration: 600, // 卷轴展开要慢一点才优雅
+        easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)', // 经典的平滑展开曲线
+        fill: 'forwards',
+        pseudoElement: `::view-transition-${isDark.value ? 'old' : 'new'}(root)`
+      }
+    )
+  } catch (e) {
+    // 快速连点导致 transition 被中断时，直接切换不报错
+    if (!toggled) isDark.value = !isDark.value
+  }
+  rememberManual()
+})
+
 // --- 3. 圆形切换动画逻辑 ---
 const enableTransitions = () =>
   'startViewTransition' in document &&
   window.matchMedia('(prefers-reduced-motion: no-preference)').matches
 
-provide('toggle-appearance', async () => {
-  if (!enableTransitions()) {
-    isDark.value = !isDark.value
-    return
-  }
 
-  // 1. 定义卷轴展开的路径（从中间的一条线，向上下两端展开）
-  const clipPath = [
-    'inset(50% 0 50% 0)', // 起点：中间的一条横线（上下都缩进50%）
-    'inset(0 0 0 0)'      // 终点：完全展开
-  ]
-
-  await (document as any).startViewTransition(async () => {
-    isDark.value = !isDark.value
-    await nextTick()
-  }).ready
-
-  // 2. 执行动画
-  document.documentElement.animate(
-    {
-      // 切换模式时，路径正反运行
-      clipPath: isDark.value ? clipPath.reverse() : clipPath
-    },
-    {
-      duration: 600, // 卷轴展开要慢一点才优雅
-      easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)', // 经典的平滑展开曲线
-      fill: 'forwards',
-      pseudoElement: `::view-transition-${isDark.value ? 'old' : 'new'}(root)`
-    }
-  )
-})
 </script>
 
 <template>
@@ -223,13 +265,13 @@ provide('toggle-appearance', async () => {
 }
 
 /* 鼠标划过头像，气泡跟着有个俏皮的小缩放 */
-.sidebar-profile 。:hover .status-badge {
+.sidebar-profile .avatar-box:hover .status-badge {
   transform: scale(1.2);
 }
 
 /* 适配移动端，气泡稍微缩小一点点 */
 @media (max-width: 640px) {
-  .sidebar-profile 。 .status-badge {
+  .sidebar-profile .status-badge {
     width: 24px;
     height: 24px;
     font-size: 14px;
@@ -429,13 +471,6 @@ provide('toggle-appearance', async () => {
     gap: 8px;
   }
 }
-/* 保持您原有的动画 CSS */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
 ::view-transition-old(root),
 .dark::view-transition-new(root) {
   z-index: 1;

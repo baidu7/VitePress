@@ -32,6 +32,7 @@ title: 写作空间
     <div class="token-wrap">
       <input type="password" v-model="token" placeholder="密码" />
       <button @click="saveToken">{{ tokenSaved ? '已登录' : '登录' }}</button>
+      <button v-if="tokenSaved" class="btn-logout" @click="logout" title="清除本机保存的 Token">退出</button>
     </div>
   </div>
 
@@ -61,16 +62,18 @@ title: 写作空间
     <button @click="insertTag('tip')">💡 提示</button>
     <button @click="insertTag('details')">📁 折叠</button>
     <button @click="insertTag('video')">📽️ 视频</button>
-				<button @click="insertTag('iframe')">🎞️️ iframe</button>
+    <button @click="insertTag('iframe')">🎞️️ iframe</button>
     <button @click="insertTag('grid')">🖼️ 网格</button>
     <button @click="insertTag('jz')">🀄 居中</button>
     <button @click="insertTag('meta')">⚙️ 设置</button>
-				<ImageHelper 
-				  :token="token" 
-				  :owner="IMG_OWNER"  :repo="IMG_REPO"    @success="handleImageSuccess"
-				  @error="showAlert"
-				  @busy="showAlert"
-				/>
+    <ImageHelper
+      :token="token"
+      :owner="IMG_OWNER"
+      :repo="IMG_REPO"
+      @success="handleImageSuccess"
+      @error="showAlert"
+      @busy="showAlert"
+    />
     <button @click="createNewFile" style="color:var(--vp-c-brand)">➕ 新建</button>
   </div>
 
@@ -136,7 +139,10 @@ const handleFakeLogin = () => {
   showAlert('❌ 验证失败：账号或密码错误')
 }
 
-const goBack = () => { window.location.href = '/' }
+const goBack = () => {
+  if (easyMDE && easyMDE.value() && !confirm('确定返回首页？未保存的内容将丢失')) return
+  window.location.href = '/'
+}
 
 const handleImageSuccess = (cdnUrl) => {
   const cm = easyMDE.codemirror
@@ -176,10 +182,17 @@ onMounted(async () => {
   token.value = localStorage.getItem('gh_token') || ''
   if(token.value) tokenSaved.value = true
   
-  const [EasyMDEModule, MarkedModule] = await Promise.all([
-    import('https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js'),
-    import('https://cdn.jsdelivr.net/npm/marked/marked.min.js')
-  ])
+  // 加载编辑器与渲染器（CDN），失败时给出明确提示而不是静默崩溃
+  try {
+    await Promise.all([
+      import('https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js'),
+      import('https://cdn.jsdelivr.net/npm/marked/marked.min.js')
+    ])
+    if (typeof EasyMDE === 'undefined' || typeof marked === 'undefined') throw new Error('CDN not loaded')
+  } catch (e) {
+    showAlert('❌ 编辑器组件加载失败，请刷新页面重试')
+    return
+  }
   
   easyMDE = new EasyMDE({
     element: document.getElementById('mdEditor'),
@@ -187,61 +200,104 @@ onMounted(async () => {
     status: false,
     minHeight: '500px',
     toolbar: [
-"bold", "italic", "strikethrough", "heading", "|", 
-    "quote", "code","horizontal-rule", "|", 
-    "unordered-list", "ordered-list", "|", 
-    "link", "image", "|", 
-    "guide"
-				],
+      "bold", "italic", "strikethrough", "heading", "|",
+      "quote", "code", "horizontal-rule", "|",
+      "unordered-list", "ordered-list", "|",
+      "link", "image", "|",
+      "guide"
+    ],
     placeholder: "在这里挥洒才华...",
   })
 
   // 实时同步预览
   easyMDE.codemirror.on("change", () => {
     const val = easyMDE.value()
-				// 【新增】用正则表达式把 --- 之间的内容替换掉，不让它显示在预览区
-				  const cleanVal = val.replace(/^---[\s\S]*?---\n/, '')
-    // 模拟容器转换
-    previewHtml.value = window.marked.parse(cleanVal.replace(/:::\s(\w+).*\n/g, '> **$1**: \n\n'))
+    // 去掉开头 Frontmatter，不让它显示在预览区
+    const cleanVal = val.replace(/^---[\s\S]*?---\n/, '')
+    // 把 ::: 提示容器转成引用块：开头行转引用，结尾独立 :: 行删除
+    const converted = cleanVal
+      .replace(/^:::\s*(\w+)[^\n]*\n?/gm, (m, type) => `> **${type}**:\n>\n`)
+      .replace(/^:::\s*$/gm, '')
+    previewHtml.value = window.marked.parse(converted)
   })
 
   if (token.value) fetchFiles('docs')
 })
 
 const saveToken = () => {
-  localStorage.setItem('gh_token', token.value); tokenSaved.value = true; fetchFiles('docs')
+  if (!token.value) { showAlert('⚠️ 请先输入 GitHub Token'); return }
+  localStorage.setItem('gh_token', token.value)
+  tokenSaved.value = true
+  fetchFiles('docs')
+}
+
+const logout = () => {
+  localStorage.removeItem('gh_token')
+  token.value = ''
+  tokenSaved.value = false
+  fileList.value = []
+  filePath.value = ''
+  currentSha.value = ''
+  showAlert('🔓 已退出登录')
 }
 
 const fetchFiles = async (path) => {
-  const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-    headers: { 'Authorization': `token ${token.value}` }
-  })
-  if (res.ok) fileList.value = await res.json()
+  try {
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+      headers: { 'Authorization': `token ${token.value}` }
+    })
+    if (!res.ok) {
+      const d = await res.json().catch(() => null)
+      showAlert(`❌ 加载目录失败：${res.status} ${d?.message || ''}`)
+      return
+    }
+    fileList.value = await res.json()
+  } catch (e) {
+    showAlert('❌ 网络错误，请检查网络连接')
+  }
 }
 
 const handleFileClick = (f) => f.type === 'dir' ? fetchFiles(f.path) : loadFile(f.path)
 
 const loadFile = async (path) => {
   loading.value = true
-  const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-    headers: { 'Authorization': `token ${token.value}` }
-  })
-  const data = await res.json()
-  easyMDE.value(decodeURIComponent(escape(atob(data.content))))
-  filePath.value = path; currentSha.value = data.sha; loading.value = false
+  try {
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+      headers: { 'Authorization': `token ${token.value}` }
+    })
+    if (!res.ok) {
+      const d = await res.json().catch(() => null)
+      showAlert(`❌ 打开文件失败：${res.status} ${d?.message || ''}`)
+      return
+    }
+    const data = await res.json()
+    easyMDE.value(decodeURIComponent(escape(atob(data.content))))
+    filePath.value = path; currentSha.value = data.sha
+  } catch (e) {
+    showAlert('❌ 网络错误，请检查网络连接')
+  } finally {
+    loading.value = false
+  }
 }
 
 const submitFile = async () => {
-  if (!filePath.value) return alert('路径？')
+  if (!filePath.value) { showAlert('❌ 请先选择或输入要发布的文件路径'); return }
   loading.value = true
-  const content = btoa(unescape(encodeURIComponent(easyMDE.value())))
-  const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath.value}`, {
-    method: 'PUT',
-    headers: { 'Authorization': `token ${token.value}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: 'Update', content, sha: currentSha.value || undefined })
-  })
-  if (res.ok) {
-    const d = await res.json(); currentSha.value = d.content.sha; alert('✅ 已同步至云端')
+  try {
+    const content = btoa(unescape(encodeURIComponent(easyMDE.value())))
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath.value}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${token.value}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Update: ${filePath.value}`, content, sha: currentSha.value || undefined })
+    })
+    if (res.ok) {
+      const d = await res.json(); currentSha.value = d.content.sha; showAlert('✅ 已同步至云端')
+    } else {
+      const d = await res.json().catch(() => null)
+      showAlert(`❌ 发布失败：${res.status} ${d?.message || '未知错误'}`)
+    }
+  } catch (e) {
+    showAlert('❌ 网络错误，请检查网络连接')
   }
   loading.value = false
 }
@@ -249,42 +305,58 @@ const submitFile = async () => {
 const createNewFile = () => {
   const name = prompt("文件名（建议格式：blog/文件名.md）:", "blog/new-post.md")
   if (name) {
-    // 1. 自动获取当前日期 YYYY-MM-DD
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const today = `${year}-${month}-${day}`;
+    // 更新路径并清空旧 SHA
+    filePath.value = `docs/${name}`
+    currentSha.value = ''
 
-    // 2. 更新路径并清空旧 SHA
-    filePath.value = `docs/${name}`;
-    currentSha.value = '';
-
-    // 3. 填充完整模版
+    // 填充完整模版（日期自动取当天）
     const template = `---
 title: 标题
 description: 简介
 tags: [标签, ]
 category: [分类, ]
 cover: 
-date: ${today}
+date: ${getToday()}
 outline: [2, 3]
 ---
 
 # 在这里开始写作...`;
 
-    easyMDE.value(template);
+    easyMDE.value(template)
   }
 }
 
 const deleteFile = async () => {
-  if (!confirm('确定删？')) return
-  await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath.value}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `token ${token.value}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: 'Delete', sha: currentSha.value })
-  })
-  location.reload()
+  if (!filePath.value) { showAlert('❌ 请先选择要删除的文件'); return }
+  if (!confirm(`确定删除「${filePath.value}」？此操作不可恢复！`)) return
+  loading.value = true
+  try {
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath.value}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `token ${token.value}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Delete: ${filePath.value}`, sha: currentSha.value })
+    })
+    if (res.ok) {
+      showAlert('✅ 文件已删除')
+      filePath.value = ''
+      currentSha.value = ''
+      fetchFiles('docs')
+    } else {
+      const d = await res.json().catch(() => null)
+      showAlert(`❌ 删除失败：${res.status} ${d?.message || '未知错误'}`)
+    }
+  } catch (e) {
+    showAlert('❌ 网络错误，请检查网络连接')
+  }
+  loading.value = false
+}
+
+const getToday = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 const insertTag = (type) => {
@@ -293,13 +365,14 @@ const insertTag = (type) => {
     tip: '\n::: tip 💡\n\n:::\n',
     warning: '\n::: warning ⚠\n\n:::\n',
     details: '\n::: details 点击展开\n\n:::\n',
-				video: '\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n<source src="/movie.mp4" type="video/mp4">\n您的浏览器不支持播放该视频。\n</video>\n',
-    iframe: '\n	<div class="iframe-container">\n<iframe src="这里填链接&autoplay=0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n',
+    video: '\n<video controls playsinline preload="metadata" style="aspect-ratio: 16/9;">\n<source src="/movie.mp4" type="video/mp4">\n您的浏览器不支持播放该视频。\n</video>\n',
+    iframe: '\n<div class="iframe-container">\n<iframe src="这里填链接&autoplay=0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>\n</div>\n',
     grid: '\n<div id="image-grid">\n<img src="" />\n</div>\n',
     jz: '\n<center><img src="" style="width:50%" /></center>\n',
-    meta: '---\ntitle: 标题\ndescription: 简介\ntags: [标签, ]\ncategory: [分类, ]\ncover: \ndate: 2026-02-11\noutline: [2, 3]\n---\n'
+    meta: () => `\n---\ntitle: 标题\ndescription: 简介\ntags: [标签, ]\ncategory: [分类, ]\ncover: \ndate: ${getToday()}\noutline: [2, 3]\n---\n`
   }
-  cm.replaceSelection(map[type] || ''); cm.focus()
+  const tag = typeof map[type] === 'function' ? map[type]() : (map[type] || '')
+  cm.replaceSelection(tag); cm.focus()
 }
 </script>
 
@@ -308,7 +381,11 @@ const insertTag = (type) => {
 :deep(.CodeMirror) {
     height: 450px !important; /* 您可以根据屏幕高度调这个值，比如 500px */
     min-height: 300px;
+    border: none !important;
+    font-size: 15px;
+    background: transparent !important;
 }
+:deep(.editor-toolbar) { background: var(--vp-c-bg-soft) !important; border: none !important; border-bottom: 1px solid var(--vp-c-divider) !important; }
 
 /* 2. 确保预览区（右侧）也是独立滚动的，且高度与左边对齐 */
 :deep(.editor-preview-side) {
@@ -349,6 +426,7 @@ const insertTag = (type) => {
 .header-logo { font-weight: bold; font-size: 1.2rem; }
 .token-wrap input { background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider); padding: 4px 10px; border-radius: 6px; font-size: 11px; width: 120px; margin-right: 8px; }
 .token-wrap button { font-size: 12px; font-weight: bold; }
+.token-wrap .btn-logout { color: #ef4444; background: var(--vp-c-bg-soft); border: 1px solid var(--vp-c-divider); border-radius: 6px; padding: 4px 10px; margin-left: 4px; }
 
 /* 路径与控制 */
 .writer-ctrl { align-items: center; display: flex; gap: 10px; margin-bottom: 15px; }
@@ -388,29 +466,20 @@ const insertTag = (type) => {
   .mobile-preview-btn { display: block; }
   .workbench { height: calc(100vh - 300px); }
   .preview-area { display: none; }
-  
+
   /* 预览激活状态 */
-  .mobile-preview-active .preview-area { 
-    display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+  .mobile-preview-active .preview-area {
+    display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     z-index: 90; background: var(--vp-c-bg); border: none; border-radius: 0;
     padding-bottom: 80px;
   }
   .mobile-preview-active .editor-area { display: none; }
-  .mobile-preview-active .writer-ctrl, 
+  .mobile-preview-active .writer-ctrl,
   .mobile-preview-active .file-scroller,
   .mobile-preview-active .fast-tools,
   .mobile-preview-active .writer-header { display: none; }
-}
 
-:deep(.CodeMirror) { border: none !important; font-size: 15px; background: transparent !important; }
-:deep(.editor-toolbar) { background: var(--vp-c-bg-soft) !important; border: none !important; border-bottom: 1px solid var(--vp-c-divider) !important; }
-/* =============
-   手机端适配逻辑
-   ============= */
-@media (max-width: 768px) {
-  /* ... 原有的逻辑保留 ... */
-
-  /* 核心修改：工具栏变宫格布局 */
+  /* 工具栏变宫格布局 */
   .fast-tools {
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 每行均匀分配 4 个 */

@@ -101,12 +101,48 @@ import { ref, computed, onMounted } from 'vue'
 // --- 1. 配置区 ---
 const localList = [
   { 
-    name: "FM", 
-    url: "http://lhttp.qingting.fm/live/1671/64k.mp3", 
+    name: "济南音乐广播", 
+    url: "https://lhttp.qingting.fm/live/1671/64k.mp3", 
     lrc: "", 
     pic: "/img/avatar.png",
     isCloud: false 
-  }
+  },
+		{
+		  name: "河北音乐广播", 
+		  url: "https://lhttp.qingting.fm/live/1649/64k.mp3", 
+		  lrc: "", 
+		  pic: "/img/avatar.png",
+		  isCloud: false 
+		},
+		{ 
+		    name: "上海 LoveRadio 经典流行", 
+		    url: "https://lhttp.qingting.fm/live/273/64k.mp3", 
+		    lrc: "", 
+		    pic: "/img/avatar.png",
+		    isCloud: false 
+		  },
+			{ 
+    name: "青岛音乐体育广播", 
+    url: "https://lhttp.qingting.fm/live/1672/64k.mp3", 
+    lrc: "", 
+    pic: "/img/avatar.png",
+    isCloud: false 
+  },
+		{ 
+    name: "清晨音乐台", 
+    url: "https://lhttp.qingting.fm/live/4915/64k.mp3", 
+    lrc: "", 
+    pic: "/img/avatar.png",
+    isCloud: false 
+  },
+		{
+		  name: "两广之声音乐台", 
+		  url: "https://lhttp.qingting.fm/live/20500149/64k.mp3", 
+		  lrc: "", 
+		  pic: "/img/avatar.png",
+		  isCloud: false 
+		}
+				
 ]
 const API_BASE = 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id='
 const fullList = ref([]) 
