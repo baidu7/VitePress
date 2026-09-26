@@ -94,7 +94,7 @@
       </div>
     </div>
   </div>
-  <audio ref="audioRef" :src="currentSong?.url" @timeupdate="onUpdate" @loadedmetadata="onLoaded" @ended="next"></audio>
+  <audio ref="audioRef" :src="currentSong?.url" @timeupdate="onUpdate" @loadedmetadata="onLoaded" @ended="next" @error="onAudioError"></audio>
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -159,8 +159,8 @@ const audioRef = ref(null)
 const currentPid = ref('local'); 
 const isLiveStream = ref(false)
 const isDragging = ref(false)
-// ?? 侦察兵：预检下一首的隐藏播放器
-const scoutAudio = typeof Audio !== 'undefined' ? new Audio() : null;
+// 连续自动跳过保护（防止死循环）
+const skipGuard = ref(0)
 // --- 频道配置区 ---
 const myChannels = [
   { name: '❤️ 收藏', id: 'local' },
@@ -230,8 +230,15 @@ const playIndex = async (i, autoPlay = true) => {
     setTimeout(() => {
       if (audioRef.value) {
         audioRef.value.play()
-          .then(() => { isPlaying.value = true; })
-          .catch(() => { isPlaying.value = false; });
+          .then(() => { isPlaying.value = true; skipGuard.value = 0; /* 播放成功即复位保护计数 */ })
+          .catch(() => {
+            isPlaying.value = false;
+            // 播放失败自动跳下一首（带保护，避免死循环）
+            if (skipGuard.value < fullList.value.length + 5) {
+              skipGuard.value++;
+              next();
+            }
+          });
       }
     }, 150);
   }
@@ -288,48 +295,82 @@ const onLoaded = () => {
     fetchCloudList(currentPid.value);
   }
 }
-// --- ?? 核心：侦察兵预检逻辑 ---
-const preCheckSong = (targetIdx, direction = 'next') => {
+// 播放过程中出错：非本地电台则自动跳下一首（带保护）
+const onAudioError = () => {
+  isPlaying.value = false;
+  if (currentPid.value !== 'local' && skipGuard.value < fullList.value.length + 5) {
+    skipGuard.value++;
+    next();
+  }
+};
+// --- 核心：预检一首歌能否播放（每次用独立临时 Audio，避免全局单例串扰） ---
+const preCheckOne = (song) => {
   return new Promise((resolve) => {
-    if (fullList.value.length === 0) return resolve(targetIdx);
-    let safeIdx = (targetIdx + fullList.value.length) % fullList.value.length;
-    const song = fullList.value[safeIdx];
-    
-    // 如果没有侦察兵或这首歌是本地的，直接放行
-    if (!song || !scoutAudio || !song.isCloud) return resolve(safeIdx);
-    scoutAudio.src = song.url;
-    scoutAudio.muted = true;
+    // 本地电台或没有 Audio，直接放行
+    if (!song || !song.isCloud || typeof Audio === 'undefined') return resolve(true);
+    // 每次新建独立实例，互不串扰，用后即弃
+    const scout = new Audio();
+    scout.preload = 'metadata';
+    scout.muted = true;
+    let settled = false;
     const cleanup = () => {
-      scoutAudio.removeEventListener('loadedmetadata', onMetadata);
-      scoutAudio.removeEventListener('error', onError);
+      scout.removeEventListener('loadedmetadata', onMeta);
+      scout.removeEventListener('error', onErr);
+      scout.src = '';
     };
-    const onMetadata = () => {
-      cleanup();
-      if (scoutAudio.duration > 0 && scoutAudio.duration < 60) {
-        console.log(`江大爷巡检：剔除短歌 [${song.name}]`);
-        fullList.value.splice(safeIdx, 1);
-        if (fullList.value.length === 0) return resolve(0);
-        let nextTarget = direction === 'next' ? safeIdx : safeIdx - 1;
-        resolve(preCheckSong(nextTarget, direction));
-      } else {
-        resolve(safeIdx);
-      }
+    const finish = (ok) => { if (settled) return; settled = true; cleanup(); resolve(ok); };
+    const onMeta = () => {
+      // 跨域/302 时 duration 可能是 NaN 或 Infinity，需归一化
+      const d = scout.duration;
+      const finiteD = isFinite(d) ? d : 0;
+      // 只有"明确可读且小于 60 秒"才算无效短歌；读不到时长(直播/跨域)一律放行
+      const isBadShort = finiteD > 0 && finiteD < 60;
+      finish(!isBadShort);
     };
-    const onError = () => { cleanup(); resolve(safeIdx); };
-    scoutAudio.addEventListener('loadedmetadata', onMetadata);
-    scoutAudio.addEventListener('error', onError);
-    setTimeout(() => { cleanup(); resolve(safeIdx); }, 2500); // 2.5秒超时
+    const onErr = () => {
+      // 报错：视为不可播，交给上层自动跳过
+      finish(false);
+    };
+    scout.addEventListener('loadedmetadata', onMeta);
+    scout.addEventListener('error', onErr);
+    scout.src = song.url;
+    scout.load();
+    // 超时兜底：拿不到时长按可播放放行，避免卡死
+    setTimeout(() => finish(true), 2500);
   });
 };
+
+// 从 targetIdx 起，向后(或向前)找一个可播放的歌曲，剔除坏掉的
+const findPlayable = async (targetIdx, direction) => {
+  const len = fullList.value.length;
+  if (!len) return -1;
+  // 最多尝试整个列表，防止死循环
+  let tries = 0;
+  let idx = ((targetIdx % len) + len) % len;
+  while (tries <= len) {
+    const song = fullList.value[idx];
+    if (!song) return -1;
+    const ok = await preCheckOne(song);
+    if (ok) return idx;
+    // 不可播：剔除并修正索引
+    fullList.value.splice(idx, 1);
+    if (fullList.value.length === 0) return -1;
+    idx = ((idx + (direction === 'next' ? 0 : -1)) + fullList.value.length) % fullList.value.length;
+    tries++;
+  }
+  return -1;
+};
 const next = async () => {
-  let targetIdx = (index.value + 1) % fullList.value.length;
-  const finalIdx = await preCheckSong(targetIdx, 'next');
-  playIndex(finalIdx, true);
+  const len = fullList.value.length;
+  if (!len) return;
+  const finalIdx = await findPlayable(index.value + 1, 'next');
+  if (finalIdx >= 0) playIndex(finalIdx, true);
 };
 const prev = async () => {
-  let targetIdx = (index.value - 1 + fullList.value.length) % fullList.value.length;
-  const finalIdx = await preCheckSong(targetIdx, 'prev');
-  playIndex(finalIdx, true);
+  const len = fullList.value.length;
+  if (!len) return;
+  const finalIdx = await findPlayable(index.value - 1, 'prev');
+  if (finalIdx >= 0) playIndex(finalIdx, true);
 };
 const onSeek = (e) => { 
   if (audioRef.value) audioRef.value.currentTime = e.target.value; 
@@ -548,7 +589,7 @@ onMounted(async () => {
 }
 
 /* ============================================================
-   2. ?? 手机端适配 (屏幕底部浮动)
+   2. 手机端适配 (屏幕底部浮动)
    ============================================================ */
 @media (max-width: 768px) {
   #lyric-island {
