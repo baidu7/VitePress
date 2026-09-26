@@ -10,18 +10,18 @@
     
 				<div id="playlist-selector">
 				  <button 
-				    @click="changePlaylist('988690134')" 
-				    :class="{ active: currentPid == '988690134' }"
+				    @click="changePlaylist('13828816062')" 
+				    :class="{ active: currentPid == '13828816062' }"
 				    class="selector-btn"
 				  >
-				    ❤️  经典老歌
+				    ❤️  纯音治愈
 				  </button>
 				<button 
-				    @click="changePlaylist('2232469985')" 
-				    :class="{ active: currentPid == '2232469985' }"
+				    @click="changePlaylist('10050217985')" 
+				    :class="{ active: currentPid == '10050217985' }"
 				    class="selector-btn"
 				  >
-				   📻 欧美老歌 
+				   📻 轻音放松
 				  </button>
 				  <div class="channel-container">
 				    <button class="channel-toggle" @click="showMenu = !showMenu">
@@ -164,10 +164,9 @@ const skipGuard = ref(0)
 // --- 频道配置区 ---
 const myChannels = [
   { name: '❤️ 收藏', id: 'local' },
-  { name: '🚩 飙升榜', id: '19723756' },
-  { name: '🎸 新歌榜', id: '3779629' }, 
-  { name: '🔥 热歌榜', id: '3778678' },
-  { name: '🎐 古风单', id: '17645418779' }
+  { name: '📚 学习纯音', id: '7031241143' },
+  { name: '💆 疗愈纯音', id: '14424937533' }, 
+  { name: '🎐 氛围纯音', id: '9855544828' }
 ]
 const showMenu = ref(false) 
 const activeSong = ref(null)
